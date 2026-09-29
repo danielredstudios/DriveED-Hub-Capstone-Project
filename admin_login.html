@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+    /* Customizable Login Header Styles */
+    .login-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 60px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: #ffffff;
+        z-index: 1000;
+                box-shadow: 0 3px 20px rgba(0,0,0,0.15);
+                box-sizing: border-box;
+    }
+    
+    .login-header-horizontal {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 25px;
+    }
+    
+    .header-section {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .header-left { justify-content: flex-start; flex: 1; }
+    .header-center { justify-content: center; flex: 1; }
+    .header-right { justify-content: flex-end; flex: 1; }
+    
+    .login-header-vertical {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 15px 25px;
+    }
+    
+    .header-vertical-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .login-header-centered {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 15px 25px;
+    }
+    
+    .header-centered-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .header-main {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .login-header-logo-only {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 15px 25px;
+    }
+    
+    .header-logo .logo-image {
+        height: 40px;
+        width: auto;
+        object-fit: contain;
+    }
+    
+    .header-school-name {
+        font-size: 24px;
+        font-weight: 600;
+        text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        white-space: nowrap;
+    }
+    
+    .header-welcome {
+        font-size: 16px;
+        font-weight: 500;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+    }
+    
+    .header-subtitle {
+        font-size: 12px;
+        font-weight: 400;
+        opacity: 0.9;
+        margin-top: 2px;
+    }
+
+    /* Page Background & Branding Variables (fixed scope) */
+    :root {
+        --primary-color: #667eea;
+        --secondary-color: #764ba2;
+        --header-height: 60px;
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #667eeadd 100%);
+        --secondary-gradient: linear-gradient(135deg, #764ba2 0%, #764ba2dd 100%);
+        --school-bg: url('');
+    }
+
+    body::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+                background: #f8fafc;
+                opacity: 1;
+        z-index: -1;
+    }
+
+    /* Standard Main Content Layout for Auth Pages */
+    .main-content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 60px);
+        margin-top: 60px;
+        padding: 15px;
+        position: relative;
+        z-index: 10;
+        box-sizing: border-box;
+    }
+
+    /* Mobile Header Adjustments */
+    @media (max-width: 480px) {
+        .login-header {
+            height: 48px;
+            padding: 0 10px;
+        }
+        
+        .header-school-name {
+            font-size: 14px;
+        }
+        
+        .header-logo .logo-image {
+            height: 24px;
+        }
+    }
+</style>
+
+<nav class="login-header login-header-horizontal">
+            <div class="header-section header-left">
+                                        <div class="header-school-name">
+                    DriveED Hub Driving School
+                </div>
+                    </div>
+        
+        <div class="header-section header-center">
+                                </div>
+        
+        <div class="header-section header-right">
+                                                    <div class="header-welcome">
+                    Welcome!
+                                    </div>
+                    </div>
+    </nav>
+
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --header-height: 60px;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Login Page Specific Styles */
+        .login-container {
+            background: rgba(255, 255, 255, 0.98);
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            width: 380px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .login-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            position: relative;
+        }
+
+        .login-subtitle {
+            font-size: 11px;
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+
+        .login-title::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--secondary-color)dd 100%);
+            border-radius: 2px;
+        }
+
+        .alert {
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        .alert-success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+
+        .alert-error {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        input[type="email"],
+        input[type="password"],
+        .password-input-wrap input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 13px;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .password-input-wrap {
+            position: relative;
+        }
+
+        .password-input-wrap input {
+            padding-right: 44px;
+        }
+
+        .password-toggle-btn {
+            position: absolute;
+            top: 50%;
+            right: 8px;
+            transform: translateY(-50%);
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            color: #6b7280;
+            width: 28px;
+            height: 28px;
+            padding: 0;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .password-toggle-btn:hover {
+            color: #1f2937;
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .password-toggle-btn:focus-visible {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        .password-toggle-btn svg {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            filter: drop-shadow(0 1px 1px rgba(0,0,0,0.1));
+        }
+
+        .password-toggle-btn .icon-eye-off {
+            display: none;
+        }
+
+        .password-toggle-btn[aria-pressed="true"] .icon-eye {
+            display: none;
+        }
+
+        .password-toggle-btn[aria-pressed="true"] .icon-eye-off {
+            display: block;
+        }
+
+        input[type="email"]:focus,
+        input[type="password"]:focus,
+        .password-input-wrap input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+            background: white;
+        }
+
+        input::placeholder {
+            color: #9ca3af;
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 12px;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .remember-me input[type="checkbox"] {
+            width: 14px;
+            height: 14px;
+            accent-color: var(--primary-color);
+        }
+
+        .forgot-password {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 12px;
+        }
+
+        .forgot-password:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 10px;
+            background: var(--primary-color);
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(59, 130, 246, 0.25);
+            transition: opacity 0.2s ease;
+        }
+
+        .login-button:hover {
+            opacity: 0.85;
+        }
+
+        .error-message {
+            color: #dc2626;
+            font-size: 11px;
+            margin-top: 4px;
+            text-align: left;
+        }
+
+        @media (max-width: 768px) {
+            .login-header {
+                height: 50px;
+                padding: 0 15px;
+            }
+            
+            .header-school-name {
+                font-size: 18px;
+            }
+            
+            .header-welcome {
+                font-size: 14px;
+            }
+            
+            .header-logo .logo-image {
+                height: 32px;
+            }
+
+            .main-content {
+                padding: 15px;
+                height: calc(100vh - 50px);
+                margin-top: 50px;
+            }
+
+            .login-container {
+                width: 100%;
+                max-width: 400px;
+                padding: 25px 20px;
+                border-radius: 15px;
+            }
+
+            .login-title {
+                font-size: 24px;
+            }
+
+            .login-subtitle {
+                font-size: 12px;
+            }
+
+            input[type="email"],
+            input[type="password"],
+            .password-input-wrap input {
+                padding: 14px;
+                font-size: 16px;
+            }
+
+            .login-button {
+                padding: 14px;
+                font-size: 16px;
+            }
+
+            .form-options {
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-header {
+                height: 45px;
+                padding: 0 12px;
+            }
+            
+            .login-header-horizontal .header-right,
+            .login-header-horizontal .header-center {
+                display: none;
+            }
+            
+            .header-school-name {
+                font-size: 16px;
+            }
+            
+            .header-welcome {
+                display: none;
+            }
+            
+            .header-logo .logo-image {
+                height: 28px;
+            }
+
+            .main-content {
+                padding: 10px;
+                height: calc(100vh - 45px);
+                margin-top: 45px;
+            }
+
+            .login-container {
+                padding: 14px 18px;
+                width: 230px;
+                max-width: 90%;
+                border-radius: 8px;
+            }
+
+            .login-title {
+                font-size: 18px;
+            }
+
+            .login-subtitle {
+                font-size: 10px;
+                margin-bottom: 10px;
+            }
+
+            .alert {
+                font-size: 11px;
+                padding: 6px 8px;
+                border-radius: 5px;
+                margin-bottom: 8px;
+            }
+
+            .form-group {
+                margin-bottom: 8px;
+            }
+
+            input[type="email"],
+            input[type="password"],
+            .password-input-wrap input {
+                padding: 7px 9px;
+                font-size: 12px;
+                border: 1px solid #d1d5db;
+                border-radius: 5px;
+            }
+
+            input::placeholder {
+                font-size: 11px;
+            }
+
+            .form-options {
+                font-size: 10px;
+                margin-bottom: 10px;
+            }
+
+            .remember-me {
+                font-size: 10px;
+                gap: 3px;
+            }
+
+            .remember-me input[type="checkbox"] {
+                width: 12px;
+                height: 12px;
+            }
+
+            .forgot-password {
+                font-size: 10px;
+            }
+
+            .login-button {
+                padding: 8px;
+                font-size: 12px;
+                border-radius: 5px;
+                box-shadow: 0 1px 4px rgba(59, 130, 246, 0.2);
+            }
+
+            .error-message {
+                font-size: 10px;
+                margin-top: 2px;
+            }
+
+            /* Register link section for mobile */
+            .register-link-wrap {
+                margin-top: 14px !important;
+                padding-top: 14px !important;
+            }
+
+            .register-link-text {
+                font-size: 10px !important;
+                margin-bottom: 8px !important;
+            }
+
+            .register-link-anchor {
+                font-size: 11px !important;
+            }
+        }
+
+        .register-link-wrap {
+            text-align: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .register-link-text {
+            color: #666;
+            margin-bottom: 6px;
+            font-size: 12px;
+        }
+
+        .register-link-anchor {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 20px 25px;
+            }
+
+            .login-title {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-content">
+        <div class="login-container">
+            <h2 class="login-title">Login</h2>
+
+
+
+            <form method="POST" action="http://localhost:8004/drived-hub/login">
+                <input type="hidden" name="_token" value="rkEpZbMs7G92iqSS0rEIYFRs2xcjY2udTfSKCf4V" autocomplete="off">                <div class="form-group">
+                    <label for="email" style="display: block; font-size: 0.9rem; font-weight: 600; color: #374151; margin-bottom: 6px;">Email Address</label>
+                    <input 
+                        id="email"
+                        type="email" 
+                        name="email" 
+                        placeholder="Email Address" 
+                        value=""
+                        required>
+                                    </div>
+                <div class="form-group">
+                    <label for="password" style="display: block; font-size: 0.9rem; font-weight: 600; color: #374151; margin-bottom: 6px;">Password</label>
+                    <div class="password-input-wrap">
+                        <input 
+                            id="password"
+                            type="password" 
+                            name="password" 
+                            placeholder="Password" 
+                            required>
+                        <button type="button" class="password-toggle-btn" data-password-toggle="password" aria-label="Show password" aria-pressed="false">
+                            <svg class="icon-eye" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            <svg class="icon-eye-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18"></path><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"></path><path d="M9.9 4.2A11 11 0 0 1 12 4c6.5 0 10 6 10 6a18.7 18.7 0 0 1-4 4.9"></path><path d="M6.1 6.1A18.9 18.9 0 0 0 2 12s3.5 6 10 6c1.5 0 2.9-.3 4.1-.8"></path></svg>
+                        </button>
+                    </div>
+                                    </div>
+                <div class="form-options">
+                    <label class="remember-me">
+                        <input type="checkbox" name="remember">
+                        <span>Remember me</span>
+                    </label>
+                    <a href="http://localhost:8004/drived-hub/forgot-password" class="forgot-password">Forgot Password?</a>
+                </div>
+                <button type="submit" class="login-button">Log In</button>
+            </form>
+            
+            <div class="register-link-wrap">
+                <p class="register-link-text">Don't have an account?</p>
+                <a href="http://localhost:8004/drived-hub/register" class="register-link-anchor" style="display:inline-flex; align-items:center; justify-content:center; gap:4px;">
+                    Register for Student Account 
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePasswordVisibility(inputId, trigger) {
+            const input = document.getElementById(inputId);
+            if (!input) {
+                return;
+            }
+
+            const isHidden = input.type === 'password';
+            input.type = isHidden ? 'text' : 'password';
+            trigger.setAttribute('aria-pressed', isHidden ? 'true' : 'false');
+            trigger.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+        }
+
+        document.querySelectorAll('[data-password-toggle]').forEach(function(trigger) {
+            trigger.addEventListener('click', function() {
+                togglePasswordVisibility(trigger.getAttribute('data-password-toggle'), trigger);
+            });
+        });
+    </script>
+    <div id="toast-container" class="toast-container"></div>
+
+<style>
+    .toast-container {
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        z-index: 10001;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        max-width: 420px;
+        width: calc(100% - 48px);
+        pointer-events: none;
+    }
+
+    .toast {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-radius: var(--border-radius, 12px);
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-left: 6px solid var(--primary-color, #2563eb);
+        animation: toast-slide-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        pointer-events: auto;
+        overflow: hidden;
+        position: relative;
+        transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s;
+    }
+
+    .toast:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 40px rgba(0, 0, 0, 0.18);
+    }
+
+    .toast-success { border-left-color: var(--btn-success-bg, #10b981) !important; }
+    .toast-error { border-left-color: var(--btn-danger-bg, #ef4444) !important; }
+    .toast-warning { border-left-color: var(--badge-pending-bg, #fbbf24) !important; }
+    .toast-info { border-left-color: var(--primary-color, #3b82f6) !important; }
+
+    .toast-icon-wrap {
+        flex-shrink: 0;
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        background: rgba(37, 99, 235, 0.1);
+        color: var(--primary-color, #2563eb);
+    }
+
+    .toast-success .toast-icon-wrap { background: rgba(16, 185, 129, 0.15); color: #059669; }
+    .toast-error .toast-icon-wrap { background: rgba(239, 68, 68, 0.15); color: #dc2626; }
+    .toast-warning .toast-icon-wrap { background: rgba(245, 158, 11, 0.15); color: #d97706; }
+    .toast-info .toast-icon-wrap { background: rgba(59, 130, 246, 0.15); color: #2563eb; }
+
+    .toast-content {
+        flex: 1;
+        font-size: 14px;
+        line-height: 1.5;
+        color: #111827;
+        font-weight: 500;
+        padding-right: 8px;
+    }
+
+    .toast-close {
+        flex-shrink: 0;
+        background: transparent;
+        border: none;
+        color: #9ca3af;
+        cursor: pointer;
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        transition: all 0.2s;
+        line-height: 1;
+    }
+
+    .toast-close:hover {
+        background: rgba(0,0,0,0.05);
+        color: #374151;
+        transform: rotate(90deg);
+    }
+
+    /* Progress Bar */
+    .toast-progress {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 4px;
+        width: 100%;
+        background: rgba(0, 0, 0, 0.05);
+        transform-origin: left;
+    }
+
+    .toast-progress-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        background: inherit;
+        filter: brightness(0.9);
+        transform-origin: left;
+        background: var(--primary-color, #667eea);
+        opacity: 0.3;
+    }
+
+    .toast-success .toast-progress-bar { background: var(--btn-success-bg, #10b981); }
+    .toast-error .toast-progress-bar { background: var(--btn-danger-bg, #ef4444); }
+    .toast-warning .toast-progress-bar { background: var(--badge-pending-bg, #f59e0b); }
+    .toast-info .toast-progress-bar { background: var(--primary-color, #3b82f6); }
+
+    @keyframes toast-slide-in {
+        from { transform: translateX(120%) scale(0.9); opacity: 0; }
+        to { transform: translateX(0) scale(1); opacity: 1; }
+    }
+
+    .toast-fade-out {
+        animation: toast-fade-out 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+    }
+
+    @keyframes toast-fade-out {
+        from { transform: translateX(0) scale(1); opacity: 1; }
+        to { transform: translateX(120%) scale(0.9); opacity: 0; }
+    }
+
+    /* Mobile adjustments */
+    @media (max-width: 480px) {
+        .toast-container {
+            top: 16px;
+            right: 16px;
+            width: calc(100% - 32px);
+        }
+        .toast {
+            padding: 12px 14px;
+        }
+    }
+</style>
+
+<script>
+    (function() {
+        function normalizeToastArgs(arg1, arg2, arg3) {
+            const defaultConfig = {
+                message: '',
+                type: 'info',
+                duration: 5000
+            };
+
+            const typeSet = { success: true, error: true, warning: true, info: true, danger: true };
+
+            if (arg1 && typeof arg1 === 'object' && !Array.isArray(arg1)) {
+                const message = String(arg1.message ?? arg1.text ?? '');
+                const rawType = String(arg1.type ?? arg1.level ?? defaultConfig.type).toLowerCase();
+                const type = typeSet[rawType] ? rawType : defaultConfig.type;
+                const duration = Number.isFinite(Number(arg1.duration)) ? Math.max(0, Number(arg1.duration)) : defaultConfig.duration;
+                return { message, type, duration };
+            }
+
+            if (typeof arg1 === 'string' && typeSet[arg1.toLowerCase()] && typeof arg2 === 'string') {
+                const duration = Number.isFinite(Number(arg3)) ? Math.max(0, Number(arg3)) : defaultConfig.duration;
+                return {
+                    message: arg2,
+                    type: arg1.toLowerCase(),
+                    duration
+                };
+            }
+
+            if (typeof arg1 === 'string' && arg2 && typeof arg2 === 'object' && !Array.isArray(arg2)) {
+                const rawType = String(arg2.type ?? arg2.level ?? defaultConfig.type).toLowerCase();
+                const type = typeSet[rawType] ? rawType : defaultConfig.type;
+                const duration = Number.isFinite(Number(arg2.duration)) ? Math.max(0, Number(arg2.duration)) : defaultConfig.duration;
+                return {
+                    message: arg1,
+                    type,
+                    duration
+                };
+            }
+
+            return {
+                message: String(arg1 ?? ''),
+                type: (typeof arg2 === 'string' && typeSet[arg2.toLowerCase()]) ? arg2.toLowerCase() : defaultConfig.type,
+                duration: Number.isFinite(Number(arg3)) ? Math.max(0, Number(arg3)) : defaultConfig.duration
+            };
+        }
+
+        function escapeHtml(text) {
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        // Universal notification function
+        window.showToast = function(arg1, arg2, arg3) {
+            const normalized = normalizeToastArgs(arg1, arg2, arg3);
+            const message = normalized.message;
+            const type = normalized.type === 'danger' ? 'error' : normalized.type;
+            const duration = normalized.duration;
+
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            // Progress tracking
+            let remainingTime = duration;
+            let startTime = Date.now();
+            let timerId = null;
+            let progressInterval = null;
+
+            // Icons mapping
+            const icons = {
+                success: '<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>',
+                error: '<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>',
+                warning: '<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>',
+                info: '<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
+            };
+
+            const iconHtml = icons[type] || icons.info;
+
+            toast.innerHTML = `
+                <div class="toast-icon-wrap">${iconHtml}</div>
+                <div class="toast-content">${escapeHtml(message)}</div>
+                <button class="toast-close" title="Dismiss">&times;</button>
+                <div class="toast-progress">
+                    <div class="toast-progress-bar" id="progress-${Date.now()}"></div>
+                </div>
+            `;
+
+            const progressBar = toast.querySelector('.toast-progress-bar');
+
+            function startTimer() {
+                startTime = Date.now();
+                if (duration > 0) {
+                    timerId = setTimeout(removeToast, remainingTime);
+                    
+                    // Smooth progress bar update
+                    progressInterval = setInterval(() => {
+                        const elapsed = Date.now() - startTime;
+                        const currentProgress = ((remainingTime - elapsed) / duration) * 100;
+                        if (currentProgress >= 0) {
+                            progressBar.style.transform = `scaleX(${currentProgress / 100})`;
+                        }
+                    }, 10);
+                }
+            }
+
+            function pauseTimer() {
+                clearTimeout(timerId);
+                clearInterval(progressInterval);
+                remainingTime -= Date.now() - startTime;
+            }
+
+            function removeToast() {
+                toast.classList.add('toast-fade-out');
+                setTimeout(() => {
+                    if (toast.parentElement) toast.remove();
+                }, 400);
+            }
+
+            // Events
+            toast.addEventListener('mouseenter', pauseTimer);
+            toast.addEventListener('mouseleave', () => {
+                if (remainingTime > 0) startTimer();
+            });
+
+            toast.querySelector('.toast-close').addEventListener('click', (e) => {
+                e.stopPropagation();
+                removeToast();
+            });
+
+            // Universal click to dismiss (optional)
+            toast.addEventListener('click', (e) => {
+                if (!e.target.closest('.toast-close')) {
+                    removeToast();
+                }
+            });
+
+            container.appendChild(toast);
+            startTimer();
+        };
+
+        // Compatibility alias - avoid infinite loop if already defined
+        if (!window.showNotification) {
+            window.showNotification = function(arg1, arg2, arg3) {
+                window.showToast(arg1, arg2, arg3);
+            };
+        }
+
+        // Object-style compatibility wrapper (Toast.success, Toast.error, etc.)
+        if (!window.Toast) {
+            window.Toast = {
+                success: function(msg, title, duration) { window.showToast(msg, 'success', duration); },
+                error: function(msg, title, duration) { window.showToast(msg, 'error', duration); },
+                info: function(msg, title, duration) { window.showToast(msg, 'info', duration); },
+                warning: function(msg, title, duration) { window.showToast(msg, 'warning', duration); },
+                danger: function(msg, title, duration) { window.showToast(msg, 'error', duration); }
+            };
+        }
+
+        // Initialize from session on load
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            
+            
+            
+            
+                    });
+    })();
+</script>
+
+</body>
+</html>
