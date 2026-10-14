@@ -13,6 +13,9 @@
     // Login Header Customization Settings
     $headerLayout = $settings?->login_header_layout ?? 'horizontal';
     $logoImage = $settings?->login_logo_image;
+    $logoUrl = $logoImage
+        ? asset('storage/' . $logoImage)
+        : asset('images/logo-smart-transparent.png');
     $logoPosition = $settings?->login_logo_position ?? 'left';
     $logoSize = $settings?->login_logo_size ?? 40;
     $schoolNameText = $settings?->login_school_name_text ?? $schoolName;
@@ -235,9 +238,9 @@
 <nav class="login-header login-header-{{ $headerLayout }}">
     @if($headerLayout === 'horizontal')
         <div class="header-section header-left">
-            @if($logoImage && $logoPosition === 'left')
+            @if($logoPosition === 'left')
                 <div class="header-logo">
-                    <img src="{{ asset('storage/' . $logoImage) }}" alt="Logo" class="logo-image">
+                    <img src="{{ $logoUrl }}" alt="SMART Driving School logo" class="logo-image">
                 </div>
             @endif
             @if($showSchoolName && $schoolNamePosition === 'left')
@@ -248,9 +251,9 @@
         </div>
         
         <div class="header-section header-center">
-            @if($logoImage && $logoPosition === 'center')
+            @if($logoPosition === 'center')
                 <div class="header-logo">
-                    <img src="{{ asset('storage/' . $logoImage) }}" alt="Logo" class="logo-image">
+                    <img src="{{ $logoUrl }}" alt="SMART Driving School logo" class="logo-image">
                 </div>
             @endif
             @if($showSchoolName && $schoolNamePosition === 'center')
@@ -261,9 +264,9 @@
         </div>
         
         <div class="header-section header-right">
-            @if($logoImage && $logoPosition === 'right')
+            @if($logoPosition === 'right')
                 <div class="header-logo">
-                    <img src="{{ asset('storage/' . $logoImage) }}" alt="Logo" class="logo-image">
+                    <img src="{{ $logoUrl }}" alt="SMART Driving School logo" class="logo-image">
                 </div>
             @endif
             @if($showSchoolName && $schoolNamePosition === 'right')
@@ -282,9 +285,9 @@
         </div>
     @elseif($headerLayout === 'vertical')
         <div class="header-vertical-content">
-            @if($logoImage)
+            @if($logoUrl)
                 <div class="header-logo">
-                    <img src="{{ asset('storage/' . $logoImage) }}" alt="Logo" class="logo-image">
+                    <img src="{{ $logoUrl }}" alt="SMART Driving School logo" class="logo-image">
                 </div>
             @endif
             @if($showSchoolName)
@@ -304,9 +307,9 @@
     @elseif($headerLayout === 'centered')
         <div class="header-centered-content">
             <div class="header-main">
-                @if($logoImage)
+                @if($logoUrl)
                     <div class="header-logo">
-                        <img src="{{ asset('storage/' . $logoImage) }}" alt="Logo" class="logo-image">
+                        <img src="{{ $logoUrl }}" alt="SMART Driving School logo" class="logo-image">
                     </div>
                 @endif
                 @if($showSchoolName)
@@ -326,8 +329,8 @@
         </div>
     @elseif($headerLayout === 'logo-only')
         <div class="header-logo-only">
-            @if($logoImage)
-                <img src="{{ asset('storage/' . $logoImage) }}" alt="Logo" class="logo-image">
+            @if($logoUrl)
+                <img src="{{ $logoUrl }}" alt="SMART Driving School logo" class="logo-image">
             @else
                 <div class="header-school-name">{{ $schoolNameText }}</div>
             @endif

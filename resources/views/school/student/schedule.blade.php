@@ -1643,6 +1643,10 @@
                                 $linkedEnrollmentRequestId = $approvedEnrollmentByCourse->get($timeSlot->course_id);
                                                                 $availableStudentSpots = $timeSlot->getAvailableStudentSpots();
                                                                 $slotIsFull = $availableStudentSpots <= 0;
+                                                                $slotBookingStatus = $bookingStatusBySlot[$timeSlot->id] ?? null;
+                                                                $alreadyBooked = $slotBookingStatus !== null;
+                                                                $cannotBook = $slotIsFull || $alreadyBooked;
+                                                                $bookButtonLabel = $slotBookingStatus === 'pending' ? 'Request pending' : ($alreadyBooked ? 'Already scheduled' : ($slotIsFull ? 'Full' : null));
                             @endphp
                                <div class="available-schedule-card {{ !$isEnrolledInCourse ? 'is-hidden' : '' }}" 
                                  data-course-id="{{ $timeSlot->course_id ?? '' }}" 
@@ -1674,7 +1678,7 @@
                                     
                                     @if($selectionMode === 'student_chooses')
                                         <!-- Student selects instructor -->
-                                        <select class="instructor-select" id="instructor-{{ $timeSlot->id }}" onchange="updateBookButton({{ $timeSlot->id }})" {{ $slotIsFull ? 'disabled' : '' }}>
+                                        <select class="instructor-select" id="instructor-{{ $timeSlot->id }}" onchange="updateBookButton({{ $timeSlot->id }})" {{ $cannotBook ? 'disabled' : '' }}>
                                             <option value="">Select an instructor</option>
                                             @if($timeSlot->instructors->count() > 0)
                                                 @foreach($timeSlot->instructors as $instructor)
@@ -1691,7 +1695,7 @@
                                                 {{ $availableStudentSpots }} {{ $availableStudentSpots === 1 ? 'spot' : 'spots' }} available
                                             </div>
                                             <button class="book-now-btn book-now-btn-inline book-now-btn-disabled" id="book-btn-{{ $timeSlot->id }}" onclick="bookTimeSlot({{ $timeSlot->id }})" disabled>
-                                                {{ $slotIsFull ? 'Full' : 'Schedule Lesson' }}
+                                                {{ $bookButtonLabel ?? 'Schedule Lesson' }}
                                             </button>
                                         </div>
                                     @elseif($selectionMode === 'auto_assign')
@@ -1703,8 +1707,8 @@
                                             <div class="booking-status booking-status-inline">
                                                 {{ $availableStudentSpots }} {{ $availableStudentSpots === 1 ? 'spot' : 'spots' }} available
                                             </div>
-                                            <button class="book-now-btn book-now-btn-inline {{ $slotIsFull ? 'book-now-btn-disabled' : '' }}" onclick="bookTimeSlotAuto({{ $timeSlot->id }})" {{ $slotIsFull ? 'disabled' : '' }}>
-                                                {{ $slotIsFull ? 'Full' : 'Schedule Now' }}
+                                            <button class="book-now-btn book-now-btn-inline {{ $cannotBook ? 'book-now-btn-disabled' : '' }}" onclick="bookTimeSlotAuto({{ $timeSlot->id }})" {{ $cannotBook ? 'disabled' : '' }}>
+                                                {{ $bookButtonLabel ?? 'Schedule Now' }}
                                             </button>
                                         </div>
                                     @else
@@ -1716,8 +1720,8 @@
                                             <div class="booking-status booking-status-inline">
                                                 {{ $availableStudentSpots }} {{ $availableStudentSpots === 1 ? 'spot' : 'spots' }} available
                                             </div>
-                                            <button class="book-now-btn book-now-btn-inline {{ $slotIsFull ? 'book-now-btn-disabled' : '' }}" onclick="bookTimeSlotAdmin({{ $timeSlot->id }})" {{ $slotIsFull ? 'disabled' : '' }}>
-                                                {{ $slotIsFull ? 'Full' : 'Request Schedule' }}
+                                            <button class="book-now-btn book-now-btn-inline {{ $cannotBook ? 'book-now-btn-disabled' : '' }}" onclick="bookTimeSlotAdmin({{ $timeSlot->id }})" {{ $cannotBook ? 'disabled' : '' }}>
+                                                {{ $bookButtonLabel ?? 'Request Schedule' }}
                                             </button>
                                         </div>
                                     @endif

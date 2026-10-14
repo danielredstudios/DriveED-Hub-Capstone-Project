@@ -1770,8 +1770,9 @@
     <!-- Topbar -->
     <nav class="topbar" role="banner">
         <div class="topbar-left">
-            <div class="topbar-logo" role="heading" aria-level="1">
-                {{ $schoolName ?? 'Driving School' }}
+            <div class="topbar-logo" role="heading" aria-level="1" style="display: flex; align-items: center; gap: 8px;">
+                <img src="{{ asset('images/logo-smart-transparent.png') }}" alt="SMART Driving School Logo" style="height: 40px; width: auto;">
+                <span>{{ config('app.name', 'SMART Driving School') }}</span>
             </div>
         </div>
 
@@ -2208,6 +2209,7 @@
             e.stopPropagation();
             const dropdown = document.getElementById('notificationDropdown');
             notificationDropdownOpen = !notificationDropdownOpen;
+            document.querySelector('.notification-icon[aria-label="Notifications"]')?.setAttribute('aria-expanded', String(notificationDropdownOpen));
 
             if (notificationDropdownOpen) {
                 dropdown.classList.add('show');
@@ -2222,6 +2224,7 @@
             const dropdown = document.getElementById('notificationDropdown');
             notificationDropdownOpen = false;
             if (dropdown) dropdown.classList.remove('show');
+            document.querySelector('.notification-icon[aria-label="Notifications"]')?.setAttribute('aria-expanded', 'false');
         }
 
         function fetchNotifications() {

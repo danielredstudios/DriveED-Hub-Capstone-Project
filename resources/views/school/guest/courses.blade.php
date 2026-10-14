@@ -816,6 +816,7 @@
         background: #4b5563;
     }
 </style>
+@include('school.partials.course-flyer-styles')
 
 <div class="courses-container">
     <div class="courses-header">
@@ -827,16 +828,16 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        Click on a course package to view full details, including training hours and curriculum, before enrolling.
+        Compare courses here, then open enrollment to review every package before sending your request.
     </div>
 
-    <div class="courses-grid">
+    <div class="courses-grid course-flyer-grid" style="--flyer-accent: {{ $primaryColor }};">
         
         @forelse($courses as $course)
         <div class="course-card">
             <div class="course-banner">
-                @if($course->hasBannerImage)
-                    <img src="{{ asset($course->banner_image) }}" alt="{{ $course->title }}">
+                @if($course->banner_image_url)
+                    <img src="{{ $course->banner_image_url }}" alt="{{ $course->title }}">
                 @else
                     <svg class="course-banner-icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16">
                         <path d="M2.52 3.515A2.5 2.5 0 0 1 4.82 2h6.362c1 0 1.904.596 2.298 1.515l.792 1.848c.075.175.21.319.38.404.5.25.855.715.965 1.262l.335 1.679c.033.161.049.325.049.49v.413c0 .814-.39 1.543-1 1.997V13.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-1.338c-1.292.048-2.745.088-4 .088s-2.708-.04-4-.088V13.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-1.892c-.61-.454-1-1.183-1-1.997v-.413a2.5 2.5 0 0 1 .049-.49l.335-1.68c.11-.546.465-1.012.964-1.261a.807.807 0 0 0 .381-.404l.792-1.848ZM3 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm10 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM6 8a1 1 0 0 0 0 2h4a1 1 0 1 0 0-2H6ZM2.906 5.189a.51.51 0 0 0 .497.731c.91-.073 3.35-.17 4.597-.17 1.247 0 3.688.097 4.597.17a.51.51 0 0 0 .497-.731l-.956-1.913A.5.5 0 0 0 11.691 3H4.309a.5.5 0 0 0-.447.276L2.906 5.19Z"/>
@@ -862,6 +863,21 @@
                 @if($course->description)
                     <p class="course-description">{{ Str::limit($course->description, 120) }}</p>
                 @endif
+
+                @php
+                    $flyerHours = $course->hours_required ?? $course->duration_hours;
+                    $flyerPrice = $course->packages?->count() ? $course->packages->min('price') : $course->price;
+                @endphp
+                <div class="flyer-facts">
+                    <div class="flyer-fact">
+                        <span class="flyer-fact-label">{{ $course->packages?->count() ? 'Packages' : 'Training' }}</span>
+                        <span class="flyer-fact-value">{{ $course->packages?->count() ? $course->packages->count() . ' available' : ($flyerHours ? $flyerHours . ' hours' : 'See details') }}</span>
+                    </div>
+                    <div class="flyer-fact">
+                        <span class="flyer-fact-label">{{ $course->packages?->count() ? 'From' : 'Course price' }}</span>
+                        <span class="flyer-fact-value">{{ $flyerPrice !== null ? '₱' . number_format($flyerPrice, 0) : 'See details' }}</span>
+                    </div>
+                </div>
                 
                 @php $features = $course->features; @endphp
                 @if($features && is_array($features) && count($features) > 0)
@@ -979,13 +995,13 @@
                     @if($course->course_type === 'practical' && (!$guest || !$guest->hasVerifiedLicense()))
                         <div class="license-required-note">
                             <i class="fas fa-info-circle me-1"></i>
-                            Student Permit/License is recommended for PDC. You can provide it later.
+                            A valid Student Driver's License is required for PDC enrollment.
                         </div>
                     @endif
                     <input type="hidden" id="selectedPackage{{ $course->id }}" value="">
                     <button type="button" class="btn-enroll" id="mainEnrollBtn{{ $course->id }}" 
                         onclick="openEnrollModal({{ $course->id }}, document.getElementById('selectedPackage{{ $course->id }}').value)">
-                        Enroll
+                        View details &amp; enroll
                     </button>
                 @endif
             </div>
@@ -1005,7 +1021,7 @@
 
 <!-- Enrollment Modals -->
 @foreach($courses as $course)
-<div class="modal fade" id="enrollModal{{ $course->id }}" tabindex="-1" aria-labelledby="enrollModalLabel{{ $course->id }}" aria-hidden="true">
+<div class="modal fade" id="enrollModal{{ $course->id }}" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="enrollModalLabel{{ $course->id }}" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <form method="POST" action="{{ route('schools.guest.enroll', ['school' => $school, 'course' => $course->id]) }}" enctype="multipart/form-data" data-no-ajax>
@@ -1133,6 +1149,26 @@
                     <!-- Package Selection (if available) -->
                     @if($course->packages && $course->packages->count() > 0)
                         <div class="mb-3">
+                            <div class="enroll-package-details" aria-label="Package details">
+                                @foreach($course->packages as $package)
+                                    <div class="enroll-package-detail">
+                                        <div class="enroll-package-heading">
+                                            <span>{{ $package->name }}</span>
+                                            <strong>₱{{ number_format($package->price, 2) }}</strong>
+                                        </div>
+                                        <p>
+                                            @if($package->training_hours){{ $package->training_hours }} hours of training @endif
+                                            @if(!$package->training_hours && $package->tdc_hours){{ $package->tdc_hours }}h TDC @endif
+                                            @if(!$package->training_hours && $package->pdc_hours){{ $package->tdc_hours ? ' · ' : '' }}{{ $package->pdc_hours }}h PDC @endif
+                                            @if($package->transmission_type){{ ($package->training_hours || $package->tdc_hours || $package->pdc_hours) ? ' · ' : '' }}{{ ucfirst($package->transmission_type) }} transmission @endif
+                                        </p>
+                                        @if($package->description)<p>{{ $package->description }}</p>@endif
+                                        @if(is_array($package->features) && count($package->features))
+                                            <ul>@foreach($package->features as $feature)<li>{{ $feature }}</li>@endforeach</ul>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
                             <label for="package_id{{ $course->id }}" class="form-label">
                                 <strong>Select Package</strong> <span class="text-danger">*</span>
                             </label>
@@ -1271,7 +1307,9 @@ function openEnrollModal(courseId, packageId = null) {
         }
         
         document.body.style.overflow = 'hidden';
+        modal.setAttribute('aria-hidden', 'false');
         modal.style.display = 'flex';
+        modal.querySelector('.btn-close')?.focus();
     }
 }
 
@@ -1279,7 +1317,9 @@ function closeEnrollModal(courseId) {
     const modal = document.getElementById('enrollModal' + courseId);
     if (modal) {
         modal.style.display = 'none';
+        modal.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
+        document.getElementById('mainEnrollBtn' + courseId)?.focus();
     }
 }
 

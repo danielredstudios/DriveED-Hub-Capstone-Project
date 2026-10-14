@@ -610,7 +610,7 @@
                         </div>
                     </div>
 
-                    @if($request->status === 'pending' && $guest->student_license_status === 'rejected')
+                    @if($request->status === 'pending' && $request->course?->course_type === 'practical' && $guest->student_license_status === 'rejected')
                     <div class="payment-alert" style="background: #fee2e2; border-color: #fecaca; margin-bottom: 0;">
                         <div class="payment-alert-content">
                             <div class="payment-alert-icon" style="background: #fecaca; color: #dc2626;">

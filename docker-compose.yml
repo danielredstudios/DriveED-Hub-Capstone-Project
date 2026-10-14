@@ -10,7 +10,7 @@ services:
     ports:
       - "8004:80"
     environment:
-      APP_NAME: "Driving School Management System"
+      APP_NAME: "SMART Driving School"
       APP_ENV: local
       APP_DEBUG: "true"
       APP_URL: "http://localhost:8004"

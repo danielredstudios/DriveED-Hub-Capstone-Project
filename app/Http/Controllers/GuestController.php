@@ -180,11 +180,6 @@ class GuestController extends Controller
             $enrollmentStatuses = $enrollments->pluck('status', 'course_id')->toArray();
         }
 
-        // Pre-check banner images to avoid file_exists() in the view
-        foreach ($courses as $course) {
-            $course->hasBannerImage = $course->banner_image && file_exists(public_path($course->banner_image));
-        }
-
         $branches = collect();
         $enableBranches = $school->schoolSetting->enable_branches ?? false;
         if ($enableBranches) {

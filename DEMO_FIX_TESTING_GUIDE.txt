@@ -1,0 +1,376 @@
+DRIVEED HUB - FIX VERIFICATION AND CLIENT DEMO GUIDE
+======================================================
+
+
+
+
+1. START THE APPLICATION
+------------------------
+Open PowerShell in the project folder and run:
+
+    docker compose up -d --build
+    docker compose exec app php artisan migrate
+
+Open the login page:
+
+    http://localhost:8004/drived-hub/login
+
+If the application is not available, check:
+
+    docker compose ps
+    docker compose logs --tail=100 app
+
+PREPARE FULL BUG-DEMO DATA
+--------------------------
+After a clean database reset, seed the transactional records required by the
+dashboard, booking, cancellation, instructor roster, and TDC batch tests:
+
+    docker compose exec app php scratch/seed_bug_demo_data.php
+
+This creates an approved practical enrollment, a cancellable practical booking,
+and a three-day TDC batch. It does not change account credentials.
+
+2. DEMO CREDENTIALS
+-------------------
+Use the seeded automated-demo accounts below.
+
+Admin:
+    Email:    admin1@driveedhub.test
+    Password: DriveDemo123
+
+Instructor:
+    Email:    instructor1@driveedhub.test
+    Password: DriveDemo123
+
+Practical student:
+    Email:    student1@driveedhub.test
+    Password: DriveDemo123
+
+New student:
+    Email:    student4@driveedhub.test
+    Password: DriveDemo123
+
+Guest:
+    Email:    guest4@driveedhub.test
+    Password: DriveDemo123
+
+3. ENROLLMENT 500 ERROR
+-----------------------
+Test URL:
+    http://localhost:8004/drived-hub/guest/courses
+
+Login:
+    guest4@driveedhub.test / DriveDemo123
+
+Steps:
+    1. Log in as Guest.
+    2. Open Guest Courses.
+    3. Click Enroll Now.
+    4. Select the experience level.
+    5. Select a license code if the form displays one.
+    6. Upload a small PDF or image if requested.
+    7. Submit the enrollment.
+
+Expected result:
+    - No 500 page or Internal Server Error appears.
+    - The request redirects to payment, or validation feedback is shown.
+    - The user can continue or correct the displayed validation error.
+
+Automated test:
+    npm.cmd test -- tests/e2e/01-enrollment-500.spec.js
+
+4. ADMIN STUDENT SCOPING
+------------------------
+Test URL:
+    http://localhost:8004/drived-hub/admin/user-management
+
+Login:
+    admin1@driveedhub.test / DriveDemo123
+
+Steps:
+    1. Log in as Admin.
+    2. Open User Management.
+    3. Select the student role filter.
+    4. Search for a student.
+    5. Test the branch filter if available.
+    6. Open the student export menu and download PDF or Excel.
+
+Expected result:
+    - Only students from the current school are shown.
+    - Branch-restricted admins see only their assigned branch.
+    - Exported students follow the same branch scope.
+    - No other school's students are visible.
+
+5. INSTRUCTOR STUDENT SCOPING AND DETAIL ACCESS
+------------------------------------------------
+List URL:
+    http://localhost:8004/drived-hub/instructor/students
+
+Schedule URL:
+    http://localhost:8004/drived-hub/instructor/my-schedule
+
+Login:
+    instructor1@driveedhub.test / DriveDemo123
+
+Steps:
+    1. Log in as Instructor.
+    2. Open My Students.
+    3. Confirm only assigned students appear.
+    4. Confirm there is only one student list/grid.
+    5. Search for a listed student and open the student detail.
+    6. Try an unassigned ID, for example:
+       http://localhost:8004/drived-hub/instructor/students/999999
+    7. Open instructor student export if needed.
+
+Expected result:
+    - The list contains only students assigned through bookings or session logs.
+    - The detail page also allows students assigned through session logs.
+    - An unassigned student returns 403 or 404.
+    - No private student data is leaked.
+
+Automated test:
+    npm.cmd test -- tests/e2e/02-scoping.spec.js
+
+6. STUDENT DASHBOARD COURSE TYPE AND ROADMAP
+--------------------------------------------
+Dashboard URL:
+    http://localhost:8004/drived-hub/student
+
+My Course URL:
+    http://localhost:8004/drived-hub/student/my-course
+
+Login:
+    student1@driveedhub.test / DriveDemo123
+
+Steps:
+    1. Log in as the Practical Student.
+    2. Open the Student Dashboard.
+    3. Check the displayed enrolled course type.
+    4. Check the license roadmap.
+    5. Open My Course.
+
+Expected result:
+    - The course displays Practical or Combo when appropriate.
+    - The roadmap advances to the practical/PDC step instead of incorrectly showing Step 1.
+    - A progress bar is visible.
+    - Lessons are ordered and show completed/current/future states.
+
+Automated test:
+    npm.cmd test -- tests/e2e/03-dashboard-roadmap.spec.js
+
+7. REAL LESSON COMPLETION TRACKING
+----------------------------------
+Lesson list URL:
+    Open Student My Course, then open a module and its lesson list.
+
+Login:
+    student1@driveedhub.test / DriveDemo123
+
+Steps:
+    1. Open My Course.
+    2. Open a lesson.
+    3. Read or review the lesson content.
+    4. Click Mark Lesson Complete.
+    5. Return to the lesson list or My Course.
+    6. Refresh the page.
+
+Expected result:
+    - The lesson shows Completed.
+    - The lesson remains completed after refresh.
+    - The next lesson is highlighted as Up Next.
+    - Completion is based on the exact lesson, not only completed training hours.
+
+8. COURSE RESTRICTION BADGES
+----------------------------
+Test URL:
+    http://localhost:8004/drived-hub/student/courses
+
+Login:
+    student4@driveedhub.test / DriveDemo123
+
+Steps:
+    1. Open Student Courses.
+    2. Inspect the course cards.
+    3. Open a course detail page.
+
+Expected result:
+    - Main course cards do not display unnecessary Pro/Non-Pro or restriction lists.
+    - Course detail still displays Restrictions and Eligibility.
+    - License codes remain available during the selection process.
+
+Automated test:
+    npm.cmd test -- tests/e2e/04-course-badges.spec.js
+
+9. TDC BATCH SCHEDULING
+-----------------------
+Test URL:
+    http://localhost:8004/drived-hub/admin/schedules
+
+Login:
+    admin1@driveedhub.test / DriveDemo123
+
+Steps:
+    1. Log in as Admin.
+    2. Open Manage Schedule.
+    3. Open the create schedule form.
+    4. Select a TDC/Theoretical course.
+    5. Enable TDC Batch Scheduling.
+    6. Enter a prefix such as TDC Batch A.
+    7. Add at least three future dates.
+    8. Assign an instructor.
+    9. Create the schedule.
+
+Expected result:
+    - One schedule is created for each selected date.
+    - Each schedule stores a shared batch group and a unique day number.
+    - The notes show the sequence, such as Day 1, Day 2, and Day 3.
+    - A student cannot select the same batch day twice.
+
+Automated test:
+    npm.cmd test -- tests/e2e/05-scheduling.spec.js
+
+10. MAXIMUM DAILY HOURS
+-----------------------
+Test URL:
+    http://localhost:8004/drived-hub/admin/schedules
+
+Login:
+    admin1@driveedhub.test / DriveDemo123
+
+Steps:
+    1. Open the create schedule form.
+    2. Enter Start: 08:00.
+    3. Enter End: 17:00.
+    4. Select a valid course.
+    5. Submit.
+
+Expected result:
+    - The schedule is rejected because it exceeds 8 hours.
+    - A readable validation message is shown.
+    - No invalid schedule is created.
+
+11. DOUBLE BOOKING PREVENTION
+-----------------------------
+Test URL:
+    http://localhost:8004/drived-hub/admin/schedules
+
+Login:
+    admin1@driveedhub.test / DriveDemo123
+
+Steps:
+    1. Create or locate an instructor schedule from 09:00 to 11:00.
+    2. Try to create another schedule for the same instructor on the same date.
+    3. Use an overlapping time, such as 10:00 to 12:00.
+
+Expected result:
+    - The second schedule is rejected.
+    - The error identifies the instructor conflict.
+    - No overlapping schedule is saved.
+
+Adjacent-time check:
+    - 09:00 to 11:00 and 11:00 to 13:00 should be allowed because they do not overlap.
+
+12. CANCELLATION SYNCHRONIZATION
+--------------------------------
+Student URL:
+    http://localhost:8004/drived-hub/student/schedule
+
+Instructor URL:
+    http://localhost:8004/drived-hub/instructor/my-schedule
+
+Student login:
+    student4@driveedhub.test / DriveDemo123
+
+Instructor login:
+    instructor1@driveedhub.test / DriveDemo123
+
+Steps:
+    1. Log in as Student.
+    2. Open Student Schedule.
+    3. Cancel an existing booking, or remove a queued booking.
+    4. Confirm the cancellation.
+    5. Record the success message.
+    6. Log out.
+    7. Log in as Instructor.
+    8. Open Instructor Schedule.
+
+Expected result:
+    - The booking status is cancelled.
+    - The student sees a successful cancellation message.
+    - The instructor receives a cancellation notification.
+    - The cancelled booking is not shown as an active booking.
+    - The slot becomes available again.
+
+Expected message:
+    Instructor notified and slot freed
+
+Automated test:
+    npm.cmd test -- tests/e2e/06-cancellation-sync.spec.js
+
+13. DYNAMIC COMBO CREATION
+--------------------------
+Test URL:
+    http://localhost:8004/drived-hub/admin/courses
+
+Login:
+    admin1@driveedhub.test / DriveDemo123
+
+Steps:
+    1. Open Course Management.
+    2. Click Create New Course.
+    3. Select Combo as the course type.
+    4. Select existing courses using the checkboxes.
+    5. Select at least two courses, such as TDC A and TDC B or TDC plus PDC.
+    6. Complete the remaining required fields.
+    7. Save the combo course.
+    8. Open Student Courses and verify the combo is visible.
+
+Expected result:
+    - Existing courses can be selected dynamically.
+    - The combo saves successfully.
+    - The selected course IDs are stored.
+    - Courses from another school cannot be bundled.
+
+Automated test:
+    npm.cmd test -- tests/e2e/07-combo.spec.js
+
+14. RUN ALL AUTOMATED FIX TESTS
+-------------------------------
+From the project folder, run:
+
+    npm.cmd test -- tests/e2e/01-enrollment-500.spec.js tests/e2e/02-scoping.spec.js tests/e2e/03-dashboard-roadmap.spec.js tests/e2e/04-course-badges.spec.js tests/e2e/05-scheduling.spec.js tests/e2e/06-cancellation-sync.spec.js tests/e2e/07-combo.spec.js
+
+Expected result:
+    16 passed
+
+15. CLIENT DEMO EVIDENCE CHECKLIST
+----------------------------------
+Capture screenshots or screen recordings of:
+    [ ] Enrollment success or validation without 500
+    [ ] Admin scoped student list
+    [ ] Instructor single scoped student list
+    [ ] Unauthorized instructor student response
+    [ ] Practical dashboard course type
+    [ ] Practical roadmap step
+    [ ] Completed lesson and next lesson
+    [ ] Course grid without restriction badges
+    [ ] Batch schedule with Day 1, Day 2, Day 3
+    [ ] Rejected over-8-hour schedule
+    [ ] Rejected overlapping instructor schedule
+    [ ] Cancellation confirmation
+    [ ] Instructor cancellation notification or refreshed schedule
+    [ ] Dynamic combo course selection
+    [ ] Final automated test result showing 16 passed
+
+16. TROUBLESHOOTING
+-------------------
+If the new lesson or batch fields cause an unknown-column error, run:
+
+    docker compose exec app php artisan migrate
+    docker compose restart app
+
+If test credentials do not work in a newly seeded database, inspect the
+seeder-defined password and update the credentials used for the demo.
+
+Never use production credentials for this demo. These accounts are for local
+or staging verification only.

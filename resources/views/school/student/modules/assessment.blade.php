@@ -32,8 +32,7 @@
     </div>
 
     <div class="lms-card" style="max-width: 900px; margin: 0 auto 2rem auto;">
-        <form action="#" method="POST" id="quizForm" class="lms-form">
-            @csrf
+        <form id="quizForm" class="lms-form" onsubmit="return false;">
             
             @forelse($module->questions as $index => $question)
                 <div class="lms-quiz-question" style="padding: 2rem; border-bottom: 1px solid #f1f5f9; position: relative;">
@@ -178,6 +177,10 @@
 </div>
 
 <script>
+(() => {
+    const quizForm = document.getElementById('quizForm');
+    if (!quizForm || quizForm.dataset.assessmentBound === 'true') return;
+    quizForm.dataset.assessmentBound = 'true';
     const normalizeAnswer = (v) => String(v ?? '').trim().replace(/\s+/g, ' ').toLowerCase();
 
     // Identification: exact term; alternatives in stored answer may use | or / or ;
@@ -210,7 +213,7 @@
         return raw;
     };
 
-    document.getElementById('quizForm').addEventListener('submit', function(e) {
+    quizForm.addEventListener('submit', function(e) {
         e.preventDefault();
 
         const form = this;
@@ -377,6 +380,7 @@
         overlay.style.display = 'block';
         window.scrollTo({ top: overlay.offsetTop - 100, behavior: 'smooth' });
     });
+})();
 </script>
 
 <style>

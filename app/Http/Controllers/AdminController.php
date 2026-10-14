@@ -1793,8 +1793,8 @@ class AdminController extends Controller
                         ->get();
                     $existingMinutes = $daySlots->sum(function($s){
                         try {
-                            $a=\Carbon\Carbon::createFromFormat('H:i',$s->start_time);
-                            $b=\Carbon\Carbon::createFromFormat('H:i',$s->end_time);
+                            $a=\Carbon\Carbon::parse($s->start_time);
+                            $b=\Carbon\Carbon::parse($s->end_time);
                             return $a->diffInMinutes($b);
                         } catch(\Exception $e){ return 0; }
                     });
@@ -1871,8 +1871,8 @@ class AdminController extends Controller
                             ->whereHas('instructors', fn($q)=>$q->where('instructors.id',$inst->id))
                             ->get()
                             ->filter(function($slot) use ($validated){
-                                $s1 = \Carbon\Carbon::createFromFormat('H:i',$slot->start_time);
-                                $e1 = \Carbon\Carbon::createFromFormat('H:i',$slot->end_time);
+                                $s1 = \Carbon\Carbon::parse($slot->start_time);
+                                $e1 = \Carbon\Carbon::parse($slot->end_time);
                                 $s2 = \Carbon\Carbon::createFromFormat('H:i',$validated['start_time']);
                                 $e2 = \Carbon\Carbon::createFromFormat('H:i',$validated['end_time']);
                                 return $s1->lt($e2) && $s2->lt($e1);

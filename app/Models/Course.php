@@ -9,11 +9,32 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class Course extends Model
 {
     use HasSchoolScope;
     use HasFactory;
+
+    protected $appends = ['banner_image_url'];
+
+    public function getBannerImageUrlAttribute(): ?string
+    {
+        $path = $this->banner_image;
+        if (!$path) {
+            return null;
+        }
+
+        if (file_exists(public_path($path))) {
+            return asset($path);
+        }
+
+        if (Storage::disk('public')->exists($path)) {
+            return asset(Storage::url($path));
+        }
+
+        return null;
+    }
 
     protected $fillable = [
         'school_id',

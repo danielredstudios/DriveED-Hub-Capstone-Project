@@ -335,13 +335,14 @@
         .course-header-banner { height: 200px; }
     }
 </style>
+@include('school.partials.course-flyer-styles')
 
 <div class="course-detail-container">
 
 
     <div class="course-header-banner">
-        @if($course->banner_image)
-            <img src="{{ asset($course->banner_image) }}" alt="{{ $course->title }}">
+        @if($course->banner_image_url)
+            <img src="{{ $course->banner_image_url }}" alt="{{ $course->title }}">
         @endif
         <div class="banner-overlay">
             <h1 class="course-title-large">{{ $course->title }}</h1>
@@ -350,7 +351,9 @@
                 @if($course->vehicle_type)
                     <span class="meta-badge">{{ $course->vehicle_type }}</span>
                 @endif
-                <span class="meta-badge">{{ $course->hours_required ?? $course->duration_hours ?? 0 }} Hours Training</span>
+                @if(!$course->packages?->count())
+                    <span class="meta-badge">{{ $course->hours_required ?? $course->duration_hours ?? 0 }} Hours Training</span>
+                @endif
             </div>
         </div>
     </div>
@@ -373,7 +376,6 @@
                         <span style="padding:6px 12px;border-radius:14px;background:#dbeafe;color:#1e40af;font-weight:600;font-size:0.85rem;">Req. Restriction: {{ $course->required_restriction }}</span>
                     @endif
                 </div>
-                <p style="font-size:0.9rem;color:#6b7280;">This badge information is shown here to help you choose the right package; it is hidden on the course grid.</p>
             </div>
 
             <div class="detail-card">
@@ -418,7 +420,12 @@
                     @endif
                 @else
                     <div class="price-tag">
-                        ₱{{ number_format($course->price ?? 0, 2) }}
+                        @if($course->packages?->count())
+                            <small>Packages from</small>
+                            ₱{{ number_format($course->packages->min('price'), 2) }}
+                        @else
+                            ₱{{ number_format($course->price ?? 0, 2) }}
+                        @endif
                     </div>
 
                     <div class="course-quick-info">
@@ -426,10 +433,12 @@
                             <span class="text-gray-500">License Category</span>
                             <span class="font-semibold">{{ ucfirst(str_replace('_', ' ', $course->license_type ?? 'N/A')) }}</span>
                         </div>
-                        <div class="quick-info-row">
-                            <span class="text-gray-500">Total Hours</span>
-                            <span class="font-semibold">{{ $course->hours_required ?? $course->duration_hours ?? 0 }} hrs</span>
-                        </div>
+                        @if(!$course->packages?->count())
+                            <div class="quick-info-row">
+                                <span class="text-gray-500">Total Hours</span>
+                                <span class="font-semibold">{{ $course->hours_required ?? $course->duration_hours ?? 0 }} hrs</span>
+                            </div>
+                        @endif
                     </div>
 
                     @if($isPracticalCourse)
@@ -481,6 +490,26 @@
                 
                 @if($course->packages && $course->packages->count() > 0)
                 <div class="form-group">
+                    <div class="enroll-package-details" aria-label="Package details">
+                        @foreach($course->packages as $package)
+                            <div class="enroll-package-detail">
+                                <div class="enroll-package-heading">
+                                    <span>{{ $package->name }}</span>
+                                    <strong>₱{{ number_format($package->price, 2) }}</strong>
+                                </div>
+                                <p>
+                                    @if($package->training_hours){{ $package->training_hours }} hours of training @endif
+                                    @if(!$package->training_hours && $package->tdc_hours){{ $package->tdc_hours }}h TDC @endif
+                                    @if(!$package->training_hours && $package->pdc_hours){{ $package->tdc_hours ? ' · ' : '' }}{{ $package->pdc_hours }}h PDC @endif
+                                    @if($package->transmission_type){{ ($package->training_hours || $package->tdc_hours || $package->pdc_hours) ? ' · ' : '' }}{{ ucfirst($package->transmission_type) }} transmission @endif
+                                </p>
+                                @if($package->description)<p>{{ $package->description }}</p>@endif
+                                @if(is_array($package->features) && count($package->features))
+                                    <ul>@foreach($package->features as $feature)<li>{{ $feature }}</li>@endforeach</ul>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
                     <label class="form-label">Choose Package</label>
                     <select name="package_id" class="form-select" required>
                         <option value="">Select a package...</option>

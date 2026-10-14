@@ -678,15 +678,15 @@
             ;
             padding: 40px;
             color: white;
-            text-align: center;
+            text-align: left;
         }
 
         .preview-guest-banner-img {
             max-width: 600px;
             width: 100%;
-            border-radius: 12px;
+            border-radius: 10px;
             margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
         }
 
         .preview-guest-banner-icon {
@@ -697,15 +697,15 @@
         }
 
         .preview-guest-title {
-            font-size: 2.5rem;
+            font-size: clamp(1.75rem, 4vw, 2.4rem);
             font-weight: 700;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         .preview-guest-meta {
             display: flex;
             gap: 15px;
-            justify-content: center;
+            justify-content: flex-start;
             flex-wrap: wrap;
             margin-bottom: 15px;
         }
@@ -733,9 +733,21 @@
         .preview-guest-description {
             font-size: 1.1rem;
             max-width: 700px;
-            margin: 0 auto;
+            margin: 0;
             opacity: 0.95;
         }
+
+        .preview-guest-facts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 28px;
+            margin-top: 24px;
+            padding-top: 18px;
+            border-top: 1px solid rgba(255, 255, 255, .4);
+        }
+
+        .preview-guest-facts span { display: block; font-size: .8rem; opacity: .88; }
+        .preview-guest-facts strong { display: block; margin-top: 3px; font-size: 1.15rem; }
 
         .preview-guest-body {
             padding: 40px;
@@ -746,11 +758,11 @@
         }
 
         .preview-guest-section-title {
-            font-size: 1.8rem;
+            font-size: 1.35rem;
             font-weight: 700;
             color: #2d3748;
             margin-bottom: 25px;
-            text-align: center;
+            text-align: left;
         }
 
         .preview-guest-features-grid {
@@ -1635,8 +1647,8 @@
                 @foreach($courses as $course)
                     <div class="course-card">
                         <div class="course-banner-wrap">
-                            @if($course->banner_image && file_exists(public_path($course->banner_image)))
-                                <img src="{{ asset($course->banner_image) }}" alt="{{ $course->title }}" class="course-banner">
+                            @if($course->banner_image_url)
+                                <img src="{{ $course->banner_image_url }}" alt="{{ $course->title }}" class="course-banner">
                             @else
                                 <div class="course-banner">
                                     <i class="bi bi-car-front-fill"></i>
@@ -1782,8 +1794,8 @@
             <div class="courses-list">
                 @foreach($courses as $course)
                     <div class="course-list-item">
-                        @if($course->banner_image && file_exists(public_path($course->banner_image)))
-                            <img src="{{ asset($course->banner_image) }}" alt="{{ $course->title }}" class="course-list-banner">
+                        @if($course->banner_image_url)
+                            <img src="{{ $course->banner_image_url }}" alt="{{ $course->title }}" class="course-list-banner">
                         @else
                             <div class="course-list-banner">
                                 <i class="bi bi-car-front-fill"></i>
@@ -2482,9 +2494,9 @@
                 }
 
                 // Show banner preview if exists
-                if (course.banner_image) {
+                if (course.banner_image_url) {
                     const preview = document.getElementById('imagePreview');
-                    preview.src = '{{ asset("") }}' + course.banner_image;
+                    preview.src = course.banner_image_url;
                     preview.style.display = 'block';
                 }
 
@@ -2733,8 +2745,8 @@
                 // Build guest-view HTML
                 const previewHTML = `
                 <div class="preview-guest-hero">
-                    ${course.banner_image ?
-                        `<img src="{{ asset('') }}${course.banner_image}" class="preview-guest-banner-img">` :
+                    ${course.banner_image_url ?
+                        `<img src="${course.banner_image_url}" class="preview-guest-banner-img">` :
                         `<i class="bi bi-car-front-fill preview-guest-banner-icon"></i>`
                     }
                     <h2 class="preview-guest-title">${course.title}</h2>
@@ -2744,12 +2756,17 @@
                         ${course.is_featured ? `<span class="preview-guest-featured-pill"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="preview-guest-featured-icon"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd" /></svg>Featured</span>` : ''}
                     </div>
                     ${course.description ? `<p class="preview-guest-description">${course.description}</p>` : ''}
+                    <div class="preview-guest-facts">
+                        ${!course.packages || !course.packages.length ? `<div><span>Training</span><strong>${course.hours_required || course.duration_hours ? `${course.hours_required || course.duration_hours} hours` : 'See details'}</strong></div>` : ''}
+                        <div><span>Packages</span><strong>${course.packages ? course.packages.length : 0} available</strong></div>
+                        ${course.packages && course.packages.length ? `<div><span>Starting at</span><strong>₱${new Intl.NumberFormat().format(Math.min(...course.packages.map(pkg => Number(pkg.price))))}</strong></div>` : ''}
+                    </div>
                 </div>
 
                 <div class="preview-guest-body">
                     ${course.features && course.features.length > 0 ? `
                         <div class="preview-guest-section">
-                            <h3 class="preview-guest-section-title">✨ What's Included</h3>
+                            <h3 class="preview-guest-section-title">What's included</h3>
                             <div class="preview-guest-features-grid">
                                 ${course.features.map(feature => `
                                     <div class="preview-guest-feature-item">
@@ -2763,7 +2780,7 @@
 
                     ${course.packages && course.packages.length > 0 ? `
                         <div>
-                            <h3 class="preview-guest-section-title">Choose Your Package</h3>
+                            <h3 class="preview-guest-section-title">Package details</h3>
                             <div class="preview-guest-packages-grid">
                                 ${course.packages.map(pkg => `
                                     <div class="preview-guest-package-card ${pkg.is_popular ? 'popular' : ''}">

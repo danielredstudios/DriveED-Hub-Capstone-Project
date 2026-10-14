@@ -1843,6 +1843,7 @@
                                                 $totalCount = $timeslot->instructors->count();
                                                 $availableSpots = $timeslot->getAvailableStudentSpots();
                                                 $sessionType = $timeslot->resolved_session_type;
+                                                $studentCapacity = $sessionType === 'practical' ? $totalCount : $timeslot->max_students;
                                                 $isFull = $availableSpots <= 0;
                                             @endphp
                                             <tr class="timeslot-table-row timeslot-item" 
@@ -1852,7 +1853,9 @@
                                                 data-end-time="{{ $timeslot->end_time }}"
                                                 data-session-type="{{ $sessionType }}"
                                                 data-max-instructors="{{ $timeslot->max_instructors }}"
-                                                data-max-students="{{ $timeslot->max_students }}"
+                                                data-max-students="{{ $studentCapacity }}"
+                                                data-available-students="{{ $availableSpots }}"
+                                                data-instructors="{{ $timeslot->instructors->map(fn ($instructor) => ['name' => $instructor->name, 'type' => ($instructor->pivot->assignment_type ?? '') === 'self_selected' ? 'self' : 'admin'])->toJson() }}"
                                                 data-notes="{{ $timeslot->notes ?? '' }}">
 
                                                 <td style="width: 170px;">
@@ -1914,7 +1917,7 @@
                                                         <div style="font-size: 0.85rem; font-weight: 700; color: {{ $isFull ? '#64748b' : '#059669' }};">
                                                             {{ $isFull ? 'FULL' : $availableSpots . ' SPOTS' }}
                                                         </div>
-                                                        <div style="font-size: 0.75rem; color: #94a3b8;">Max: {{ $timeslot->max_students }} Students</div>
+                                                        <div style="font-size: 0.75rem; color: #94a3b8;">Max: {{ $studentCapacity }} Students</div>
                                                     @endif
                                                 </td>
                                                 <td style="text-align: center; width: 180px;">
@@ -2149,7 +2152,7 @@
                             input.setCustomValidity('');
                             return true;
                         }
-                        document.addEventListener('DOMContentLoaded', function() {
+                        function initCreateScheduleDates() {
                             var sel = document.getElementById('createCourseSelect');
                             if (sel) sel.addEventListener('change', updateBatchAvailability);
                             var dateInput = document.getElementById('createScheduleDate');
@@ -2158,7 +2161,12 @@
                                 dateInput.addEventListener('change', function() { validateScheduleDate(dateInput); });
                             }
                             updateBatchAvailability();
-                        });
+                        }
+                        if (document.readyState === 'loading') {
+                            document.addEventListener('DOMContentLoaded', initCreateScheduleDates, { once: true });
+                        } else {
+                            initCreateScheduleDates();
+                        }
                         function toggleBatchMode(enabled) {
                             const singleGroup = document.getElementById('singleDateGroup');
                             const batchGroup = document.getElementById('batchDatesGroup');
@@ -2168,13 +2176,13 @@
                             if (enabled) {
                                 singleGroup.style.display = 'none';
                                 batchGroup.style.display = 'block';
-                                if (dateInput) dateInput.required = false;
-                                batchDateInputs.forEach(i => i.required = true);
+                                if (dateInput) { dateInput.required = false; dateInput.disabled = true; }
+                                batchDateInputs.forEach(i => { i.required = true; i.disabled = false; });
                             } else {
                                 singleGroup.style.display = 'block';
                                 batchGroup.style.display = 'none';
-                                if (dateInput) dateInput.required = true;
-                                batchDateInputs.forEach(i => i.required = false);
+                                if (dateInput) { dateInput.required = true; dateInput.disabled = false; }
+                                batchDateInputs.forEach(i => { i.required = false; i.disabled = true; });
                             }
                         }
 
@@ -2417,7 +2425,7 @@
                 </div>
                 <div class="modal-footer">
                     <div id="batchModeAlert" style="display: none; width: 100%; text-align: left; padding: 10px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 6px; margin-bottom: 10px; font-size: 0.9rem; color: #856404;">
-                        <i class="bi bi-info-circle-fill"></i> <strong>Batch Mode Active:</strong> Since you have selected multiple instructors for a PDC session, the system will create <strong>one separate slot for each instructor</strong>.
+                        <i class="bi bi-info-circle-fill"></i> <strong>Multiple instructors selected:</strong> This creates one practical slot with one student place per assigned instructor.
                     </div>
                     <button type="button" class="btn btn-secondary" onclick="closeCreateModal()">Cancel</button>
                     <button type="submit" id="submitCreateBtn" class="btn btn-success">
@@ -2520,7 +2528,7 @@
         };
 
         // Course-Driven Smart Form Logic
-        document.addEventListener('DOMContentLoaded', function() {
+        function initCreateScheduleForm() {
             const courseSelect = document.getElementById('createCourseSelect');
             const sessionTypeSelect = document.getElementById('createSessionType');
             const maxStudentsGroup = document.getElementById('maxStudentsGroup');
@@ -2593,10 +2601,8 @@
                     const maxStudentsInput = document.getElementById('createMaxStudents');
                     if (maxStudentsInput) maxStudentsInput.disabled = false;
 
-                    // For TDC, we hide "Max Instructors" (one-to-one focus) 
-                    // and default internal instructors to 1 in the background logic.
-                    maxInstructorsGroup.style.display = 'none';
-                    maxInstructorsInput.disabled = true;
+                    maxInstructorsGroup.style.display = 'block';
+                    maxInstructorsInput.disabled = false;
 
                     batchModeAlert.style.display = 'none';
                 } else {
@@ -2623,7 +2629,12 @@
             if (instructorSelect) instructorSelect.addEventListener('change', updateFormMode);
             if (sessionTypeSelect) sessionTypeSelect.addEventListener('change', updateFormMode);
             updateFormMode();
-        });
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initCreateScheduleForm, { once: true });
+        } else {
+            initCreateScheduleForm();
+        }
 
         window.openDetailsModal = function() {
             var detailsModal = document.getElementById('detailsModal');
@@ -2895,10 +2906,15 @@
         }
 
         // Initialize AJAX handlers
-        document.addEventListener('DOMContentLoaded', function() {
+        function initScheduleSubmitHandlers() {
             handleScheduleSubmit('createScheduleForm', 'createScheduleErrors', 'Schedule created successfully!');
             handleScheduleSubmit('editScheduleForm', 'editScheduleErrors', 'Schedule updated successfully!');
-        });
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initScheduleSubmitHandlers, { once: true });
+        } else {
+            initScheduleSubmitHandlers();
+        }
 
         // Collapsible Date Sections
         window.toggleDate = function(dateHeader) {
@@ -2972,23 +2988,15 @@
                 `${window.formatTime(startTime)} - ${window.formatTime(endTime)}` : 
                 'Time not available';
 
-            // Get instructors from the DOM
-            const instructorBadges = slotItem.querySelectorAll('.badge-primary, .badge-success');
-            let instructorsList = [];
-            instructorBadges.forEach(badge => {
-                const nameText = badge.textContent.trim().replace(/^\[A\]\s*|^\[S\]\s*/, ''); // Remove prefix
-                instructorsList.push({
-                    name: nameText,
-                    type: badge.classList.contains('badge-primary') ? 'admin' : 'self'
-                });
-            });
+            const instructorsList = JSON.parse(slotItem.dataset.instructors || '[]');
 
             console.log('Instructors found:', instructorsList);
 
-            // Get availability
-            const availableBadge = slotItem.querySelector('.badge-success:not(.badge-primary), .badge-secondary');
-            const availableText = availableBadge ? availableBadge.textContent.trim() : 'Full';
             const maxStudents = slotItem.dataset.maxStudents || '1';
+            const availableStudents = Number(slotItem.dataset.availableStudents || 0);
+            const availableText = instructorsList.length === 0
+                ? 'No instructor assigned'
+                : `${availableStudents} of ${maxStudents} student spots open`;
             maxInstructors = slotItem.dataset.maxInstructors || '1';
 
             // Store data for edit modal

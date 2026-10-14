@@ -777,6 +777,11 @@ class StudentController extends Controller
         $confirmedBookings = $allBookings->whereIn('status', ['scheduled', 'confirmed', 'completed']);
         $cancelledBookings = $allBookings->where('status', 'cancelled');
         $queuedBookings = $allBookings->where('status', 'pending');
+        $bookingStatusBySlot = $allBookings
+            ->whereIn('status', ['pending', 'scheduled', 'confirmed', 'done', 'completed'])
+            ->filter(fn ($booking) => $booking->time_slot_id !== null)
+            ->pluck('status', 'time_slot_id')
+            ->toArray();
         
         // Group bookings by date
         $groupedBookings = $confirmedBookings->groupBy(function($booking) {
@@ -839,6 +844,7 @@ class StudentController extends Controller
             'confirmedBookings' => $confirmedBookings,
             'cancelledBookings' => $cancelledBookings,
             'queuedBookings' => $queuedBookings,
+            'bookingStatusBySlot' => $bookingStatusBySlot,
             'groupedBookings' => $groupedBookings,
             'groupedCancelledBookings' => $groupedCancelledBookings,
             'groupedQueuedBookings' => $groupedQueuedBookings,

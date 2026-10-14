@@ -32,11 +32,22 @@
         /* Upper section - Logo image */
         .logo-section {
             flex: 0 0 50%;
-            background-image: url('/images/SystemLogo1.png');
-            background-size: cover;
+            background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
-            background-color: #053d86;
+            background-color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .beneficiary-logo {
+            display: block;
+            width: min(78%, 420px);
+            height: auto;
+            max-height: 100%;
+            object-fit: contain;
         }
 
         /* Lower section - Driving image */
@@ -225,7 +236,9 @@
         <!-- Left Section -->
         <div class="left-section">
             <!-- Upper: Logo image -->
-            <div class="logo-section"></div>
+            <div class="logo-section">
+                <img class="beneficiary-logo" src="{{ asset('images/logo-smart-transparent.png') }}" alt="SMART Driving School logo">
+            </div>
 
             <!-- Lower: Driving image -->
             <div class="hero-section"></div>
