@@ -93,15 +93,13 @@ class InstructorTimeSlotController extends Controller
                 return redirect()->back()->with('error', 'You cannot leave this slot as it was assigned by an admin. Please use Request Removal instead.');
             }
 
-            // [NEW] 1-minute Grace Period & Booking Check
+            // Self-selected slots with no bookings can be left directly at any time.
+            // Slots with bookings (or admin-assigned slots) must go through Request Removal.
             $hasBookings = $timeSlot->bookings()->where('instructor_id', $instructor->id)->where('status', '!=', 'cancelled')->exists();
-            $joinTime = \Carbon\Carbon::parse($pivot->pivot->created_at);
-            $isGracePeriod = $joinTime->gt(now()->subMinute());
 
-            if ($hasBookings || !$isGracePeriod) {
-                $reason = $hasBookings ? 'This slot has student bookings.' : 'The 1-minute grace period for self-selected slots has expired.';
-                $message = $reason . ' You must "Request Removal" so the admin can review the request.';
-                
+            if ($hasBookings) {
+                $message = 'This slot has student bookings. You must "Request Removal" so the admin can review the request.';
+
                 if ($isAjax) {
                     return response()->json(['success' => false, 'message' => $message], 400);
                 }
@@ -279,6 +277,18 @@ class InstructorTimeSlotController extends Controller
             ];
         }
 
+        // Cancelled bookings for this instructor (shown in the "Cancelled Schedules" section)
+        $cancelledBookings = Booking::with(['timeSlot', 'course'])
+            ->where('school_id', $school->id)
+            ->where('instructor_id', $instructorId)
+            ->where('status', 'cancelled')
+            ->orderByDesc('booking_date')
+            ->get();
+
+        $groupedCancelledBookings = $cancelledBookings->groupBy(function ($booking) {
+            return \Carbon\Carbon::parse($booking->booking_date)->format('Y-m-d');
+        });
+
         return view('school.instructor.schedule-new', [
             'school' => $school,
             'instructorId' => $instructorId,
@@ -292,6 +302,8 @@ class InstructorTimeSlotController extends Controller
             'upcomingSlots' => $upcomingSlots,
             'availableSlots' => $availableSlots,
             'groupedAvailableSlots' => $groupedAvailableSlots,
+            'cancelledBookings' => $cancelledBookings,
+            'groupedCancelledBookings' => $groupedCancelledBookings,
             'instructorSchedule' => $instructorSchedule,
             'isAjax' => $request->ajax(),
         ]);

@@ -1033,8 +1033,8 @@
                 <div class="modal-body">
                     <!-- Course Type Badge -->
                     <div class="mb-3">
-                        <span class="badge {{ $course->course_type == 'theoretical' ? 'bg-info' : 'bg-primary' }} me-2">
-                            {{ ucfirst($course->course_type) }} Course ({{ $course->course_type == 'theoretical' ? 'TDC' : 'PDC' }})
+                        <span class="badge {{ $course->course_type == 'practical' ? 'bg-primary' : 'bg-info' }} me-2">
+                            {{ ucfirst($course->course_type) }} Course ({{ $course->course_type == 'practical' ? 'PDC' : ($course->course_type == 'combo' ? 'TDC + PDC' : 'TDC') }})
                         </span>
                         <span class="badge bg-secondary">
                             {{ ucfirst(str_replace('_', ' ', $course->license_type)) }}
@@ -1076,7 +1076,7 @@
                         </label>
                         <select name="experience_level" id="experience_level{{ $course->id }}" class="form-select @error('experience_level') is-invalid @enderror" required onchange="handleExperienceChange{{ $course->id }}()">
                             <option value="">Select your experience...</option>
-                            @if($course->course_type === 'theoretical')
+                            @if(in_array($course->course_type, ['theoretical', 'combo']))
                                 <option value="new_driver" {{ old('experience_level') == 'new_driver' ? 'selected' : '' }}>
                                     New Driver (No license, learning from scratch)
                                 </option>
@@ -1095,6 +1095,8 @@
                         @enderror
                         @if($course->course_type === 'theoretical')
                             <small class="text-muted">TDC is open to all drivers — this helps us customize your learning path</small>
+                        @elseif($course->course_type === 'combo')
+                            <small class="text-muted">Combo (TDC + PDC) is open to all drivers — the practical sessions need a student license, which you can add later</small>
                         @else
                             <small class="text-muted">PDC needs a verified student license before practical driving sessions. You may submit an enrollment request first.</small>
                         @endif

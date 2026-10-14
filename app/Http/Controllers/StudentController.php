@@ -773,8 +773,10 @@ class StudentController extends Controller
             ->orderBy('booking_date')
             ->get();
 
-        // Separate bookings by status
-        $confirmedBookings = $allBookings->whereIn('status', ['scheduled', 'confirmed', 'completed']);
+        // Separate bookings by status.
+        // Pending (queued) bookings are shown in the main schedule too, so students
+        // can cancel them directly — the dedicated "Queued Schedules" section was removed.
+        $confirmedBookings = $allBookings->whereIn('status', ['scheduled', 'confirmed', 'completed', 'pending']);
         $cancelledBookings = $allBookings->where('status', 'cancelled');
         $queuedBookings = $allBookings->where('status', 'pending');
         $bookingStatusBySlot = $allBookings
@@ -829,7 +831,7 @@ class StudentController extends Controller
 
         // Pre-compute upcoming bookings for sidebar (avoids repeating logic in blade)
         $upcomingBookings = $confirmedBookings
-            ->whereIn('status', ['scheduled', 'confirmed'])
+            ->whereIn('status', ['scheduled', 'confirmed', 'pending'])
             ->where('booking_date', '>=', now()->toDateString())
             ->where('booking_date', '<=', now()->addDays(7)->toDateString())
             ->sortBy('booking_date');

@@ -1185,6 +1185,32 @@ class AdminController extends Controller
                 ->where('id', $removalRequest->schedule_instructor_id)
                 ->delete();
 
+            // Notify the instructor that their removal request was approved
+            $instructor = $removalRequest->instructor;
+            if ($instructor) {
+                $timeSlotInfo = $removalRequest->timeSlot;
+                $slotLabel = $timeSlotInfo
+                    ? Carbon::parse($timeSlotInfo->date)->format('M d, Y') . ', ' . Carbon::parse($timeSlotInfo->start_time)->format('g:i A') . ' - ' . Carbon::parse($timeSlotInfo->end_time)->format('g:i A')
+                    : 'the selected time slot';
+                $instructorMessage = "Your removal request for {$slotLabel} has been approved. You have been removed from this time slot.";
+                if ($request->admin_notes) {
+                    $instructorMessage .= " Admin note: {$request->admin_notes}";
+                }
+
+                try {
+                    \App\Models\Notification::send(
+                        $instructor,
+                        'removal_request_approved',
+                        'Removal Request Approved',
+                        $instructorMessage,
+                        'success',
+                        school_route('instructor.schedule', ['school' => $school->slug])
+                    );
+                } catch (\Exception $e) {
+                    LogFacade::warning("Failed to send removal approval notification to instructor: " . $e->getMessage());
+                }
+            }
+
             // Notify students if requested
             if ($request->notify_students) {
                 $timeSlot = $removalRequest->timeSlot;
@@ -1262,6 +1288,29 @@ class AdminController extends Controller
                 'processed_by' => $admin->id,
                 'processed_at' => now(),
             ]);
+
+            // Notify the instructor that their removal request was rejected
+            $instructor = $removalRequest->instructor;
+            if ($instructor) {
+                $timeSlotInfo = $removalRequest->timeSlot;
+                $slotLabel = $timeSlotInfo
+                    ? Carbon::parse($timeSlotInfo->date)->format('M d, Y') . ', ' . Carbon::parse($timeSlotInfo->start_time)->format('g:i A') . ' - ' . Carbon::parse($timeSlotInfo->end_time)->format('g:i A')
+                    : 'the selected time slot';
+                $instructorMessage = "Your removal request for {$slotLabel} was rejected. You remain assigned to this time slot. Admin note: {$request->admin_notes}";
+
+                try {
+                    \App\Models\Notification::send(
+                        $instructor,
+                        'removal_request_rejected',
+                        'Removal Request Rejected',
+                        $instructorMessage,
+                        'warning',
+                        school_route('instructor.schedule', ['school' => $school->slug])
+                    );
+                } catch (\Exception $e) {
+                    LogFacade::warning("Failed to send removal rejection notification to instructor: " . $e->getMessage());
+                }
+            }
 
             DB::commit();
 

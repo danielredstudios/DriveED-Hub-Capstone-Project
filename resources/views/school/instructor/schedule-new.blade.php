@@ -442,6 +442,64 @@
     .status-completed { background: #dcfce7; color: #166534; }
     .status-no-show { background: #fee2e2; color: #991b1b; }
 
+    /* Cancelled Schedules section */
+    .cancelled-date-group { margin-bottom: 14px; }
+
+    .cancelled-date-header {
+        background: #fee2e2;
+        color: #991b1b;
+        font-weight: 700;
+        font-size: 13px;
+        padding: 8px 10px;
+        border-radius: 6px;
+        margin-bottom: 8px;
+    }
+
+    .cancelled-lesson-card {
+        background: #fff5f5;
+        border: 1px solid #fecaca;
+        border-left: 4px solid #dc2626;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 8px;
+    }
+
+    .cancelled-student-name {
+        font-weight: 600;
+        color: #000;
+        margin-bottom: 4px;
+    }
+
+    .cancelled-meta {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 6px;
+    }
+
+    .cancelled-reason {
+        margin-top: 6px;
+        font-size: 12px;
+        color: #6b7280;
+        word-break: break-word;
+    }
+
+    .booking-status-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.2px;
+    }
+
+    .booking-status-cancelled-you { background: #fee2e2; color: #991b1b; }
+    .booking-status-cancelled-instructor { background: #ffedd5; color: #9a3412; }
+    .booking-status-cancelled-school { background: #ede9fe; color: #5b21b6; }
+    .booking-status-cancelled-default { background: #f3f4f6; color: #374151; }
+
     .attendance-attended { background: #dcfce7; color: #166534; }
     .attendance-late { background: #ffedd5; color: #9a3412; }
     .attendance-absent { background: #fee2e2; color: #991b1b; }
@@ -947,15 +1005,9 @@
                                         <div class="slot-actions">
                                             @php
                                                 $hasAnyBookings = $slotBookings->count() > 0;
-                                                $pivot = $instructor ? $instructor->pivot : null;
-                                                $isGracePeriod = false;
-                                                
-                                                if ($pivot) {
-                                                    $joinTime = \Carbon\Carbon::parse($pivot->created_at);
-                                                    $isGracePeriod = $joinTime->gt(now()->subMinute());
-                                                }
-                                                
-                                                $shouldRequest = $isAdminAssigned || $hasAnyBookings || !$isGracePeriod;
+                                                // Match the server-side rule in InstructorTimeSlotController::toggle():
+                                                // self-selected slots without bookings can be left directly at any time.
+                                                $shouldRequest = $isAdminAssigned || $hasAnyBookings;
                                             @endphp
                                             
                                             @if($shouldRequest)
@@ -1084,6 +1136,48 @@
                     @empty
                         <div class="no-lessons">No upcoming slots</div>
                     @endforelse
+                </div>
+
+                <div class="sidebar-section">
+                    <h3 class="sidebar-title">Cancelled Schedules</h3>
+                    @if(($groupedCancelledBookings ?? collect())->count() > 0)
+                        @foreach($groupedCancelledBookings as $date => $dateCancelledBookings)
+                            <div class="cancelled-date-group">
+                                <div class="cancelled-date-header">{{ \Carbon\Carbon::parse($date)->format('D, M d, Y') }}</div>
+                                @foreach($dateCancelledBookings as $booking)
+                                    <div class="cancelled-lesson-card">
+                                        <div class="lesson-time">
+                                            @if($booking->timeSlot)
+                                                {{ \Carbon\Carbon::parse($booking->timeSlot->start_time)->format('g:i A') }} - {{ \Carbon\Carbon::parse($booking->timeSlot->end_time)->format('g:i A') }}
+                                            @elseif($booking->scheduled_at)
+                                                {{ \Carbon\Carbon::parse($booking->scheduled_at)->format('g:i A') }}
+                                            @else
+                                                Time TBD
+                                            @endif
+                                        </div>
+                                        <div class="cancelled-student-name">{{ $booking->student->name ?? 'Student' }}</div>
+                                        <div class="student-course">{{ $booking->course->title ?? 'Course' }}</div>
+                                        <div class="cancelled-meta">
+                                            @if($booking->cancelled_by === 'student')
+                                                <span class="booking-status-pill booking-status-cancelled-you">Cancelled by Student</span>
+                                            @elseif($booking->cancelled_by === 'instructor')
+                                                <span class="booking-status-pill booking-status-cancelled-instructor">Cancelled by You</span>
+                                            @elseif($booking->cancelled_by === 'admin')
+                                                <span class="booking-status-pill booking-status-cancelled-school">Cancelled by School</span>
+                                            @else
+                                                <span class="booking-status-pill booking-status-cancelled-default">Cancelled</span>
+                                            @endif
+                                        </div>
+                                        @if($booking->cancellation_reason)
+                                            <div class="cancelled-reason">Reason: {{ $booking->cancellation_reason }}</div>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endforeach
+                    @else
+                        <div class="no-lessons">No cancelled schedules</div>
+                    @endif
                 </div>
             </div>
         </div>
