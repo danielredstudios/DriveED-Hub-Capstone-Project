@@ -303,6 +303,14 @@
         color: #1f2937;
     }
     
+    @media (max-width: 640px) {
+        .log-message {
+            white-space: normal;
+            max-width: 100%;
+            word-break: break-word;
+        }
+    }
+    
     /* Time Display */
     .log-time {
         display: flex;

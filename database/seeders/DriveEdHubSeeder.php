@@ -64,12 +64,12 @@ class DriveEdHubSeeder extends Seeder
         $hashedPassword = Hash::make($demoPassword);
 
         $this->command->info('');
-        $this->command->info('🏫 Creating DriveED Hub Driving School (2 branches)...');
+        $this->command->info('🏫 Creating SMART Driving School (2 branches)...');
 
         $school = School::updateOrCreate(
             ['slug' => 'drived-hub'],
             [
-                'name' => 'DriveED Hub Driving School',
+                'name' => 'SMART Driving School',
                 'timezone' => 'Asia/Manila',
                 'branding' => json_encode([
                     'logo' => null,

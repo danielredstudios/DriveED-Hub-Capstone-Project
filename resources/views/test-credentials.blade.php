@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
             min-height: 100vh;
             padding: 20px;
             display: flex;
@@ -200,7 +200,7 @@
         }
 
         .copy-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
             color: white;
             border: none;
             padding: 6px 12px;
@@ -227,7 +227,7 @@
             display: block;
             width: 100%;
             padding: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
             color: white;
             text-decoration: none;
             text-align: center;
@@ -577,7 +577,7 @@
 
         // Display a welcome toast
         window.addEventListener('load', () => {
-            console.log('%c🔒 Test Credentials Loaded!', 'color: #667eea; font-size: 20px; font-weight: bold;');
+            console.log('%c🔒 Test Credentials Loaded!', 'color: #2563eb; font-size: 20px; font-weight: bold;');
             console.log('%cAll accounts use password: "password"', 'color: #10b981; font-size: 14px;');
         });
     </script>

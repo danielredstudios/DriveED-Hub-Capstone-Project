@@ -45,7 +45,7 @@
         left: -30px;
         width: calc(100% + 100px);
         height: 3px;
-        background: {{ $settings->primary_color ?? '#667eea' }};
+        background: {{ $settings->primary_color ?? '#2563eb' }};
     }
 
     .profile-card {
@@ -149,7 +149,7 @@
     .contact-input-group {
         display: flex;
         align-items: center;
-        background: {{ $settings->primary_color ?? '#667eea' }}05;
+        background: {{ $settings->primary_color ?? '#2563eb' }}05;
         border: 1px solid #ddd;
         border-radius: 8px;
         overflow: hidden;
@@ -157,7 +157,7 @@
     }
 
     .contact-input-group:focus-within {
-        border-color: {{ $settings->primary_color ?? '#667eea' }};
+        border-color: {{ $settings->primary_color ?? '#2563eb' }};
         background: white;
     }
 
@@ -344,6 +344,55 @@
         margin-top: 6px;
         color: #b91c1c;
         font-size: 13px;
+    }
+
+    @media (max-width: 640px) {
+        .profile-page {
+            padding: 24px 12px;
+        }
+
+        .profile-page-title::after {
+            left: 0;
+            width: 100%;
+        }
+
+        .profile-card-header {
+            padding: 28px 16px 20px;
+        }
+
+        .profile-avatar-circle {
+            width: 140px;
+            height: 140px;
+        }
+
+        .profile-avatar-letter {
+            font-size: 56px;
+        }
+
+        .profile-card-body {
+            padding: 0 16px 20px;
+        }
+
+        .profile-field {
+            grid-template-columns: 1fr;
+            gap: 4px;
+            padding: 12px 0;
+        }
+
+        .profile-actions,
+        .edit-form {
+            padding: 20px 16px;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn-save,
+        .btn-cancel,
+        .btn-edit-profile {
+            width: 100%;
+        }
     }
 </style>
 

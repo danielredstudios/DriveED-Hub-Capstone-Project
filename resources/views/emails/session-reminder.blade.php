@@ -6,10 +6,10 @@
     <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+        .header { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
         .content { background: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; }
         .footer { background: #f9fafb; padding: 20px; text-align: center; font-size: 12px; color: #6b7280; border-radius: 0 0 8px 8px; }
-        .button { display: inline-block; padding: 12px 30px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 15px 0; }
+        .button { display: inline-block; padding: 12px 30px; background: #2563eb; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 15px 0; }
         .info-box { background: #fefce8; border-left: 4px solid #eab308; padding: 15px; margin: 15px 0; border-radius: 4px; }
         .session-card { background: #f8f9fa; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; margin: 20px 0; }
         .session-detail { display: flex; align-items: flex-start; margin-bottom: 12px; }
@@ -18,7 +18,7 @@
         .session-value { font-size: 15px; color: #1f2937; font-weight: 500; }
         .checklist { margin: 20px 0; padding: 0; }
         .checklist li { list-style: none; padding: 6px 0; font-size: 14px; }
-        .checklist li::before { content: "☐ "; color: #667eea; font-size: 16px; }
+        .checklist li::before { content: "☐ "; color: #2563eb; font-size: 16px; }
     </style>
 </head>
 <body>
@@ -44,7 +44,7 @@
                     </div>
                 </div>
                 <div class="session-detail">
-                    <span class="session-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#667eea" style="width:20px;height:20px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span>
+                    <span class="session-icon"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#2563eb" style="width:20px;height:20px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></span>
                     <div>
                         <div class="session-label">Time</div>
                         <div class="session-value">

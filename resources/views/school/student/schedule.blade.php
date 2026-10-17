@@ -7,8 +7,8 @@
     $school = $school ?? $currentSchool ?? null;
     $settings = $school?->schoolSetting;
 
-    $primaryColor = $settings?->primary_color ?? '#667eea';
-    $secondaryColor = $settings?->secondary_color ?? '#764ba2';
+    $primaryColor = $settings?->primary_color ?? '#2563eb';
+    $secondaryColor = $settings?->secondary_color ?? '#1d4ed8';
     $borderRadius = $settings?->border_radius ?? 8;
 @endphp
 
@@ -602,12 +602,12 @@
         }
         
         .booking-status {
-            font-size: 0.65rem;
+            font-size: 0.72rem;
             margin-top: 4px;
         }
         
         .course-badge {
-            font-size: 0.6rem;
+            font-size: 0.72rem;
             padding: 2px 6px;
         }
         
@@ -617,7 +617,7 @@
         }
         
         .mini-booking-card .mini-date {
-            font-size: 0.65rem;
+            font-size: 0.72rem;
         }
         
         .mini-booking-card .mini-course {
@@ -649,7 +649,7 @@
         }
         
         .booking-details .booking-status {
-            font-size: 0.65rem;
+            font-size: 0.72rem;
         }
         
         .instructor-select {
@@ -752,7 +752,7 @@
         }
         
         .status-badge {
-            font-size: 0.65rem;
+            font-size: 0.72rem;
             padding: 2px 6px;
         }
         
@@ -1159,7 +1159,7 @@
         color: white;
         padding: 2px 6px;
         border-radius: 3px;
-        font-size: 0.65rem;
+        font-size: 0.72rem;
         margin-left: 4px;
     }
 
@@ -1310,7 +1310,7 @@
         }
         
         .filter-checkbox {
-            font-size: 10px;
+            font-size: 12px;
             padding: 5px 8px;
             justify-content: center;
         }
@@ -1398,7 +1398,7 @@
                                             <span>Status: {{ ucfirst($booking->status ?? 'Scheduled') }}</span>
                                             <form method="POST" action="{{ route('schools.student.bookings.cancel', [$school->slug, $booking->id]) }}" style="margin: 0;">
                                                 @csrf
-                                                <button type="button" style="background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fee2e2'" onclick="showConfirmDialog('Are you sure you want to cancel this scheduled lesson? Your instructor will be notified and your reserved spot will be released.', () => this.closest('form').submit())">
+                                                <button type="button" style="background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; padding: 7px 12px; margin: -4px 0; border-radius: 4px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fee2e2'" onclick="showConfirmDialog('Are you sure you want to cancel this scheduled lesson? Your instructor will be notified and your reserved spot will be released.', () => this.closest('form').submit())">
                                                     Cancel Schedule
                                                 </button>
                                             </form>

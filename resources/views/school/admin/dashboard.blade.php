@@ -7,8 +7,8 @@
     $school = $school ?? $currentSchool ?? null;
     $schoolName = $school->name ?? 'Driving School';
     $settings = $school?->schoolSetting;
-    $primaryColor = blank($settings?->primary_color) ? '#667eea' : $settings->primary_color;
-    $secondaryColor = blank($settings?->secondary_color) ? '#764ba2' : $settings->secondary_color;
+    $primaryColor = blank($settings?->primary_color) ? '#2563eb' : $settings->primary_color;
+    $secondaryColor = blank($settings?->secondary_color) ? '#1d4ed8' : $settings->secondary_color;
     $useGradient = $settings?->use_gradient_header ?? true;
 @endphp
 

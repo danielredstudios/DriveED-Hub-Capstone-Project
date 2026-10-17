@@ -6,7 +6,7 @@
     $schoolNameSize = $settings?->login_school_name_size ?? 24;
     $welcomeSize = $settings?->login_welcome_size ?? 16;
     $logoSize = $settings?->login_logo_size ?? 40;
-    $schoolName = $school?->name ?? 'DriveEd Hub';
+    $schoolName = $school?->name ?? 'SMART Driving School';
 @endphp
 <!DOCTYPE html>
 <html>
@@ -68,7 +68,7 @@
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
         }
         .back-link { margin-top: 25px; padding-top: 15px; border-top: 1px solid #e5e7eb; }
-        .back-link a { color: #2563eb; text-decoration: none; font-size: 13px; font-weight: 600; }
+        .back-link a { color: #2563eb; text-decoration: none; font-size: 13px; font-weight: 600; display: inline-block; padding: 6px 4px; margin: -6px -4px; }
         .back-link a:hover { text-decoration: underline; }
     </style>
 </head>

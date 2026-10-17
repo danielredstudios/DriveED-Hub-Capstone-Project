@@ -7,8 +7,8 @@
     $school = $school ?? $currentSchool ?? null;
     $settings = $school?->schoolSetting;
 
-    $primaryColor = $settings?->primary_color ?? '#667eea';
-    $secondaryColor = $settings?->secondary_color ?? '#764ba2';
+    $primaryColor = $settings?->primary_color ?? '#2563eb';
+    $secondaryColor = $settings?->secondary_color ?? '#1d4ed8';
     $accentColor = $settings?->accent_color ?? '#8b5cf6';
 @endphp
 
@@ -322,7 +322,7 @@
     }
     
     .package-tag {
-        font-size: 0.65rem;
+        font-size: 0.72rem;
         padding: 2px 6px;
         border-radius: 8px;
         font-weight: 600;

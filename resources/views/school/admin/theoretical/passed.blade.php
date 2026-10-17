@@ -6,8 +6,8 @@
 @php
     $school = $school ?? $currentSchool ?? null;
     $settings = $school?->schoolSetting;
-    $primaryColor = $settings->primary_color ?? '#667eea';
-    $secondaryColor = $settings->secondary_color ?? '#764ba2';
+    $primaryColor = $settings->primary_color ?? '#2563eb';
+    $secondaryColor = $settings->secondary_color ?? '#1d4ed8';
 
     // ...existing code...
 @endphp

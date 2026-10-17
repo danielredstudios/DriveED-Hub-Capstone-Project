@@ -7,7 +7,7 @@
     $schoolNameSize = $settings?->login_school_name_size ?? 24;
     $welcomeSize = $settings?->login_welcome_size ?? 16;
     $logoSize = $settings?->login_logo_size ?? 40;
-    $schoolName = $school?->name ?? 'DriveEd Hub';
+    $schoolName = $school?->name ?? 'SMART Driving School';
 @endphp
 <!DOCTYPE html>
 <html>
@@ -346,7 +346,7 @@
             }
 
             .login-subtitle {
-                font-size: 10px;
+                font-size: 12px;
                 margin-bottom: 10px;
             }
 
@@ -375,22 +375,32 @@
             }
 
             .form-options {
-                font-size: 10px;
+                font-size: 12px;
                 margin-bottom: 10px;
+                flex-wrap: wrap;
+                gap: 6px 14px;
+            }
+
+            .remember-me,
+            .forgot-password {
+                white-space: nowrap;
             }
 
             .remember-me {
-                font-size: 10px;
-                gap: 3px;
+                font-size: 12px;
+                gap: 4px;
             }
 
             .remember-me input[type="checkbox"] {
-                width: 12px;
-                height: 12px;
+                width: 18px;
+                height: 18px;
             }
 
             .forgot-password {
-                font-size: 10px;
+                font-size: 12px;
+                display: inline-block;
+                padding: 5px 4px;
+                margin: -5px -4px;
             }
 
             .login-button {
@@ -401,7 +411,7 @@
             }
 
             .error-message {
-                font-size: 10px;
+                font-size: 11px;
                 margin-top: 2px;
             }
 
@@ -412,12 +422,15 @@
             }
 
             .register-link-text {
-                font-size: 10px !important;
+                font-size: 12px !important;
                 margin-bottom: 8px !important;
             }
 
             .register-link-anchor {
-                font-size: 11px !important;
+                font-size: 12px !important;
+                display: inline-block;
+                padding: 6px 4px;
+                margin: -6px -4px;
             }
         }
 

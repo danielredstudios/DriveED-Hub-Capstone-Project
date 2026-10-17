@@ -6,8 +6,8 @@
 @php
     $school = $school ?? $currentSchool ?? null;
     $settings = $school->schoolSetting;
-    $primaryColor = $settings->primary_color ?? '#667eea';
-    $secondaryColor = $settings->secondary_color ?? '#764ba2';
+    $primaryColor = $settings->primary_color ?? '#2563eb';
+    $secondaryColor = $settings->secondary_color ?? '#1d4ed8';
 @endphp
 
 @include('school.admin.partials.admin-styles')
@@ -229,7 +229,7 @@
         background: {{ $primaryColor }};
         color: white;
         box-shadow: 0 0 0 4px {{ $primaryColor }}30;
-        animation: pulse-dot 2s ease-in-out infinite;
+        
     }
 
     .timeline-dot.waiting {
@@ -269,7 +269,7 @@
     }
 
     .timeline-date {
-        font-size: 0.65rem;
+        font-size: 0.72rem;
         color: #9ca3af;
         text-align: center;
     }
@@ -441,14 +441,14 @@
         }
 
         .timeline-label {
-            font-size: 0.6rem;
+            font-size: 0.72rem;
             max-width: 60px;
         }
 
         .timeline-dot {
             width: 24px;
             height: 24px;
-            font-size: 0.6rem;
+            font-size: 0.72rem;
         }
 
         .timeline-connector {

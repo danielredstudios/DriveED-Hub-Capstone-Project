@@ -9,3 +9,62 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+/* Global Responsive Fixes */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+/* Prevent media from overflowing containers */
+img,
+picture,
+video,
+canvas,
+svg {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Prevent long strings from breaking layouts */
+body,
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    overflow-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
+}
+
+/* Better horizontal overflow handling */
+html,
+body {
+    width: 100%;
+    overflow-x: clip;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+/* Ensure flex/grid children don't force overflow */
+main,
+.main-content,
+.container,
+.container-fluid,
+.row,
+.flex,
+.grid {
+    min-width: 0;
+}
+
+/* Table responsiveness base */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}

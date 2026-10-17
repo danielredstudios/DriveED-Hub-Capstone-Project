@@ -257,6 +257,8 @@
 
     .color-picker {
         width: 50px;
+        min-width: 50px;
+        flex: 0 0 50px;
         height: 40px;
         border: 2px solid #d1d5db;
         border-radius: 6px;
@@ -399,6 +401,9 @@
 
     .opacity-range {
         flex: 1;
+        min-width: 0;
+        height: 24px;
+        cursor: pointer;
     }
 
     .opacity-value {
@@ -1607,16 +1612,16 @@
                 <div class="form-group">
                     <label class="form-label">Primary Color</label>
                     <div class="color-input-group">
-                        <input type="color" class="color-picker" id="primary_color" name="primary_color" value="{{ old('primary_color', $settings->primary_color ?? '#667eea') }}" onchange="updatePreview()">
-                        <input type="text" class="color-text" value="{{ old('primary_color', $settings->primary_color ?? '#667eea') }}" readonly>
+                        <input type="color" class="color-picker" id="primary_color" name="primary_color" value="{{ old('primary_color', $settings->primary_color ?? '#2563eb') }}" onchange="updatePreview()">
+                        <input type="text" class="color-text" value="{{ old('primary_color', $settings->primary_color ?? '#2563eb') }}" readonly>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Secondary Color</label>
                     <div class="color-input-group">
-                        <input type="color" class="color-picker" id="secondary_color" name="secondary_color" value="{{ old('secondary_color', $settings->secondary_color ?? '#764ba2') }}" onchange="updatePreview()">
-                        <input type="text" class="color-text" value="{{ old('secondary_color', $settings->secondary_color ?? '#764ba2') }}" readonly>
+                        <input type="color" class="color-picker" id="secondary_color" name="secondary_color" value="{{ old('secondary_color', $settings->secondary_color ?? '#1d4ed8') }}" onchange="updatePreview()">
+                        <input type="text" class="color-text" value="{{ old('secondary_color', $settings->secondary_color ?? '#1d4ed8') }}" readonly>
                     </div>
                 </div>
 
@@ -1796,8 +1801,8 @@
                 <div class="form-group">
                     <label class="form-label">Primary Button Background</label>
                     <div class="color-input-group">
-                        <input type="color" class="color-picker" id="button_primary_bg" name="button_primary_bg" value="{{ old('button_primary_bg', $settings->button_primary_bg ?? '#667eea') }}" onchange="updatePreview()">
-                        <input type="text" class="color-text" value="{{ old('button_primary_bg', $settings->button_primary_bg ?? '#667eea') }}" readonly>
+                        <input type="color" class="color-picker" id="button_primary_bg" name="button_primary_bg" value="{{ old('button_primary_bg', $settings->button_primary_bg ?? '#2563eb') }}" onchange="updatePreview()">
+                        <input type="text" class="color-text" value="{{ old('button_primary_bg', $settings->button_primary_bg ?? '#2563eb') }}" readonly>
                     </div>
                 </div>
 
@@ -1862,8 +1867,8 @@
                 <div class="form-group">
                     <label class="form-label">Header Background</label>
                     <div class="color-input-group">
-                        <input type="color" class="color-picker" id="modal_header_bg" name="modal_header_bg" value="{{ old('modal_header_bg', $settings->modal_header_bg ?? '#667eea') }}" onchange="updatePreview()">
-                        <input type="text" class="color-text" value="{{ old('modal_header_bg', $settings->modal_header_bg ?? '#667eea') }}" readonly>
+                        <input type="color" class="color-picker" id="modal_header_bg" name="modal_header_bg" value="{{ old('modal_header_bg', $settings->modal_header_bg ?? '#2563eb') }}" onchange="updatePreview()">
+                        <input type="text" class="color-text" value="{{ old('modal_header_bg', $settings->modal_header_bg ?? '#2563eb') }}" readonly>
                     </div>
                 </div>
 
@@ -1939,8 +1944,8 @@
                 <div class="form-group">
                     <label class="form-label">Calendar Day Hover Color</label>
                     <div class="color-input-group">
-                        <input type="color" class="color-picker" id="calendar_day_hover" name="calendar_day_hover" value="{{ old('calendar_day_hover', $settings->calendar_day_hover ?? $settings->primary_color ?? '#667eea') }}" onchange="updatePreview()">
-                        <input type="text" class="color-text" value="{{ old('calendar_day_hover', $settings->calendar_day_hover ?? $settings->primary_color ?? '#667eea') }}" readonly>
+                        <input type="color" class="color-picker" id="calendar_day_hover" name="calendar_day_hover" value="{{ old('calendar_day_hover', $settings->calendar_day_hover ?? $settings->primary_color ?? '#2563eb') }}" onchange="updatePreview()">
+                        <input type="text" class="color-text" value="{{ old('calendar_day_hover', $settings->calendar_day_hover ?? $settings->primary_color ?? '#2563eb') }}" readonly>
                     </div>
                     <small class="help-text-muted help-text-block">
                         Border color when hovering over calendar days
@@ -1950,8 +1955,8 @@
                 <div class="form-group">
                     <label class="form-label">Today Highlight Color</label>
                     <div class="color-input-group">
-                        <input type="color" class="color-picker" id="calendar_today_color" name="calendar_today_color" value="{{ old('calendar_today_color', $settings->calendar_today_color ?? $settings->primary_color ?? '#667eea') }}" onchange="updatePreview()">
-                        <input type="text" class="color-text" value="{{ old('calendar_today_color', $settings->calendar_today_color ?? $settings->primary_color ?? '#667eea') }}" readonly>
+                        <input type="color" class="color-picker" id="calendar_today_color" name="calendar_today_color" value="{{ old('calendar_today_color', $settings->calendar_today_color ?? $settings->primary_color ?? '#2563eb') }}" onchange="updatePreview()">
+                        <input type="text" class="color-text" value="{{ old('calendar_today_color', $settings->calendar_today_color ?? $settings->primary_color ?? '#2563eb') }}" readonly>
                     </div>
                     <small class="help-text-muted help-text-block">
                         Border color for today's date in the calendar
@@ -3015,19 +3020,19 @@ function resetToDefaults() {
         message: 'Are you sure you want to reset all settings to their default values? This cannot be undone.',
         confirmText: 'Reset',
         onConfirm: function() {
-            document.getElementById('primary_color').value = '#667eea';
-            document.getElementById('secondary_color').value = '#764ba2';
+            document.getElementById('primary_color').value = '#2563eb';
+            document.getElementById('secondary_color').value = '#1d4ed8';
             document.getElementById('accent_color').value = '#5568d3';
             document.getElementById('sidebar_bg_color').value = '#ffffff';
             document.getElementById('sidebar_text_color').value = '#333333';
             document.getElementById('sidebar_hover_color').value = '#f5f5f5';
             document.getElementById('button_style').value = 'solid';
-            document.getElementById('button_primary_bg').value = '#667eea';
+            document.getElementById('button_primary_bg').value = '#2563eb';
             document.getElementById('button_secondary_bg').value = '#6c757d';
             document.getElementById('button_success_bg').value = '#28a745';
             document.getElementById('button_danger_bg').value = '#dc3545';
             document.getElementById('button_border_radius').value = '8';
-            document.getElementById('modal_header_bg').value = '#667eea';
+            document.getElementById('modal_header_bg').value = '#2563eb';
             document.getElementById('modal_header_text').value = '#ffffff';
             document.getElementById('badge_pending_bg').value = '#fbbf24';
             document.getElementById('badge_approved_bg').value = '#10b981';

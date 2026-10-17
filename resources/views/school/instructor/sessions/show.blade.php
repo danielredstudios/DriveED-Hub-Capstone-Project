@@ -6,7 +6,7 @@
 @php
     $school = $school ?? $currentSchool ?? null;
     $settings = $school?->schoolSetting;
-    $primaryColor = $settings?->primary_color ?? '#667eea';
+    $primaryColor = $settings?->primary_color ?? '#2563eb';
 
     $student = $sessionCompletion->enrollment->student ?? $sessionCompletion->enrollment->learner ?? null;
     $course = $sessionCompletion->enrollment->course ?? null;

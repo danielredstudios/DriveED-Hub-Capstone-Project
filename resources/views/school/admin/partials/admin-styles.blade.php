@@ -1,8 +1,8 @@
 @php
     $school = $school ?? $currentSchool ?? null;
     $settings = $school?->schoolSetting;
-    $primaryColor = blank($settings?->primary_color) ? '#667eea' : $settings->primary_color;
-    $secondaryColor = blank($settings?->secondary_color) ? '#764ba2' : $settings->secondary_color;
+    $primaryColor = blank($settings?->primary_color) ? '#2563eb' : $settings->primary_color;
+    $secondaryColor = blank($settings?->secondary_color) ? '#1d4ed8' : $settings->secondary_color;
     $accentColor = blank($settings?->accent_color) ? '#1e40af' : $settings->accent_color;
     $useGradient = $settings?->use_gradient_header ?? true;
     $headerTextColor = blank($settings?->header_text_color) ? '#ffffff' : $settings->header_text_color;

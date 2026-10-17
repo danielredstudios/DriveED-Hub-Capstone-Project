@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <style>
         body { font-family: Arial, sans-serif; font-size: 11px; margin: 20px; color: #333; }
-        .header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid #667eea; padding-bottom: 15px; }
-        .header h1 { color: #667eea; margin: 0; font-size: 22px; }
+        .header { text-align: center; margin-bottom: 25px; border-bottom: 2px solid #2563eb; padding-bottom: 15px; }
+        .header h1 { color: #2563eb; margin: 0; font-size: 22px; }
         .header p { color: #666; margin: 5px 0; font-size: 12px; }
         
         .info-box { background: #f3f4f6; padding: 10px; border-radius: 4px; margin-bottom: 20px; font-size: 11px; }
         
         .course-card { border: 1px solid #e5e7eb; border-radius: 6px; margin-bottom: 20px; overflow: hidden; page-break-inside: avoid; }
-        .course-header { background: #667eea; color: white; padding: 10px 15px; font-weight: bold; font-size: 13px; }
+        .course-header { background: #2563eb; color: white; padding: 10px 15px; font-weight: bold; font-size: 13px; }
         .course-body { padding: 15px; }
         
         .course-type { display: inline-block; padding: 2px 8px; background: #e0e7ff; color: #3730a3; border-radius: 3px; font-size: 9px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; }

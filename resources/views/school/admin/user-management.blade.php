@@ -1115,6 +1115,31 @@
             color: #666;
         }
 
+        .empty-state-prompt {
+            padding: 70px 20px;
+        }
+
+        .empty-state-prompt .empty-state-icon {
+            font-size: 2.5rem;
+            color: #cbd5e1;
+            margin-bottom: 14px;
+        }
+
+        .empty-state-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .empty-state-prompt .empty-state-text {
+            font-size: 0.95rem;
+            color: #6b7280;
+            max-width: 520px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
         .pagination-groups {
             display: flex;
             flex-direction: column;
@@ -1689,7 +1714,7 @@
 
         <!-- Statistics Cards -->
         <div class="stats-grid">
-            <div class="stat-card total {{ (($activeRoleFilter ?? 'all') === 'all' && ($activeStatusFilter ?? 'all') === 'all') ? 'filter-selected' : '' }}"
+            <div class="stat-card total {{ ($filtersApplied ?? true) && (($activeRoleFilter ?? 'all') === 'all' && ($activeStatusFilter ?? 'all') === 'all') ? 'filter-selected' : '' }}"
                 onclick="applyQuickFilter('all')">
                 <div class="stat-content">
                     <div class="stat-header">
@@ -1875,7 +1900,14 @@
             </div>
 
             <div class="table-container">
-                @if($users->count() > 0)
+                @if(!($filtersApplied ?? true))
+                    <div class="empty-state empty-state-prompt">
+                        <div class="empty-state-icon"><i class="bi bi-funnel"></i></div>
+                        <div class="empty-state-title">Choose a filter to view users</div>
+                        <p class="empty-state-text">Click a card above, pick a branch from the dropdown, or search and press Enter —
+                            the list loads once a filter is applied.</p>
+                    </div>
+                @elseif($users->count() > 0)
                     <table id="usersTable">
                         <thead>
                             <tr>
@@ -2008,7 +2040,7 @@
                                                 @if($lStatus === 'verified' && !empty($user->restriction_codes))
                                                     <div class="d-flex flex-wrap gap-1 mt-1" style="max-width: 120px;">
                                                         @foreach($user->restriction_codes as $code)
-                                                            <span class="badge bg-primary" style="font-size: 0.65rem;">{{ $code }}</span>
+                                                            <span class="badge bg-primary" style="font-size: 0.72rem;">{{ $code }}</span>
                                                         @endforeach
                                                     </div>
                                                 @endif
@@ -2146,12 +2178,12 @@
                 @else
                     <div class="empty-state">
                         <div class="empty-state-icon"></div>
-                        <div class="empty-state-text">No users found. Add your first student or instructor to get started!</div>
+                        <div class="empty-state-text">No users match the current filters.</div>
                     </div>
                 @endif
             </div>
 
-            @if($users->count() > 0)
+            @if(($filtersApplied ?? true) && $users->count() > 0)
                 <div class="mt-4 pagination-groups">
                     <div>
                         <h4 style="font-size: 0.9rem; margin-bottom: 5px; color: #6b7280;">
@@ -2666,6 +2698,10 @@
                 }
             }
 
+            // Any filter action reveals the roster, including the "show everyone"
+            // (Total Users) case that carries no other filter parameters.
+            url.searchParams.set('filtered', '1');
+
             return url;
         }
 
@@ -3029,7 +3065,7 @@
         }
 
         // --- UNIFIED USER VIEW MODAL LOGIC ---
-        let currentEditingData = null;
+        var currentEditingData = null;
 
         function openUserViewModal(data) {
             currentEditingData = data;

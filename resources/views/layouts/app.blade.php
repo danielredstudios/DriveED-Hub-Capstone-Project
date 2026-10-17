@@ -269,12 +269,32 @@
             align-items: center;
             gap: 10px;
             text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            /* 40px icon + 8px inline gap + 88px text floor: the group must never
+               shrink under that, or the truncation gets clipped instead of ellipsized. */
+            min-width: 136px;
+        }
+
+        .topbar-left {
+            min-width: 136px;
+        }
+
+        /* School name truncates to one line instead of wrapping and growing the bar.
+           Keep a readable minimum so the brand never collapses to a few characters. */
+        .topbar-logo span {
+            min-width: 88px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .topbar-right {
             display: flex;
             align-items: center;
             gap: 15px;
+            /* Shrinkable: the school name on the left has a fixed floor, so this
+               side yields and the signed-in name ellipsizes instead of spilling
+               past the right edge of the bar. */
+            min-width: 0;
         }
 
         /* Floating Sidebar Toggle Tab */
@@ -284,7 +304,7 @@
             top: 50%;
             transform: translateY(-50%);
             z-index: 1000;
-            background: var(--primary-color, #667eea);
+            background: var(--primary-color, #2563eb);
             color: white;
             border: none;
             border-radius: 0 8px 8px 0;
@@ -311,7 +331,7 @@
         }
 
         .sidebar-toggle-tab.active {
-            left: 300px;
+            left: clamp(280px, 85vw, 320px);
         }
 
         .sidebar-toggle-tab.active svg {
@@ -344,6 +364,15 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            min-width: 0;
+        }
+
+        /* Keep the signed-in name on one line so the topbar never grows past its height */
+        .topbar-user-name {
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .profile-picture {
@@ -375,6 +404,8 @@
             right: 0;
             background: white;
             min-width: 180px;
+            width: max-content;
+            max-width: 90vw;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             border-radius: 8px;
             z-index: 10001;
@@ -464,16 +495,17 @@
             top: 100%;
             right: 0;
             background: white;
-            min-width: 340px;
-            max-width: 380px;
+            width: min(380px, 92vw);
+            max-width: 92vw;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
             border-radius: 12px;
             z-index: 10002;
             display: none;
             border: 1px solid #e1e5e9;
             margin-top: 8px;
-            max-height: 420px;
+            max-height: min(420px, 80dvh);
             overflow: hidden;
+            overflow-y: auto;
         }
 
         .notification-dropdown.show {
@@ -499,7 +531,7 @@
 
         .notification-mark-all {
             font-size: 12px;
-            color: #667eea;
+            color: #2563eb;
             cursor: pointer;
             border: none;
             background: none;
@@ -600,9 +632,9 @@
         .sidebar {
             position: fixed;
             top: 60px;
-            left: -300px;
-            width: 300px;
-            height: calc(100vh - 60px);
+            left: -100%;
+            width: clamp(280px, 85vw, 320px);
+            height: calc(100dvh - 60px);
             background: var(--sidebar-bg);
             transition: left 0.3s ease;
             z-index: 999;
@@ -637,6 +669,21 @@
         .modal {
             z-index: 1001;
             /* Higher than sidebar */
+        }
+
+        .modal-dialog {
+            max-width: min(900px, 95vw);
+            margin: 1rem auto;
+        }
+
+        .modal-content {
+            max-height: 90dvh;
+            overflow: hidden;
+        }
+
+        .modal-body {
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .sidebar-header {
@@ -938,34 +985,6 @@
             color: #ffffff;
         }
 
-        /* NEW Badge for Sidebar */
-        .badge-new {
-            display: inline-block;
-            padding: 2px 8px;
-            font-size: 10px;
-            font-weight: 600;
-            text-transform: uppercase;
-            background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
-            color: #ffffff;
-            border-radius: 12px;
-            margin-left: 8px;
-            letter-spacing: 0.5px;
-            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
-            animation: pulse-glow 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse-glow {
-
-            0%,
-            100% {
-                box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
-            }
-
-            50% {
-                box-shadow: 0 2px 8px rgba(239, 68, 68, 0.6);
-            }
-        }
-
         .nav-item {
             display: flex;
             align-items: center;
@@ -1127,7 +1146,7 @@
         /* ====== Empty State Styling ====== */
         .empty-state {
             text-align: center;
-            padding: 48px 24px;
+            padding: clamp(24px, 8vw, 48px) clamp(12px, 4vw, 24px);
             color: #9ca3af;
         }
 
@@ -1168,7 +1187,8 @@
             }
 
             /* Table container always scrollable */
-            .table-container {
+            .table-container,
+            .table-responsive {
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
             }
@@ -1179,10 +1199,16 @@
             .payment-badge,
             .license-badge {
                 padding: 6px 12px;
+                word-break: break-word;
+                white-space: normal;
             }
         }
 
         @media (max-width: 480px) {
+            /* Topbar adjustments */
+            .topbar {
+                padding: 0 10px;
+            }
 
             /* Stack page headers vertically */
             .page-header {
@@ -1208,12 +1234,12 @@
             }
 
             .sidebar {
-                width: 280px;
-                left: -280px;
+                left: -100%;
+                width: clamp(280px, 85vw, 320px);
             }
 
             .sidebar-toggle-tab.active {
-                left: 280px;
+                left: clamp(280px, 85vw, 320px);
             }
 
             .main-content {
@@ -1478,7 +1504,6 @@
         .dropdown-menu .nav-item:hover {
             padding-left: 11px !important;
         }
-        }
 
         /* Small phones (320px - 360px) */
         @media (max-width: 360px) {
@@ -1490,15 +1515,14 @@
             .topbar-logo {
                 font-size: 0.75rem;
                 gap: 3px;
-                max-width: 100px;
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
             }
 
             .sidebar-toggle-tab {
-                width: 20px;
-                height: 40px;
+                width: 26px;
+                height: 48px;
             }
 
             .sidebar-toggle-tab.active {
@@ -1595,15 +1619,14 @@
             .topbar-logo {
                 font-size: 0.7rem;
                 gap: 2px;
-                max-width: 80px;
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
             }
 
             .sidebar-toggle-tab {
-                width: 20px;
-                height: 38px;
+                width: 26px;
+                height: 46px;
             }
 
             .sidebar-toggle-tab.active {
@@ -1639,9 +1662,9 @@
             }
 
             .nav-item {
-                padding: 6px 8px;
+                padding: 7px 10px;
                 margin: 2px 4px;
-                font-size: 10px;
+                font-size: 12px;
             }
 
             .main-content {
@@ -1659,12 +1682,12 @@
             }
 
             .dropdown-item {
-                padding: 6px 8px;
-                font-size: 10px;
+                padding: 7px 10px;
+                font-size: 12px;
             }
 
             .dropdown-menu .nav-item {
-                padding: 6px 8px !important;
+                padding: 7px 10px !important;
             }
 
             .dropdown-menu .nav-item:hover {
@@ -1684,6 +1707,54 @@
                 width: 22px;
                 height: 22px;
                 font-size: 10px;
+            }
+        }
+
+        /* ====== Touch-friendly form controls & taps on small screens ====== */
+        @media (max-width: 600px) {
+            input[type="checkbox"],
+            input[type="radio"] {
+                width: 18px;
+                height: 18px;
+                min-width: 18px;
+                min-height: 18px;
+                accent-color: var(--primary-color, #053d86);
+            }
+
+            .consent-checkbox,
+            .checkbox-inline,
+            .remember-checkbox {
+                width: 18px !important;
+                height: 18px !important;
+            }
+
+            /* Enlarge breadcrumb tap targets without growing the bar */
+            .breadcrumb-bar a {
+                display: inline-block;
+                padding: 4px 6px;
+                margin: -4px 0;
+            }
+
+            /* Readability floor for micro-labels on small screens */
+            .info-label,
+            .info-value,
+            .progress-ring-label,
+            .course-badge,
+            .timeline-label,
+            .timeline-date,
+            .assignment-badge,
+            .badge-new {
+                font-size: 11px !important;
+                line-height: 1.3;
+            }
+
+            /* Give inline action links a taller tap target */
+            .lms-link,
+            .lms-link-delete {
+                display: inline-flex;
+                align-items: center;
+                padding-top: 6px;
+                padding-bottom: 6px;
             }
         }
 
@@ -1809,7 +1880,7 @@
                     @else
                         <div class="profile-picture-default">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
                     @endif
-                    {{ $user->name }}
+                    <span class="topbar-user-name">{{ $user->name }}</span>
                 @elseif(Auth::guard('instructor')->check())
                     @php $user = Auth::guard('instructor')->user(); @endphp
                     @if($user->profile_picture)
@@ -1817,7 +1888,7 @@
                     @else
                         <div class="profile-picture-default">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
                     @endif
-                    {{ $user->name }}
+                    <span class="topbar-user-name">{{ $user->name }}</span>
                 @elseif(Auth::guard('student')->check())
                     @php $user = Auth::guard('student')->user(); @endphp
                     @if($user->profile_picture)
@@ -1825,7 +1896,7 @@
                     @else
                         <div class="profile-picture-default">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
                     @endif
-                    {{ $user->name }}
+                    <span class="topbar-user-name">{{ $user->name }}</span>
                 @else
                     <div class="profile-picture-default">U</div>
                     User

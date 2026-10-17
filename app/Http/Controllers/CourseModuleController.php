@@ -6,6 +6,7 @@ use App\Models\CourseModule;
 use App\Models\Course;
 use App\Models\ModuleLesson;
 use App\Models\School;
+use App\Models\StudentLessonCompletion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -242,8 +243,50 @@ class CourseModuleController extends Controller
         // Get navigation
         $navigation = $this->getLearningPathNavigation($course, $module);
 
+        // Shared course outline so the quiz renders inside the LMS sidebar shell.
+        $outline = $this->getCourseOutline($course, $student->id);
+
         return view($school->resolveView('student.modules.assessment'), compact('school', 'course', 'module', 'questions', 'navigation'))
+            ->with('outlineModules', $outline['modules'])
+            ->with('completedLessonIds', $outline['completedLessonIds'])
             ->with('isAjax', $request->ajax());
+    }
+
+    /**
+     * Build the ordered course outline (modules -> lessons + questions) plus the
+     * given student's completed lesson ids. Shared by the lesson viewer and the
+     * quiz page so both render the same sidebar.
+     *
+     * @return array{modules: \Illuminate\Support\Collection, completedLessonIds: array}
+     */
+    public function getCourseOutline(Course $course, ?int $studentId = null): array
+    {
+        $modules = $course->modules()
+            ->ordered()
+            ->with([
+                'lessons' => fn ($query) => $query->ordered(),
+                'questions',
+            ])
+            ->get();
+
+        $completedLessonIds = [];
+
+        if ($studentId) {
+            $lessonIds = $modules->flatMap(fn ($module) => $module->lessons->pluck('id'))->all();
+
+            if (! empty($lessonIds)) {
+                $completedLessonIds = StudentLessonCompletion::where('student_id', $studentId)
+                    ->whereIn('lesson_id', $lessonIds)
+                    ->pluck('lesson_id')
+                    ->map(fn ($id) => (int) $id)
+                    ->all();
+            }
+        }
+
+        return [
+            'modules' => $modules,
+            'completedLessonIds' => $completedLessonIds,
+        ];
     }
 
     /**
@@ -268,8 +311,10 @@ class CourseModuleController extends Controller
                     'url' => school_route('student.courses.modules.lessons.show', ['course' => $course->id, 'module' => $module->id, 'lesson' => $nextLesson->id])
                 ];
             } else {
-                // End of lessons in this module. Is there an assessment in this module?
-                if ($module->module_type === 'assessment') {
+                // End of lessons in this module. Continue into this module's own
+                // assessment whenever it has questions, so the quiz flows straight
+                // on from the last lesson.
+                if ($module->module_type === 'assessment' || $module->questions()->exists()) {
                     $next = [
                         'type' => 'assessment',
                         'title' => 'Module Assessment',

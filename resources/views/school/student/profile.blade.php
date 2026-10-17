@@ -8,8 +8,8 @@
     $schoolName = $school->name ?? 'Driving School';
     $student = $student ?? Auth::guard('student')->user();
     $settings = $school?->schoolSetting;
-    $primaryColor = $settings?->primary_color ?? '#667eea';
-    $secondaryColor = $settings?->secondary_color ?? '#764ba2';
+    $primaryColor = $settings?->primary_color ?? '#2563eb';
+    $secondaryColor = $settings?->secondary_color ?? '#1d4ed8';
 @endphp
 
 <style>
@@ -116,7 +116,7 @@
 
     .profile-field {
         display: grid;
-        grid-template-columns: 140px 1fr;
+        grid-template-columns: minmax(0, 140px) minmax(0, 1fr);
         padding: 15px 0;
         border-bottom: 1px solid #e0e0e0;
         gap: 20px;
@@ -406,7 +406,7 @@
     
     .info-row {
         display: grid;
-        grid-template-columns: 160px 1fr;
+        grid-template-columns: minmax(0, 160px) minmax(0, 1fr);
         padding: 16px 0;
         border-bottom: 1px solid #e5e7eb;
         align-items: center;
@@ -425,6 +425,7 @@
     .info-value {
         color: #4b5563;
         font-size: 15px;
+        overflow-wrap: anywhere;
     }
 
     .profile-buttons {
@@ -688,6 +689,22 @@
         
         .profile-page-title {
             font-size: 20px;
+        }
+
+        .profile-page-title::after {
+            left: 0;
+            width: 100%;
+        }
+
+        .profile-info {
+            padding: 0 15px 20px;
+        }
+
+        .info-row {
+            grid-template-columns: 1fr;
+            gap: 4px;
+            padding: 12px 0;
+            align-items: start;
         }
         
         .profile-avatar {

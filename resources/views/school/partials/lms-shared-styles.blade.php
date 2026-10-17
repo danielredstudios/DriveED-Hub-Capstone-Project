@@ -543,4 +543,210 @@
     @keyframes btn-spinner-spin {
         to { transform: rotate(360deg); }
     }
+
+    /* ── LMS course player: outline sidebar + main column ─────────────── */
+    .lms-page.lms-player {
+        max-width: 1280px;
+        display: grid;
+        grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+        gap: 22px;
+        align-items: start;
+    }
+
+    .lms-outline {
+        position: sticky;
+        top: 108px;
+        max-height: calc(100vh - 124px);
+        overflow-y: auto;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
+    }
+
+    .lms-outline-head {
+        padding: 16px 18px;
+        border-bottom: 1px solid #eef2f7;
+        background: #fbfdff;
+        border-radius: 14px 14px 0 0;
+    }
+
+    .lms-outline-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #6b7280;
+        text-decoration: none;
+    }
+
+    .lms-outline-back:hover {
+        color: var(--primary-color);
+    }
+
+    .lms-outline-course {
+        margin-top: 10px;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #111827;
+        line-height: 1.3;
+    }
+
+    .lms-outline-progress-track {
+        margin-top: 12px;
+        height: 8px;
+        border-radius: 999px;
+        background: #e5e7eb;
+        overflow: hidden;
+    }
+
+    .lms-outline-progress-fill {
+        height: 100%;
+        background: var(--primary-color);
+        transition: width 0.4s ease;
+    }
+
+    .lms-outline-progress-text {
+        margin-top: 6px;
+        font-size: 0.75rem;
+        color: #6b7280;
+    }
+
+    .lms-outline-nav {
+        padding: 8px 0;
+    }
+
+    .lms-outline-module {
+        padding: 6px 0;
+    }
+
+    .lms-outline-module-title {
+        padding: 8px 18px 4px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #94a3b8;
+    }
+
+    .lms-outline-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 18px;
+        text-decoration: none;
+        color: #374151;
+        font-size: 0.88rem;
+        border-left: 3px solid transparent;
+        transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .lms-outline-item:hover {
+        background: #f8fafc;
+    }
+
+    .lms-outline-item.is-active {
+        background: #eff6ff;
+        border-left-color: var(--primary-color);
+        color: #1e3a8a;
+        font-weight: 600;
+    }
+
+    .lms-outline-mark {
+        flex-shrink: 0;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.72rem;
+        font-weight: 700;
+        background: #f1f5f9;
+        color: #64748b;
+    }
+
+    .lms-outline-item.is-done .lms-outline-mark {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .lms-outline-item.is-active .lms-outline-mark {
+        background: var(--primary-color);
+        color: #ffffff;
+    }
+
+    .lms-outline-quiz .lms-outline-mark {
+        background: #e0e7ff;
+        color: #4338ca;
+    }
+
+    .lms-outline-label {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .lms-outline-empty {
+        padding: 18px;
+        color: #6b7280;
+        font-size: 0.85rem;
+    }
+
+    .lms-player-main {
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .lms-player-topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+
+    .lms-player-eyebrow {
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #94a3b8;
+        margin-bottom: 4px;
+    }
+
+    .lms-actionbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        flex-wrap: wrap;
+        padding: 16px 18px;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06);
+    }
+
+    .lms-actionbar-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-left: auto;
+    }
+
+    @media (max-width: 900px) {
+        .lms-page.lms-player {
+            grid-template-columns: 1fr;
+        }
+
+        .lms-outline {
+            position: static;
+            max-height: none;
+        }
+    }
 </style>

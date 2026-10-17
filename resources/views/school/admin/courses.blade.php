@@ -551,7 +551,7 @@
             background: #fff7ed !important;
             color: #c2410c !important;
             border: 2px solid #fdba74 !important;
-            animation: pulse-warning 2s infinite;
+            
         }
 
         @keyframes pulse-warning {
@@ -653,7 +653,7 @@
 
         .preview-modal-header {
             background:
-                {{ $settings->modal_header_bg ?? $settings->primary_color ?? '#667eea' }}
+                {{ $settings->modal_header_bg ?? $settings->primary_color ?? '#2563eb' }}
             ;
         }
 
@@ -674,7 +674,7 @@
 
         .preview-guest-hero {
             background:
-                {{ $settings?->use_gradient_header ? 'linear-gradient(135deg, ' . $settings->primary_color . ' 0%, ' . $settings->secondary_color . ' 100%)' : ($settings->primary_color ?? '#667eea') }}
+                {{ $settings?->use_gradient_header ? 'linear-gradient(135deg, ' . $settings->primary_color . ' 0%, ' . $settings->secondary_color . ' 100%)' : ($settings->primary_color ?? '#2563eb') }}
             ;
             padding: 40px;
             color: white;
@@ -778,7 +778,7 @@
             padding: 15px 20px;
             border-radius: 10px;
             border-left: 4px solid
-                {{ $settings->primary_color ?? '#667eea' }}
+                {{ $settings->primary_color ?? '#2563eb' }}
             ;
         }
 
@@ -895,7 +895,7 @@
             font-size: 2.5rem;
             font-weight: 700;
             color:
-                {{ $settings->primary_color ?? '#667eea' }}
+                {{ $settings->primary_color ?? '#2563eb' }}
             ;
         }
 
@@ -937,7 +937,7 @@
             justify-content: space-between;
             align-items: center;
             background:
-                {{ $settings->modal_header_bg ?? $settings->primary_color ?? '#667eea' }}
+                {{ $settings->modal_header_bg ?? $settings->primary_color ?? '#2563eb' }}
             ;
             color: white;
             border-radius: 16px 16px 0 0;
@@ -993,7 +993,7 @@
         .form-control:focus {
             outline: none;
             border-color:
-                {{ $settings->primary_color ?? '#667eea' }}
+                {{ $settings->primary_color ?? '#2563eb' }}
             ;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
@@ -1193,7 +1193,7 @@
 
         .view-toggle-btn.active {
             background: white;
-            color: #667eea;
+            color: #2563eb;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
@@ -1246,7 +1246,7 @@
                         {{ $settings->secondary_color }}
                         100%);
             @else background:
-                {{ $settings->primary_color ?? '#667eea' }}
+                {{ $settings->primary_color ?? '#2563eb' }}
                 ;
             @endif display: flex;
             align-items: center;
@@ -1328,7 +1328,7 @@
             font-size: 1.1rem;
             font-weight: 700;
             color:
-                {{ $settings->primary_color ?? '#667eea' }}
+                {{ $settings->primary_color ?? '#2563eb' }}
             ;
         }
 
@@ -1391,11 +1391,12 @@
             cursor: pointer;
             outline: none;
             padding-right: 20px;
+            min-height: 32px;
         }
 
         .sort-select:focus {
             color:
-                {{ $settings->primary_color ?? '#667eea' }}
+                {{ $settings->primary_color ?? '#2563eb' }}
             ;
         }
 

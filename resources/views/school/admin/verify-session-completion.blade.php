@@ -7,8 +7,8 @@
         $school = $school ?? $currentSchool ?? null;
         $schoolName = $school->name ?? 'Driving School';
         $settings = $school?->schoolSetting;
-        $primaryColor = $settings?->primary_color ?? '#667eea';
-        $secondaryColor = $settings?->secondary_color ?? '#764ba2';
+        $primaryColor = $settings?->primary_color ?? '#2563eb';
+        $secondaryColor = $settings?->secondary_color ?? '#1d4ed8';
     @endphp
 
     @include('school.admin.partials.admin-styles')
@@ -243,7 +243,7 @@
         }
 
         .badge-ready {
-            animation: pulseReady 2s infinite;
+            
         }
 
         .stat-card-clickable {
@@ -322,7 +322,7 @@
                         href="{{ route('schools.admin.exports.verify-session-completion.excel', ['school' => $school->slug]) }}">
                         <i class="bi bi-file-earmark-excel-fill" style="color: #10b981;"></i> Full Export (Excel)
                     </a>
-                    <div class="dropdown-header" style="font-size: 0.65rem; color: #94a3b8;">Format help</div>
+                    <div class="dropdown-header" style="font-size: 0.72rem; color: #94a3b8;">Format help</div>
                     <div style="padding: 10px 16px; font-size: 0.8rem; color: #64748b; line-height: 1.4;">
                         Export contains all verified and pending completions for the current branch.
                     </div>

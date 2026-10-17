@@ -6,7 +6,7 @@
 @php
     $school = $school ?? $currentSchool ?? null;
     $settings = $school?->schoolSetting;
-    $primaryColor = $settings?->primary_color ?? '#667eea';
+    $primaryColor = $settings?->primary_color ?? '#2563eb';
 @endphp
 
 @include('school.admin.partials.admin-styles')

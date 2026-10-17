@@ -19,3 +19,6 @@ tests
 scratch
 *.sql
 *.zip
+
+# Laravel public disk symlink (created at runtime by entrypoint; breaks Docker build context)
+public/storage

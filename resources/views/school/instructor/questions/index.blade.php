@@ -160,7 +160,7 @@
                             <form action="{{ school_route('instructor.questions.destroy', ['question' => $question->id]) }}" method="POST" onsubmit="return confirm('Remove this question from the bank?');" style="display:inline;">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="lms-link lms-link-delete" style="background:none; border:none; padding:0; cursor:pointer; color: #dc3545;">Delete</button>
+                                <button type="submit" class="lms-link lms-link-delete" style="background:none; border:none; padding:6px 8px; margin:-6px -8px; cursor:pointer; color: #dc3545;">Delete</button>
                             </form>
                         @endif
                     </div>

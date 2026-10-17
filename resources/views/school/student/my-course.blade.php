@@ -6,8 +6,8 @@
 @php
     $schoolName = $school->name ?? 'Driving School';
     $settings = $school->schoolSetting;
-    $primaryColor = $settings->primary_color ?? '#667eea';
-    $secondaryColor = $settings->secondary_color ?? '#764ba2';
+    $primaryColor = $settings->primary_color ?? '#2563eb';
+    $secondaryColor = $settings->secondary_color ?? '#1d4ed8';
 @endphp
 
 <style>
@@ -260,8 +260,10 @@
     border-radius: 6px;
     font-size: 0.8rem;
     font-weight: 500;
+    font-family: inherit;
     text-decoration: none;
     transition: all 0.2s;
+    cursor: pointer;
 }
 
 .btn-video {
@@ -288,6 +290,25 @@
     background: #f3f4f6;
     color: #4b5563;
     border: 1px solid #e5e7eb;
+}
+
+.btn-read:hover {
+    background: #e5e7eb;
+}
+
+.btn-complete {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+
+.btn-complete:hover {
+    background: #bbf7d0;
+}
+
+.btn-complete:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .expiry-warning {
@@ -544,10 +565,10 @@
         {{-- Progress Overview + Course Materials with visual lesson sequence --}}
         @php
             $totalLessons = $modules->sum(fn($m)=>$m->lessons ? $m->lessons->count():0);
-            $lessonProgressPct = $totalLessons>0 ? min(100, round(($progressPercentage))) : $progressPercentage;
-            // Approximate completed lessons from overall progress
             $completedLessonIds = $completedLessonIds ?? [];
             $completedCount = count($completedLessonIds);
+            // Lesson completion percentage (the bar sits under "N/M lessons completed").
+            $lessonProgressPct = $totalLessons > 0 ? min(100, (int) round(($completedCount / $totalLessons) * 100)) : 0;
             $allLessonsOrdered = $modules->sortBy('sort_order')->flatMap(fn($m)=> $m->lessons ? $m->lessons->sortBy('sort_order') : collect())->values();
         @endphp
         @if($modules->count() > 0)
@@ -580,7 +601,13 @@
                             @if($module->lessons && $module->lessons->count() > 0)
                                 <ul class="lesson-list">
                                     @foreach($module->lessons->sortBy('sort_order') as $index => $lesson)
-                                        @php $globalIndex = $allLessonsOrdered->search(fn($l)=>$l->id===$lesson->id); $isCompleted = in_array($lesson->id, $completedLessonIds, true); $isNext = !$isCompleted && $globalIndex === $completedCount && $completedCount < $totalLessons; @endphp
+                                        @php
+                                            $globalIndex = $allLessonsOrdered->search(fn($l)=>$l->id===$lesson->id);
+                                            $isCompleted = in_array($lesson->id, $completedLessonIds, true);
+                                            $isNext = !$isCompleted && $globalIndex === $completedCount && $completedCount < $totalLessons;
+                                            $lessonCompleteUrl = school_route('student.courses.modules.lessons.complete', ['course' => $course->id, 'module' => $module->id, 'lesson' => $lesson->id]);
+                                            $lessonShowUrl = school_route('student.courses.modules.lessons.show', ['course' => $course->id, 'module' => $module->id, 'lesson' => $lesson->id]);
+                                        @endphp
                                         <li class="lesson-item" style="@if($isCompleted) border-left:4px solid #10b981;background:#f0fdf4; @elseif($isNext) border-left:4px solid {{ $primaryColor }};background:#eff6ff; @endif">
                                             <div class="lesson-top">
                                                 <span class="lesson-number" style="@if($isCompleted) background:#10b981;color:white; @elseif($isNext) background:{{ $primaryColor }};color:white; @endif">@if($isCompleted) ✓ @else {{ $index + 1 }} @endif</span>
@@ -607,8 +634,14 @@
                                                 @endif
 
                                                 @if($lesson->content)
-                                                    <button type="button" class="action-btn btn-read" onclick="toggleReadModal(@js($lesson->title), @js($lesson->content))">
+                                                    <a href="{{ $lessonShowUrl }}" class="action-btn btn-read">
                                                         <i class="bi bi-book-fill"></i> Read
+                                                    </a>
+                                                @endif
+
+                                                @if(!$isCompleted)
+                                                    <button type="button" class="action-btn btn-complete" onclick="completeLessonFromList(@js($lessonCompleteUrl))">
+                                                        <i class="bi bi-check2-circle"></i> Mark Complete
                                                     </button>
                                                 @endif
                                             </div>
@@ -769,48 +802,49 @@
         @endif
     @endif
 
-    <!-- Read Lesson Modal -->
-    <div class="modal" id="readLessonModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
-        <div class="modal-content" style="background: white; border-radius: 15px; max-width: 800px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative; padding: 0;">
-            <div class="modal-header" style="background: {{ $primaryColor }}; color: white; padding: 20px; position: sticky; top: 0; display: flex; justify-content: space-between; align-items: center;">
-                <h3 id="modalLessonTitle" style="margin: 0; font-size: 1.25rem;">Lesson Title</h3>
-                <button type="button" onclick="closeReadModal()" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">&times;</button>
-            </div>
-            <div id="modalLessonContent" style="padding: 30px; line-height: 1.8; color: #374151; font-size: 1.1rem;">
-                <!-- Content goes here -->
-            </div>
-            <div style="padding: 20px; border-top: 1px solid #e5e7eb; text-align: right; position: sticky; bottom: 0; background: white;">
-                <button type="button" class="enroll-btn" onclick="closeReadModal()">Close</button>
-            </div>
-        </div>
-    </div>
 </div>
 
 <script>
-function toggleReadModal(title, content) {
-    const modal = document.getElementById('readLessonModal');
-    const modalContent = document.getElementById('modalLessonContent');
-    const rawContent = content || '';
-    const hasHtml = /<\s*\/?\s*[a-z][^>]*>/i.test(rawContent);
-
-    document.getElementById('modalLessonTitle').innerText = title;
-
-    if (hasHtml) {
-        modalContent.style.whiteSpace = '';
-        modalContent.innerHTML = rawContent;
-    } else {
-        modalContent.style.whiteSpace = 'pre-line';
-        modalContent.textContent = rawContent;
-    }
-
-    modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
+// Shared POST helper for marking a lesson complete without leaving the page.
+function postLessonCompletion(url) {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    return fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': csrfToken
+        }
+    }).then(response => {
+        if (!response.ok) {
+            throw new Error('HTTP ' + response.status);
+        }
+        return response.json();
+    });
 }
 
-function closeReadModal() {
-    const modal = document.getElementById('readLessonModal');
-    modal.style.display = 'none';
-    document.body.style.overflow = '';
+function completeLessonFromList(url) {
+    if (!url) {
+        return;
+    }
+
+    postLessonCompletion(url)
+        .then(() => {
+            if (typeof showNotification === 'function') {
+                showNotification('Lesson marked as complete.', 'success');
+            }
+            if (typeof reloadCurrentPage === 'function') {
+                reloadCurrentPage(200);
+            } else {
+                loadContent(window.location.pathname);
+            }
+        })
+        .catch(error => {
+            console.error('Complete lesson error:', error);
+            if (typeof showNotification === 'function') {
+                showNotification('Could not mark the lesson complete. Please try again.', 'error');
+            }
+        });
 }
 function toggleModule(header) {
     const moduleItem = header.closest('.module-item');

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DriveED Hub</title>
+    <title>SMART Driving School</title>
     <style>
         * {
             margin: 0;
@@ -59,6 +59,7 @@
             background-repeat: no-repeat;
             background-color: #053d86;
             overflow: hidden;
+            aspect-ratio: 16/9;
         }
 
         .hero-section img {
@@ -109,6 +110,7 @@
             gap: 20px;
             overflow-y: auto;
             align-content: start;
+            width: 100%;
         }
 
         .school-card {
@@ -196,6 +198,9 @@
             text-decoration: none;
             transition: color 0.3s;
             pointer-events: auto;
+            display: inline-block;
+            padding: 8px 6px;
+            margin: -8px -6px;
         }
 
         .footer a:hover {
@@ -212,21 +217,43 @@
                 flex-direction: column;
             }
 
-            .left-section {
-                min-height: 400px;
-                flex: 0 0 auto;
+            .left-section,
+            .right-section {
+                flex: 1 1 auto;
+                width: 100%;
+                padding: 24px 16px;
             }
 
-            .right-section {
-                flex: 0 0 auto;
-                width: 100%;
-                padding: 30px 20px;
+            .schools-list {
+                grid-template-columns: 1fr;
+            }
+
+            .logo-section {
+                min-height: 240px;
             }
         }
 
         @media (max-width: 480px) {
             .section-header h2 {
-                font-size: 1.4rem;
+                font-size: 1.25rem;
+            }
+
+            .logo-section {
+                padding: 20px 16px;
+                min-height: 150px;
+            }
+
+            .beneficiary-logo {
+                width: min(60%, 180px);
+            }
+
+            .footer {
+                position: static;
+                flex-direction: column;
+                gap: 4px;
+                text-align: center;
+                padding: 12px 16px;
+                pointer-events: auto;
             }
         }
     </style>
@@ -263,7 +290,7 @@
 
     <!-- Footer with hidden admin link -->
     <div class="footer">
-        <span>© 2025 DriveED Hub. All rights reserved.</span>
+        <span>&copy; {{ date('Y') }} SMART Driving School. All rights reserved.</span>
         <a href="{{ route('system-admin.login') }}">Admin</a>
     </div>
 </body>

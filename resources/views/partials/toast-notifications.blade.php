@@ -114,7 +114,7 @@
         background: inherit;
         filter: brightness(0.9);
         transform-origin: left;
-        background: var(--primary-color, #667eea);
+        background: var(--primary-color, #2563eb);
         opacity: 0.3;
     }
 

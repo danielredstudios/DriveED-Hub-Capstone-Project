@@ -6,8 +6,8 @@
 @php
     $school = $school ?? $currentSchool ?? null;
     $settings = $school?->schoolSetting;
-    $primaryColor = $settings?->primary_color ?? '#667eea';
-    $secondaryColor = $settings?->secondary_color ?? '#764ba2';
+    $primaryColor = $settings?->primary_color ?? '#2563eb';
+    $secondaryColor = $settings?->secondary_color ?? '#1d4ed8';
     $useGradient = $settings?->use_gradient_header ?? true;
     // ...existing code...
 @endphp
@@ -332,7 +332,7 @@
         padding: 14px;
         margin-bottom: 10px;
         box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-        border-left: 4px solid var(--primary-color, #667eea);
+        border-left: 4px solid var(--primary-color, #2563eb);
     }
     .session-mobile-card .card-row {
         display: flex;

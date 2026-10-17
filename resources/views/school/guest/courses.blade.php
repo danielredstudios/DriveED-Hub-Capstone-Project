@@ -7,8 +7,8 @@
     $school = $school ?? $currentSchool ?? null;
     $settings = $school?->schoolSetting;
 
-    $primaryColor = $settings?->primary_color ?? '#667eea';
-    $secondaryColor = $settings?->secondary_color ?? '#764ba2';
+    $primaryColor = $settings?->primary_color ?? '#2563eb';
+    $secondaryColor = $settings?->secondary_color ?? '#1d4ed8';
     $accentColor = $settings?->accent_color ?? '#8b5cf6';
 
     // Calculate RGB values for transparency effects
@@ -845,7 +845,7 @@
                 @endif
                 
                 @if($course->is_featured)
-                    <span class="featured-badge">⭐ Featured</span>
+                    <span class="featured-badge"><i class="bi bi-star-fill"></i> Featured</span>
                 @endif
             </div>
             

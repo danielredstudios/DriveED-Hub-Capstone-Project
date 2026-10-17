@@ -6,8 +6,8 @@
 @php
     $school = $school ?? $currentSchool ?? null;
     $settings = $school->schoolSetting;
-    $primaryColor = $settings->primary_color ?? '#667eea';
-    $secondaryColor = $settings->secondary_color ?? '#764ba2';
+    $primaryColor = $settings->primary_color ?? '#2563eb';
+    $secondaryColor = $settings->secondary_color ?? '#1d4ed8';
 @endphp
 
 @include('school.admin.partials.admin-styles')
@@ -161,7 +161,7 @@
     /* About Grid */
     .about-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
         gap: 24px;
     }
     
@@ -1017,14 +1017,14 @@
     <div class="tc-modal-card">
         <!-- Header -->
         <div class="tc-header">
-            <div class="tc-header-icon">🎉</div>
+            <div class="tc-header-icon"><i class="bi bi-check-circle-fill"></i></div>
             <h2 class="tc-header-title">Welcome to {{ $school->name }}!</h2>
             <p class="tc-header-subtitle">Registration Successful - Save Your Credentials</p>
         </div>
         
         <!-- Warning Banner -->
         <div class="tc-warning-banner">
-            <span class="tc-warning-icon">⚠️</span>
+            <span class="tc-warning-icon"><i class="bi bi-exclamation-triangle-fill"></i></span>
             <span>DEVELOPMENT MODE ONLY - This popup won't appear in production</span>
         </div>
         
@@ -1067,7 +1067,7 @@
             <!-- Info Box -->
             <div class="tc-info-box">
                 <div class="tc-info-row">
-                    <span class="tc-info-icon">💡</span>
+                    <span class="tc-info-icon"><i class="bi bi-lightbulb-fill"></i></span>
                     <div class="tc-info-text">
                         <p class="tc-info-title"><strong>You're now logged in as a Guest!</strong></p>
                         <p class="tc-info-desc">You can now browse courses and submit enrollment requests. Once approved by an admin, you'll become a full student with access to all features.</p>
@@ -1109,7 +1109,7 @@
     }
 
     .tc-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
         padding: 25px;
         text-align: center;
         color: white;
@@ -1203,7 +1203,7 @@
     }
 
     .tc-copy-btn {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
         color: white;
         border: none;
         padding: 8px 16px;
@@ -1254,7 +1254,7 @@
     .tc-close-btn {
         width: 100%;
         padding: 14px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
         color: white;
         border: none;
         border-radius: 10px;

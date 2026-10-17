@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <style>
         body { font-family: Arial, sans-serif; font-size: 11px; margin: 20px; }
-        .header { text-align: center; margin-bottom: 30px; border-bottom: 3px solid #667eea; padding-bottom: 15px; }
-        .header h1 { color: #667eea; margin: 5px 0; font-size: 24px; }
+        .header { text-align: center; margin-bottom: 30px; border-bottom: 3px solid #2563eb; padding-bottom: 15px; }
+        .header h1 { color: #2563eb; margin: 5px 0; font-size: 24px; }
         .header p { color: #666; margin: 3px 0; }
         .info-box { background: #f3f4f6; padding: 10px; border-radius: 5px; margin: 15px 0; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 10px; }
-        th { background: #667eea; color: white; padding: 8px 5px; text-align: left; font-weight: 600; }
+        th { background: #2563eb; color: white; padding: 8px 5px; text-align: left; font-weight: 600; }
         td { padding: 6px 5px; border-bottom: 1px solid #e5e7eb; }
         tr:nth-child(even) { background: #f9fafb; }
         .status-badge { padding: 2px 6px; border-radius: 3px; font-size: 9px; font-weight: 600; }

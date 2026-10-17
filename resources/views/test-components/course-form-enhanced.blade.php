@@ -23,7 +23,7 @@
         }
 
         .test-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
             color: white;
             padding: 20px;
             border-radius: 12px;
@@ -76,7 +76,7 @@
         .section-icon {
             width: 28px;
             height: 28px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
             border-radius: 8px;
             display: flex;
             align-items: center;
@@ -125,7 +125,7 @@
 
         .form-control:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #2563eb;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
@@ -164,13 +164,13 @@
         }
 
         .radio-option input[type="radio"]:checked + .radio-label {
-            border-color: #667eea;
+            border-color: #2563eb;
             background: #f0f4ff;
-            color: #667eea;
+            color: #2563eb;
         }
 
         .radio-label:hover {
-            border-color: #667eea;
+            border-color: #2563eb;
         }
 
         .radio-indicator {
@@ -183,8 +183,8 @@
         }
 
         .radio-option input[type="radio"]:checked + .radio-label .radio-indicator {
-            border-color: #667eea;
-            background: #667eea;
+            border-color: #2563eb;
+            background: #2563eb;
         }
 
         .radio-indicator::after {
@@ -240,7 +240,7 @@
 
         .hour-input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #2563eb;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
@@ -256,7 +256,7 @@
         }
 
         .total-hours {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
             color: white;
             padding: 20px;
             border-radius: 12px;
@@ -295,7 +295,7 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
             color: white;
             flex: 1;
         }

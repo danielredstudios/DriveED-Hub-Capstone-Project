@@ -6,7 +6,7 @@
     $schoolNameSize = $settings?->login_school_name_size ?? 24;
     $welcomeSize = $settings?->login_welcome_size ?? 16;
     $logoSize = $settings?->login_logo_size ?? 40;
-    $schoolName = $school?->name ?? 'DriveEd Hub';
+    $schoolName = $school?->name ?? 'SMART Driving School';
     $welcomeText = $settings?->register_welcome_text ?? 'Student Registration';
     $subtitleText = $settings?->register_subtitle_text;
 @endphp
@@ -252,6 +252,9 @@
             text-decoration: none;
             font-weight: 500;
             font-size: 12px;
+            display: inline-block;
+            padding: 6px 4px;
+            margin: -6px -4px;
         }
 
         .back-to-login a:hover {
@@ -278,6 +281,10 @@
 
         .consent-checkbox {
             margin-top: 4px;
+            width: 18px;
+            height: 18px;
+            min-width: 18px;
+            accent-color: var(--primary-color);
         }
 
         .consent-text {
@@ -288,6 +295,9 @@
         .policy-link {
             color: var(--primary-color);
             text-decoration: underline;
+            display: inline-block;
+            padding: 5px 3px;
+            margin: -5px -3px;
         }
 
         .policy-modal {
@@ -453,7 +463,7 @@
             }
 
             .subtitle {
-                font-size: 10px;
+                font-size: 12px;
                 margin-bottom: 8px;
             }
 
@@ -462,7 +472,7 @@
             }
 
             .form-group label {
-                font-size: 10px;
+                font-size: 12px;
                 margin-bottom: 2px;
             }
 
@@ -510,11 +520,11 @@
             }
 
             .back-to-login a {
-                font-size: 10px;
+                font-size: 12px;
             }
 
             .password-help {
-                font-size: 10px;
+                font-size: 11px;
                 color: #6b7280;
                 margin-top: 5px;
             }

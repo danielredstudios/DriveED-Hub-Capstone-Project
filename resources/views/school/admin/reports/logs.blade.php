@@ -7,7 +7,7 @@
     $school = $school ?? $currentSchool ?? null;
     $settings = $school?->schoolSetting;
     $schoolName = $school->name ?? 'Driving School';
-    $primaryColor = $settings->primary_color ?? '#667eea';
+    $primaryColor = $settings->primary_color ?? '#2563eb';
 @endphp
 
 <style>
@@ -50,7 +50,7 @@
     .report-placeholder-icon-wrap {
         width: 80px;
         height: 80px;
-        background: linear-gradient(135deg, {{ $primaryColor }} 0%, #764ba2 100%);
+        background: linear-gradient(135deg, {{ $primaryColor }} 0%, #1d4ed8 100%);
         border-radius: 50%;
         margin: 0 auto 20px;
         display: flex;

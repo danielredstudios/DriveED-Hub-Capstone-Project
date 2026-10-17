@@ -60,6 +60,7 @@
         .app-container {
             display: flex;
             min-height: 100vh;
+            min-width: 0;
         }
         
         /* Sidebar */
@@ -146,8 +147,11 @@
         /* Main Content */
         .main-content {
             margin-left: 0;
-            flex: 1;
+            flex: 1 1 0%;
+            min-width: 0;
             min-height: 100vh;
+            max-width: 100%;
+            overflow-x: hidden;
         }
         
         /* Header */
@@ -471,6 +475,48 @@
             background: var(--primary-color);
             color: white;
             border-color: var(--primary-color);
+        }
+
+        /* Pagination controls rendered by the shared pagination view */
+        .ds-page-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 36px;
+            min-height: 36px;
+            padding: 6px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            background: #fff;
+            color: #374151;
+            font-size: 0.875rem;
+            line-height: 1;
+            text-decoration: none;
+            box-sizing: border-box;
+        }
+
+        .ds-page-btn:hover {
+            background: #f9fafb;
+        }
+
+        .ds-page-btn.is-active {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: #fff;
+        }
+
+        .ds-page-btn.is-disabled {
+            opacity: 0.45;
+            pointer-events: none;
+        }
+
+        .ds-page-ellipsis {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 36px;
+            padding: 6px 4px;
+            color: #6b7280;
         }
         
         /* Table responsive wrapper */

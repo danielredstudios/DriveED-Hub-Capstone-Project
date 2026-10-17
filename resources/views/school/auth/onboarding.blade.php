@@ -7,7 +7,7 @@
         $slug = $school?->slug ?? 'default';
         $settings = $school?->schoolSetting;
         
-        $schoolName = $school->name ?? 'DriveEd Hub';
+        $schoolName = $school->name ?? 'SMART Driving School';
         $primaryColor = $settings?->primary_color ?? '#2563eb';
         $secondaryColor = $settings?->secondary_color ?? '#60a5fa';
         

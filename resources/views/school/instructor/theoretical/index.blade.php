@@ -6,8 +6,8 @@
 @php
     $school = $school ?? $currentSchool ?? null;
     $settings = $school?->schoolSetting;
-    $primaryColor = $settings->primary_color ?? '#667eea';
-    $secondaryColor = $settings->secondary_color ?? '#764ba2';
+    $primaryColor = $settings->primary_color ?? '#2563eb';
+    $secondaryColor = $settings->secondary_color ?? '#1d4ed8';
 
     // ...existing code...
 @endphp
@@ -147,7 +147,7 @@
 
     .badge-success { background:#d1fae5; color:#065f46; }
     .badge-info    { background:#dbeafe; color:#1e40af; }
-    .badge-ready   { background:#d1fae5; color:#065f46; animation: pulseReady 2s infinite; }
+    .badge-ready   { background:#d1fae5; color:#065f46;  }
     .badge-progress{ background:#fef3c7; color:#92400e; }
     .badge-started { background:#e5e7eb; color:#6b7280; }
 

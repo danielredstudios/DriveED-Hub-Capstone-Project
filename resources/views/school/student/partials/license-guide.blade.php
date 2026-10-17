@@ -1,6 +1,6 @@
 @php
     $settings = $school?->schoolSetting;
-    $primaryColor = $settings?->primary_color ?? '#667eea';
+    $primaryColor = $settings?->primary_color ?? '#2563eb';
     $borderRadius = $settings?->border_radius ?? 12;
 @endphp
 

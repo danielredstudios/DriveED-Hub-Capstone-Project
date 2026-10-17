@@ -6,7 +6,7 @@
 <div class="modal fade" id="courseModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content" style="border-radius: 15px; border: none;">
-            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 15px 15px 0 0; padding: 25px;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: white; border-radius: 15px 15px 0 0; padding: 25px;">
                 <h5 class="modal-title" id="courseModalLabel" style="font-weight: 700; font-size: 20px;">Add New Course</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -167,7 +167,7 @@
                             </div>
                         </div>
 
-                        <div class="alert" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; text-align: center; padding: 20px; border-radius: 10px;">
+                        <div class="alert" style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: white; border: none; text-align: center; padding: 20px; border-radius: 10px;">
                             <div style="font-size: 13px; opacity: 0.9; margin-bottom: 5px;">Total Training Duration</div>
                             <div style="font-size: 32px; font-weight: 700;"><span id="totalHours">28</span> hours</div>
                         </div>
@@ -177,7 +177,7 @@
 
                 <div class="modal-footer" style="padding: 20px 30px; border-top: 2px solid #e5e7eb;">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; font-weight: 600;">
+                    <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); border: none; font-weight: 600;">
                         Save Course
                     </button>
                 </div>
@@ -198,17 +198,17 @@
 
     #courseModal .form-control:focus,
     #courseModal .form-select:focus {
-        border-color: #667eea;
+        border-color: #2563eb;
         box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
 
     #courseModal .form-check-input:checked {
-        background-color: #667eea;
-        border-color: #667eea;
+        background-color: #2563eb;
+        border-color: #2563eb;
     }
 
     #courseModal .form-check-input:focus {
-        border-color: #667eea;
+        border-color: #2563eb;
         box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
     }
 </style>

@@ -7,7 +7,7 @@
     $school = $school ?? $currentSchool ?? null;
     $settings = $school?->schoolSetting;
     $schoolName = $school->name ?? 'Driving School';
-    $primaryColor = $settings->primary_color ?? '#667eea';
+    $primaryColor = $settings->primary_color ?? '#2563eb';
 @endphp
 
 @include('school.admin.partials.admin-styles')
@@ -78,8 +78,8 @@
     }
 
     .tab-btn.active {
-        color: #667eea;
-        border-bottom-color: #667eea;
+        color: #2563eb;
+        border-bottom-color: #2563eb;
     }
 
     .tab-content {
@@ -173,7 +173,7 @@
         padding: 15px;
         border-radius: 8px;
         margin-bottom: 15px;
-        border-left: 3px solid #667eea;
+        border-left: 3px solid #2563eb;
     }
 
     .request-reason-label {
@@ -304,7 +304,7 @@
     }
 
     .modal-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
         color: white;
         padding: 32px;
         border-radius: 16px 16px 0 0;
@@ -338,7 +338,7 @@
 
     .form-control:focus {
         outline: none;
-        border-color: #667eea;
+        border-color: #2563eb;
     }
 
     .modal-actions {

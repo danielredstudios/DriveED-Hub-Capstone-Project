@@ -5,21 +5,29 @@
 @section('content')
 @include('school.partials.lms-shared-styles')
 
-<div class="lms-page" data-breadcrumb-course="{{ $course->title ?? '' }}" data-breadcrumb-module="{{ $module->title ?? '' }}">
+<div class="lms-page lms-player" data-breadcrumb-course="{{ $course->title ?? '' }}" data-breadcrumb-module="{{ $module->title ?? '' }}">
+    @include('school.partials.lms-outline', [
+        'course' => $course,
+        'outlineModules' => $outlineModules ?? collect(),
+        'completedLessonIds' => $completedLessonIds ?? [],
+        'activeModuleId' => $module->id,
+        'activeLessonId' => null,
+    ])
+
+    <div class="lms-player-main">
     <div class="lms-header">
         <div>
+            <div class="lms-player-eyebrow">{{ $course->title ?? 'Course' }}</div>
             <h1 class="lms-title">{{ $module->title }}</h1>
             <p class="lms-subtitle">
                 @if($module->questions->count() > 0)
-                    Please answer all questions below to complete this assessment.
+                    Answer all questions below to complete this assessment.
                 @else
                     This assessment is currently empty.
                 @endif
             </p>
         </div>
         <div class="lms-actions">
-            <a href="{{ school_route('student.my-course') }}" class="lms-btn lms-btn-muted">Back to My Course</a>
-            
             <div style="display: flex; gap: 0.5rem;">
                 <span class="lms-chip" style="background: #eff6ff; color: #1d4ed8;">
                     {{ $module->questions->count() }} Questions
@@ -149,9 +157,9 @@
         <div style="display: flex; justify-content: center; gap: 1rem;">
             <button onclick="window.location.reload()" class="lms-btn lms-btn-muted">Retake Test</button>
             @if(isset($navigation->next))
-                <a href="{{ $navigation->next['url'] }}" class="lms-btn lms-btn-primary">Continue to Next Lesson</a>
+                <a href="{{ $navigation->next['url'] }}" class="lms-btn lms-btn-primary lms-nav-link" onclick="loadContent(this.href); return false;">Continue to Next Lesson</a>
             @else
-                <a href="{{ school_route('student.my-course') }}" class="lms-btn lms-btn-primary">Back to My Course</a>
+                <a href="{{ school_route('student.my-course') }}" class="lms-btn lms-btn-primary lms-nav-link" onclick="loadContent(this.href); return false;">Back to My Course</a>
             @endif
         </div>
     </div>
@@ -159,7 +167,7 @@
     {{-- Navigation --}}
     <div id="standardNavigation" style="display: flex; justify-content: space-between; align-items: center; max-width: 900px; margin: 2rem auto 0; padding-top: 2rem; border-top: 1px solid #e2e8f0;">
         @if(isset($navigation->prev))
-            <a href="{{ $navigation->prev['url'] }}" class="lms-btn lms-btn-muted" style="display: flex; align-items: center; gap: 0.5rem;">
+            <a href="{{ $navigation->prev['url'] }}" class="lms-btn lms-btn-muted lms-nav-link" style="display: flex; align-items: center; gap: 0.5rem;" onclick="loadContent(this.href); return false;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
                 <span>Previous: {{ $navigation->prev['title'] }}</span>
             </a>
@@ -168,11 +176,12 @@
         @endif
 
         @if(isset($navigation->next))
-            <a href="{{ $navigation->next['url'] }}" class="lms-btn lms-btn-primary" style="display: flex; align-items: center; gap: 0.5rem;">
+            <a href="{{ $navigation->next['url'] }}" class="lms-btn lms-btn-primary lms-nav-link" style="display: flex; align-items: center; gap: 0.5rem;" onclick="loadContent(this.href); return false;">
                 <span>Next: {{ $navigation->next['title'] }}</span>
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
             </a>
         @endif
+    </div>
     </div>
 </div>
 

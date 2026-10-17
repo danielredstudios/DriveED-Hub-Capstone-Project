@@ -7,7 +7,7 @@
     $school = $school ?? $currentSchool ?? null;
     $schoolName = $school->name ?? 'Driving School';
     $settings = $school?->schoolSetting;
-    $primaryColor = $settings?->primary_color ?? '#667eea';
+    $primaryColor = $settings?->primary_color ?? '#2563eb';
     $instructorId = Auth::guard('instructor')->id();
     
     // Calculate statistics
@@ -279,7 +279,7 @@
         .student-detail { font-size: 0.72rem; display: none; }
         .student-detail:first-of-type { display: block; }
         .student-grade { font-size: 0.8rem; }
-        .assignment-badge { font-size: 0.6rem; }
+        .assignment-badge { font-size: 0.72rem; }
         .controls-bar { padding: 12px; gap: 8px; }
         .search-wrapper { min-width: 150px; }
         .search-input { padding: 8px 10px; font-size: 0.82rem; }

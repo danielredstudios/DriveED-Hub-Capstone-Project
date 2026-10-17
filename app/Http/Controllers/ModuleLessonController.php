@@ -211,7 +211,13 @@ class ModuleLessonController extends Controller
             $navigation = $courseModuleController->getLearningPathNavigation($course, $module, $lesson);
             $lessonCompleted = $student->lessonCompletions()->where('lesson_id', $lesson->id)->exists();
 
-            return view('school.student.lessons.show', compact('school', 'course', 'module', 'lesson', 'navigation', 'lessonCompleted'))->with('isAjax', $request->ajax());
+            // Shared course outline for the LMS sidebar
+            $outline = $courseModuleController->getCourseOutline($course, $student->id);
+
+            return view('school.student.lessons.show', compact('school', 'course', 'module', 'lesson', 'navigation', 'lessonCompleted'))
+                ->with('outlineModules', $outline['modules'])
+                ->with('completedLessonIds', $outline['completedLessonIds'])
+                ->with('isAjax', $request->ajax());
         }
 
         // Instructor view
@@ -244,6 +250,18 @@ class ModuleLessonController extends Controller
             ['student_id' => $student->id, 'lesson_id' => $lesson->id],
             ['school_id' => $school->id, 'completed_at' => now()]
         );
+
+        // JSON consumers (e.g. the inline "Read" modal and list buttons on My
+        // Course) post via fetch with an explicit `Accept: application/json` and
+        // expect an acknowledgement instead of a redirect. Regular form posts
+        // keep the original redirect behaviour.
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'completed' => true,
+                'lesson_id' => $lesson->id,
+            ]);
+        }
 
         return redirect()->route('schools.student.courses.modules.lessons.show', [
             'school' => $school->slug,

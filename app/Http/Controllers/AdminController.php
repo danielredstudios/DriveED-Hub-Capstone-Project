@@ -262,6 +262,15 @@ class AdminController extends Controller
                 $activeBranchFilter = (string) ((int) $branchFilterRaw);
             }
 
+            // The roster stays empty until the admin actively applies a filter.
+            // The explicit "filtered" marker covers the show-everyone case
+            // (Total Users), which otherwise produces a URL with no filter params.
+            $filtersApplied = $request->boolean('filtered')
+                || $activeSearch !== ''
+                || $activeStatusFilter !== 'all'
+                || $activeRoleFilter !== 'all'
+                || $activeBranchFilter !== 'all';
+
             $applySharedFilters = function ($query) use ($activeSearch, $activeStatusFilter, $activeBranchFilter): void {
                 if ($activeSearch !== '') {
                     $query->where(function ($q) use ($activeSearch): void {
@@ -289,7 +298,7 @@ class AdminController extends Controller
             $applySharedFilters($filteredInstructorQuery);
 
             $studentItems = collect();
-            if ($activeRoleFilter !== 'instructor') {
+            if ($filtersApplied && $activeRoleFilter !== 'instructor') {
                 $studentItems = $filteredStudentQuery
                     ->select('id', 'branch_id', 'name', 'email', 'contact', 'address', 'status', 'profile_picture', 'last_login_at', 'last_logout_at')
                     ->orderBy('name')
@@ -318,7 +327,7 @@ class AdminController extends Controller
             }
 
             $instructorItems = collect();
-            if ($activeRoleFilter !== 'student') {
+            if ($filtersApplied && $activeRoleFilter !== 'student') {
                 $instructorItems = $filteredInstructorQuery
                     ->select('id', 'branch_id', 'name', 'email', 'contact', 'address', 'license_number', 'license_image', 'license_status', 'license_rejection_reason', 'restriction_codes', 'course_specializations', 'status', 'availability', 'profile_picture', 'last_login_at', 'last_logout_at')
                     ->orderBy('name')
@@ -405,6 +414,7 @@ class AdminController extends Controller
                 'activeStatusFilter' => $activeStatusFilter,
                 'activeRoleFilter' => $activeRoleFilter,
                 'activeBranchFilter' => $activeBranchFilter,
+                'filtersApplied' => $filtersApplied,
             ]);
         } catch (\Exception $e) {
             SystemLog::logError(

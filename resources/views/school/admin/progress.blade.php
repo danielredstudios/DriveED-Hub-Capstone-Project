@@ -7,7 +7,7 @@
     $school = $school ?? $currentSchool ?? null;
     $settings = $school?->schoolSetting;
     $schoolName = $school->name ?? 'Driving School';
-    $primaryColor = $settings->primary_color ?? '#667eea';
+    $primaryColor = $settings->primary_color ?? '#2563eb';
 @endphp
 
 @include('school.admin.partials.admin-styles')
@@ -58,7 +58,7 @@
 }
 
 .progress-table thead {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
     color: white;
 }
 
@@ -129,7 +129,7 @@
 .expand-icon {
     display: inline-block;
     transition: transform 0.3s;
-    color: #667eea;
+    color: #2563eb;
     font-weight: bold;
     font-size: 1.2rem;
 }
@@ -170,12 +170,12 @@
 .detail-section-title {
     font-size: 0.9rem;
     font-weight: 700;
-    color: #667eea;
+    color: #2563eb;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 15px;
     padding-bottom: 10px;
-    border-bottom: 2px solid #667eea;
+    border-bottom: 2px solid #2563eb;
 }
 
 .detail-item {
@@ -227,7 +227,7 @@
 
 .progress-bar-fill {
     height: 100%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
     border-radius: 20px;
     transition: width 0.5s ease;
     display: flex;
@@ -241,7 +241,7 @@
 .progress-percentage {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #667eea;
+    color: #2563eb;
     min-width: 70px;
     text-align: right;
 }

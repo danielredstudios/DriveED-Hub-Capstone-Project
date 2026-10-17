@@ -52,7 +52,7 @@
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
             color: white;
             padding: 30px;
             border-radius: 12px;
@@ -167,7 +167,7 @@
 
         .info-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
@@ -176,7 +176,7 @@
             padding: 15px;
             background: #f9fafb;
             border-radius: 8px;
-            border-left: 3px solid #667eea;
+            border-left: 3px solid #2563eb;
         }
 
         .info-item label {
@@ -211,6 +211,8 @@
             border-radius: 4px;
             font-size: 1.05rem;
             line-height: 1.8;
+            overflow-wrap: anywhere;
+            word-break: break-word;
         }
 
         .message-box-sm {
@@ -228,6 +230,11 @@
             line-height: 1.6;
             white-space: pre-wrap;
             word-wrap: break-word;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .context-table {
@@ -283,7 +290,7 @@
 
         .form-group textarea:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #2563eb;
         }
 
         .btn {
@@ -339,6 +346,40 @@
             background: #fee2e2;
             color: #991b1b;
             border: 1px solid #fca5a5;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 12px;
+            }
+
+            .header,
+            .log-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 14px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.35rem;
+            }
+
+            .header-actions {
+                flex-wrap: wrap;
+            }
+
+            .log-detail {
+                padding: 18px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
         }
     </style>
 </head>

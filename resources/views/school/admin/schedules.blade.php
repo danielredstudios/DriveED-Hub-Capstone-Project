@@ -1445,7 +1445,7 @@
             }
 
             .slot-badge {
-                font-size: 0.65rem;
+                font-size: 0.72rem;
                 padding: 3px 5px;
             }
 
@@ -1986,7 +1986,7 @@
             .collapsed .chevron { transform: rotate(-90deg); }
             .agenda-content { background: #ffffff; }
             .schedule-table { width: 100%; border-collapse: collapse; }
-            .schedule-table th { background: #f8fafc; padding: 8px 20px; text-align: left; font-size: 0.65rem; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e2e8f0; }
+            .schedule-table th { background: #f8fafc; padding: 8px 20px; text-align: left; font-size: 0.72rem; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e2e8f0; }
             .schedule-table td { padding: 8px 20px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
             .timeslot-table-row:hover { background: #fdfdfd; }
         </style>

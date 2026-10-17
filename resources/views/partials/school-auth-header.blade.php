@@ -4,7 +4,7 @@
     $settings = $school?->schoolSetting;
     
     // School branding
-    $schoolName = $school?->name ?? 'DriveEd Hub';
+    $schoolName = $school?->name ?? 'SMART Driving School';
     
     // Get custom colors from school settings or use defaults
     $primaryColor = $settings?->primary_color ?? '#2563eb';
