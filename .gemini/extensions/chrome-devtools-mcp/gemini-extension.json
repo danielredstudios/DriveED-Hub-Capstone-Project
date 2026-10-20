@@ -1,0 +1,15 @@
+{
+  "name": "chrome-devtools-mcp",
+  "version": "latest",
+  "mcpServers": {
+    "chrome-devtools": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "chrome-devtools-mcp@latest",
+        "--executable-path=/usr/bin/google-chrome",
+        "--headless"
+      ]
+    }
+  }
+}

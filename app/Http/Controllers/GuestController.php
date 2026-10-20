@@ -885,7 +885,7 @@ class GuestController extends Controller
                 ->with('info', 'Your email is already verified.');
         }
 
-        return redirect()->route('schools.register', $school)
+        return redirect()->route('schools.registration.form', $school)
             ->with('info', 'Please register first to verify your email.');
     }
 

@@ -430,11 +430,19 @@ class StudentController extends Controller
         $totalScheduledSessions = $allBookings->count();
         $completedBookings = $allBookings->where('status', 'completed')->count();
         
-        // Get upcoming lessons (next 7 days) - only confirmed/scheduled
+        // School-local clock: scheduled_at/booking_date are wall-clock school time
+        $schoolTimezone = School::timezoneOrDefault($school->timezone);
+        $schoolNow = Carbon::now($schoolTimezone);
+        $notYetStarted = fn (Booking $booking) => $booking->startsAt($schoolTimezone)?->gt($schoolNow) ?? true;
+
+        // Get upcoming lessons (next 7 days) - only confirmed/scheduled and not yet started
         $upcomingLessons = Booking::where('student_id', $student->id)
             ->whereIn('status', ['confirmed', 'scheduled'])
             ->where('booking_date', '>=', Carbon::now()->toDateString())
             ->where('booking_date', '<=', Carbon::now()->addDays(7)->toDateString())
+            ->with(['timeSlot:id,date,start_time,end_time'])
+            ->get()
+            ->filter($notYetStarted)
             ->count();
         
         // Get next lessons for display - only confirmed/scheduled
@@ -447,8 +455,11 @@ class StudentController extends Controller
                 'course:id,title'
             ])
             ->orderBy('booking_date', 'asc')
-            ->limit(5)
+            // Over-fetch: today's already-finished lessons sort first and are dropped below
+            ->limit(20)
             ->get()
+            ->filter($notYetStarted)
+            ->take(5)
             ->map(function($booking) {
                 return (object)[
                     'course' => $booking->course,
@@ -456,7 +467,8 @@ class StudentController extends Controller
                     'date' => $booking->timeSlot->date ?? $booking->booking_date,
                     'timeSlot' => $booking->timeSlot,
                 ];
-            });
+            })
+            ->values();
         
         // Calculate progress percentage based on hours
         $progressPercentage = $requiredHours > 0 ? min(100, round(($hoursCompleted / $requiredHours) * 100)) : 0;
@@ -805,12 +817,27 @@ class StudentController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
         
+        // Get booking queue settings
+        $settings = $school->schoolSetting;
+        $queueEnabled = $settings?->enable_booking_queue ?? true;
+        $queueDays = $settings?->booking_queue_days ?? 3;
+
+        // School-local clock shared by the slot list and the sidebar below.
+        $schoolTimezone = School::timezoneOrDefault($school->timezone);
+        $schoolNow = Carbon::now($schoolTimezone);
+
         // Get available time slots (Only those with instructors assigned)
         // Gate: hide schedules until enrollment is approved/processed.
+        // Filtered with the same timezone/cutoff/advance rules that
+        // BookingController::store() enforces, so every listed slot is bookable.
         $availableTimeSlots = $hasApprovedEnrollment
             ? \App\Models\TimeSlot::visibleToStudents()
                 ->where('school_id', $school->id)
-                ->where('date', '>=', now()->toDateString())
+                ->upcoming(
+                    $schoolTimezone,
+                    (int) ($settings?->booking_cutoff_hours ?? 0),
+                    (int) ($settings?->advance_booking_days ?? 0)
+                )
                 ->with(['instructors', 'course', 'branch'])
                 ->orderBy('date')
                 ->orderBy('start_time')
@@ -824,16 +851,15 @@ class StudentController extends Controller
         
         $todayDate = now()->toDateString();
 
-        // Get booking queue settings
-        $settings = $school->schoolSetting;
-        $queueEnabled = $settings?->enable_booking_queue ?? true;
-        $queueDays = $settings?->booking_queue_days ?? 3;
-
-        // Pre-compute upcoming bookings for sidebar (avoids repeating logic in blade)
+        // Pre-compute upcoming bookings for sidebar (avoids repeating logic in blade).
+        // booking_date is date-only for time slot bookings, so the real session
+        // start decides what counts as upcoming — otherwise today's finished
+        // lessons keep appearing under "Upcoming This Week".
         $upcomingBookings = $confirmedBookings
             ->whereIn('status', ['scheduled', 'confirmed', 'pending'])
-            ->where('booking_date', '>=', now()->toDateString())
-            ->where('booking_date', '<=', now()->addDays(7)->toDateString())
+            ->where('booking_date', '>=', $schoolNow->toDateString())
+            ->where('booking_date', '<=', $schoolNow->copy()->addDays(7)->toDateString())
+            ->filter(fn ($booking) => $booking->startsAt($schoolTimezone)?->gt($schoolNow) ?? true)
             ->sortBy('booking_date');
         
         return view($school->resolveView('student.schedule'), [

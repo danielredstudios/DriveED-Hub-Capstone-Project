@@ -43,6 +43,20 @@ class School extends Model
         return 'slug';
     }
 
+    /**
+     * Resolve a timezone Carbon can safely use: the given value when it is a real
+     * timezone, otherwise the application timezone. Keeps schedule comparisons
+     * (slot list vs. booking validation) on the same clock.
+     */
+    public static function timezoneOrDefault(?string $timezone): string
+    {
+        if ($timezone && in_array($timezone, \DateTimeZone::listIdentifiers(), true)) {
+            return $timezone;
+        }
+
+        return config('app.timezone', 'UTC');
+    }
+
     public function admins()
     {
         return $this->hasMany(Admin::class);

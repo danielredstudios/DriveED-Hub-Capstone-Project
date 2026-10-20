@@ -162,6 +162,61 @@ class TimeSlot extends Model
                      ->where('status', 'open');
     }
 
+    /**
+     * Scope for slots that a student may still book.
+     *
+     * Mirrors the rules BookingController::store() enforces: the slot must start
+     * at least $cutoffHours from now and its date must be at least $advanceDays
+     * ahead. Without those, today's slots stay listed but every booking attempt
+     * is rejected ("closed for bookings" / "must be made ... in advance").
+     *
+     * @param  string|null  $timezone  School timezone; invalid values fall back to the app timezone.
+     */
+    public function scopeUpcoming($query, ?string $timezone = null, int $cutoffHours = 0, int $advanceDays = 0)
+    {
+        $now = Carbon::now(School::timezoneOrDefault($timezone));
+        $earliestBookable = $now->copy()->addHours(max(0, $cutoffHours));
+        $advanceDate = $now->copy()->addDays(max(0, $advanceDays))->startOfDay()->toDateString();
+
+        // The later constraint wins: advance-booking only limits the date, while
+        // the cutoff also limits the time, so it is stricter on the boundary day.
+        if ($advanceDate > $earliestBookable->toDateString()) {
+            return $query->where('date', '>=', $advanceDate);
+        }
+
+        $cutoffDate = $earliestBookable->toDateString();
+        $cutoffTime = $earliestBookable->format('H:i:s');
+
+        return $query->where(function ($query) use ($cutoffDate, $cutoffTime) {
+            $query->where('date', '>', $cutoffDate)
+                ->orWhere(function ($query) use ($cutoffDate, $cutoffTime) {
+                    $query->where('date', $cutoffDate)
+                        ->where('start_time', '>=', $cutoffTime);
+                });
+        });
+    }
+
+    /**
+     * School-local date/time this slot starts, or null when it cannot be parsed.
+     */
+    public function startsAt(?string $timezone = null): ?Carbon
+    {
+        if (!$this->date || !$this->start_time) {
+            return null;
+        }
+
+        try {
+            return Carbon::parse(
+                $this->date->toDateString() . ' ' . $this->start_time,
+                School::timezoneOrDefault($timezone)
+            );
+        } catch (\Throwable $e) {
+            Log::warning('Could not parse time slot start', ['id' => $this->id, 'date' => $this->date, 'start_time' => $this->start_time]);
+
+            return null;
+        }
+    }
+
     // Keep legacy method names if they are used elsewhere to prevent breaking.
     public function getAvailableSpots(): int
     {

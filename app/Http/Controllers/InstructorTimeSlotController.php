@@ -7,6 +7,7 @@ use App\Models\School;
 use App\Models\TimeSlot;
 use App\Models\Booking;
 use App\Models\InstructorRemovalRequest;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -26,10 +27,12 @@ class InstructorTimeSlotController extends Controller
         // Get instructor's course specializations
         $instructorCourses = $instructor->course_specializations ?? [];
 
+        // Slots that have not started yet (school-local time) — matches the guard
+        // in toggle() so instructors are not offered slots they cannot select.
         $availableSlots = TimeSlot::with(['instructors', 'course', 'branch'])
             ->where('school_id', $school->id)
             ->where('status', 'open')
-            ->where('date', '>=', now()->toDateString())
+            ->upcoming($school->timezone)
             ->orderBy('date')
             ->orderBy('start_time')
             ->get();
@@ -73,12 +76,10 @@ class InstructorTimeSlotController extends Controller
             return redirect()->back()->with('error', 'This time slot is closed and cannot be selected.');
         }
 
-        if ($timeSlot->date->isPast()) {
-            if ($isAjax) {
-                return response()->json(['success' => false, 'message' => 'Cannot select past time slots.'], 400);
-            }
-            return redirect()->back()->with('error', 'Cannot select past time slots.');
-        }
+        // The date cast is midnight, so compare the real start time in the
+        // school timezone: today's slots must stay selectable until they start.
+        $timezone = School::timezoneOrDefault($school->timezone);
+        $slotHasStarted = $timeSlot->startsAt($timezone)?->lte(Carbon::now($timezone)) ?? false;
 
         if ($timeSlot->hasInstructor($instructor->id)) {
             $pivot = $timeSlot->instructors()
@@ -121,6 +122,15 @@ class InstructorTimeSlotController extends Controller
                 }
                 return redirect()->back()->with('error', 'An error occurred while leaving the slot.');
             }
+        }
+
+        // Reached only when the instructor is selecting the slot (leaving one is
+        // handled above): a slot that has already started can never be selected.
+        if ($slotHasStarted) {
+            if ($isAjax) {
+                return response()->json(['success' => false, 'message' => 'Cannot select past time slots.'], 400);
+            }
+            return redirect()->back()->with('error', 'Cannot select past time slots.');
         }
 
         if ($timeSlot->isFull()) {
@@ -247,6 +257,8 @@ class InstructorTimeSlotController extends Controller
         })->take(5);
 
         // Available slots (not taken by this instructor)
+        // Slot must not have started yet, otherwise instructors are offered
+        // slots they can see but cannot select (toggle() rejects them).
         $availableSlots = TimeSlot::with(['instructors', 'course', 'branch'])
             ->where('school_id', $school->id)
             ->where('status', 'open')
@@ -254,6 +266,7 @@ class InstructorTimeSlotController extends Controller
             $query->where('instructor_id', $instructorId);
         })
             ->whereRaw('(SELECT COUNT(*) FROM schedule_instructors WHERE schedule_instructors.time_slot_id = time_slots.id) < COALESCE(time_slots.max_instructors, 1)')
+            ->upcoming($school->timezone)
             ->orderBy('date')
             ->orderBy('start_time')
             ->get();

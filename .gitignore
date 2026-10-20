@@ -43,7 +43,6 @@ Thumbs.db
 /tests/Browser/screenshots/**/*.webp
 
 /tests
-/docs
 /routes.json
 /routes_list.txt
 /routes_utf8.json
@@ -53,13 +52,9 @@ Thumbs.db
 
 # Deployment & Config
 /phpunit.xml
-/vite.config.js
-/package.json
-/package-lock.json
-/README.md
 /nixpacks.toml
 /railway.json
 /.env.*
 !.env.example
-/public
+!.env.docker.example
 /tmp

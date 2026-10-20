@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Carbon;
 
 class Booking extends Model
 {
@@ -168,6 +169,35 @@ class Booking extends Model
     {
         return $query->where('scheduled_at', '<=', now())
             ->orderBy('scheduled_at', 'desc');
+    }
+
+    /**
+     * Local date/time the session actually starts, or null when it is unknown.
+     *
+     * scheduled_at is stored as wall-clock school time, so it is re-parsed in
+     * $timezone instead of being converted from the app timezone.
+     */
+    public function startsAt(string $timezone): ?Carbon
+    {
+        $value = $this->scheduled_at
+            ?? (($this->timeSlot?->date && $this->timeSlot?->start_time)
+                ? $this->timeSlot->date->toDateString() . ' ' . $this->timeSlot->start_time
+                : null)
+            ?? $this->booking_date;
+
+        if (!$value) {
+            return null;
+        }
+
+        $wallClock = $value instanceof \DateTimeInterface
+            ? $value->format('Y-m-d H:i:s')
+            : (string) $value;
+
+        try {
+            return Carbon::parse($wallClock, School::timezoneOrDefault($timezone));
+        } catch (\Throwable $e) {
+            return null;
+        }
     }
 
     /**
