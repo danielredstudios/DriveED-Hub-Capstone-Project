@@ -2030,8 +2030,6 @@
                             data-page="schedules">Manage Schedule</a>
                         <a href="{{ school_route('admin.verify-session-completion.index', [], $currentSchool) }}"
                             class="nav-item" data-page="verify-session-completion">Verify Session Completion</a>
-                        <a href="{{ school_route('admin.phase-progressions.index', [], $currentSchool) }}" class="nav-item"
-                            data-page="phase-progressions">Phase Progressions</a>
                     </div>
                 </div>
 
@@ -2459,7 +2457,6 @@
             'admin/schedules': 'Manage Schedule',
             'admin/verify-session-completion': 'Verify Session Completion',
             'admin/sessions': 'Session Completions',
-            'admin/phase-progressions': 'Phase Progressions',
             'admin/payments': 'Payments',
             'admin/reports': 'Reports & Analytics',
             'admin/admin-management': 'Admin Management',

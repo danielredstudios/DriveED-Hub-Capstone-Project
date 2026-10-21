@@ -646,9 +646,10 @@
 
     .modal-content {
         background: white;
-        width: 600px;
-        min-width: 600px;
-        max-width: 92%;
+        width: min(600px, 92vw);
+        min-width: 0;
+        max-width: 92vw;
+        max-height: 92vh;
         border-radius: 16px;
         box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
         animation: modalScaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -706,6 +707,8 @@
     .modal-body {
         padding: 32px !important;
         background: white;
+        overflow-y: auto;
+        min-height: 0;
     }
 
     .modal-footer {
@@ -896,6 +899,43 @@
         #pendingInvitationsModal .modal-content.pending-modal-content {
             min-width: 0;
             width: 95vw;
+        }
+
+        .modal-content {
+            width: 94vw;
+            max-width: 94vw;
+            max-height: 90vh;
+        }
+
+        .modal-header {
+            padding: 20px !important;
+        }
+
+        .modal-header h5 {
+            font-size: 1.15rem !important;
+            padding-right: 36px;
+            line-height: 1.25;
+        }
+
+        .btn-close-modal {
+            top: 14px;
+            right: 14px;
+            width: 30px;
+            height: 30px;
+        }
+
+        .modal-body {
+            padding: 18px !important;
+        }
+
+        .modal-footer {
+            padding: 14px 18px 18px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .modal-footer button {
+            flex: 1 1 auto;
         }
 
         .admin-table-card {
@@ -1301,11 +1341,11 @@
                     @if($settings->enforce_ph_contact ?? true)
                         <div class="contact-input-group">
                             <span class="contact-prefix">+63</span>
-                            <input type="text" id="create_contact" name="contact" required placeholder="9123456789" value="{{ old('contact') }}" inputmode="numeric" autocomplete="tel" maxlength="10">
+                            <input type="text" id="create_contact" name="contact" required placeholder="9123456789" value="{{ old('contact') }}" inputmode="numeric" autocomplete="tel" maxlength="10" pattern="[0-9]*">
                         </div>
                         <p class="form-hint">Enter the 10-digit number after +63 (e.g., 9123456789).</p>
                     @else
-                        <input type="text" id="create_contact" name="contact" required placeholder="Enter contact number" value="{{ old('contact') }}">
+                        <input type="text" id="create_contact" name="contact" required placeholder="Enter contact number" value="{{ old('contact') }}" inputmode="numeric" autocomplete="tel" maxlength="10" pattern="[0-9]*">
                     @endif
                 </div>
                 <input type="hidden" id="create_role" name="role" value="{{ old('role', 'school_admin') }}">

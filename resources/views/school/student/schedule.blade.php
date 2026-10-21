@@ -1573,13 +1573,25 @@
 
             @forelse($groupedAvailableSchedules as $date => $dateSchedules)
                 @php
-                    $isPast = \Carbon\Carbon::parse($date)->lt(now()->startOfDay());
+                    // Only future slots are rendered — a date group whose first
+                    // slot has already started is removed, not just hidden.
+                    $firstSlotStart = $dateSchedules
+                        ->map(fn ($slot) => \Carbon\Carbon::parse(
+                            $slot->date->format('Y-m-d') . ' ' . $slot->start_time,
+                            $schoolTimezone ?? config('app.timezone')
+                        ))
+                        ->min();
+                    $isPast = $firstSlotStart
+                        ? $firstSlotStart->lte($schoolNow ?? now())
+                        : false;
+
                     // Check if any slots are visible (enrolled) for this date
                     $hasVisibleSlots = $dateSchedules->filter(function($slot) use ($enrolledCourseIds) {
                         return empty($enrolledCourseIds) || in_array($slot->course_id, $enrolledCourseIds);
                     })->count() > 0;
                 @endphp
-                <div class="schedule-item {{ $isPast || !$hasVisibleSlots ? 'is-hidden' : '' }}" data-is-past="{{ $isPast ? 'true' : 'false' }}" data-has-visible="{{ $hasVisibleSlots ? 'true' : 'false' }}">
+                @continue($isPast)
+                <div class="schedule-item {{ !$hasVisibleSlots ? 'is-hidden' : '' }}" data-is-past="false" data-has-visible="{{ $hasVisibleSlots ? 'true' : 'false' }}">
                     <div class="schedule-date-header" onclick="toggleDate(this)">
                         <span class="date-text">{{ \Carbon\Carbon::parse($date)->format('l, F d, Y') }}</span>
                         <span class="toggle-icon">&#x25BC;</span>
@@ -1596,6 +1608,10 @@
                                                                 $alreadyBooked = $slotBookingStatus !== null;
                                                                 $cannotBook = $slotIsFull || $alreadyBooked;
                                                                 $bookButtonLabel = $slotBookingStatus === 'pending' ? 'Request pending' : ($alreadyBooked ? 'Already scheduled' : ($slotIsFull ? 'Full' : null));
+                                                                $slotStartsAt = \Carbon\Carbon::parse(
+                                                                    $timeSlot->date->format('Y-m-d') . ' ' . $timeSlot->start_time,
+                                                                    $schoolTimezone ?? config('app.timezone')
+                                                                );
                             @endphp
                                <div class="available-schedule-card {{ !$isEnrolledInCourse ? 'is-hidden' : '' }}" 
                                  data-course-id="{{ $timeSlot->course_id ?? '' }}" 
@@ -1603,6 +1619,7 @@
                                  data-enrollment-request-id="{{ $linkedEnrollmentRequestId ?? '' }}"
                                  data-branch-id="{{ $timeSlot->branch_id ?? '' }}"
                                  data-date="{{ $date }}"
+                                 data-starts-at="{{ $slotStartsAt->toIso8601String() }}"
                                  data-start-time="{{ \Carbon\Carbon::parse($timeSlot->start_time)->format('H:i') }}"
                                  data-end-time="{{ \Carbon\Carbon::parse($timeSlot->end_time)->format('H:i') }}"
                                                                  data-available-spots="{{ $availableStudentSpots }}"
@@ -1953,6 +1970,31 @@
         }
     }
     
+    // A slot can pass while the page is left open. Remove it and stop the
+    // request instead of letting the server reject it with a raw error.
+    function slotStillOpen(card) {
+        if (!card) return true;
+
+        const startsAt = card.getAttribute('data-starts-at');
+        const timestamp = startsAt ? Date.parse(startsAt) : NaN;
+
+        if (!isNaN(timestamp) && timestamp <= Date.now()) {
+            const group = card.closest('.schedule-item');
+            const remaining = group ? group.querySelectorAll('.available-schedule-card').length : 0;
+
+            if (group && remaining <= 1) {
+                group.remove();
+            } else {
+                card.remove();
+            }
+
+            showToast('This schedule has already passed and was removed. Please choose another available schedule.', 'error');
+            return false;
+        }
+
+        return true;
+    }
+
     function bookTimeSlot(timeSlotId) {
         const select = document.getElementById('instructor-' + timeSlotId);
         const selectedValue = select.value;
@@ -1964,6 +2006,9 @@
         
         // Get time slot data from data attributes
         const timeSlotCard = select.closest('.available-schedule-card');
+
+        if (!slotStillOpen(timeSlotCard)) return;
+
         const courseId = timeSlotCard.getAttribute('data-course-id');
         const courseName = timeSlotCard.getAttribute('data-course-name');
         const date = timeSlotCard.getAttribute('data-date');
@@ -1989,6 +2034,9 @@
     function bookTimeSlotAuto(timeSlotId) {
         const button = event.target;
         const timeSlotCard = button.closest('.available-schedule-card');
+
+        if (!slotStillOpen(timeSlotCard)) return;
+
         const courseId = timeSlotCard.getAttribute('data-course-id');
         const courseName = timeSlotCard.getAttribute('data-course-name');
         const date = timeSlotCard.getAttribute('data-date');
@@ -2013,6 +2061,9 @@
     function bookTimeSlotAdmin(timeSlotId) {
         const button = event.target;
         const timeSlotCard = button.closest('.available-schedule-card');
+
+        if (!slotStillOpen(timeSlotCard)) return;
+
         const courseId = timeSlotCard.getAttribute('data-course-id');
         const courseName = timeSlotCard.getAttribute('data-course-name');
         const date = timeSlotCard.getAttribute('data-date');
@@ -2555,6 +2606,19 @@ document.getElementById('bookingForm').addEventListener('submit', function(e) {
                 const firstError = Object.values(data.errors)[0];
                 if (Array.isArray(firstError) && firstError.length) errorMsg = firstError[0];
             }
+
+            // The slot may have passed while this page was open. Reload so the
+            // expired schedule disappears instead of leaving a dead card.
+            const slotExpired = /passed|closed for bookings|cannot schedule in the past|no longer available/i.test(errorMsg);
+
+            if (slotExpired) {
+                showToast('That schedule is no longer available because its date has passed. Refreshing the list...', 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="bi bi-check-circle"></i> Add Schedule Request';
+                setTimeout(() => window.location.reload(), 1500);
+                return;
+            }
+
             showToast(errorMsg, 'error');
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="bi bi-check-circle"></i> Add Schedule Request';

@@ -20,6 +20,9 @@
             padding: 20px;
             margin: 20px auto;
             max-width: 1600px;
+            width: 100%;
+            box-sizing: border-box;
+            min-width: 0;
         }
 
         .page-header {
@@ -51,16 +54,35 @@
 
         .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            /* min() keeps the track from overflowing narrow phones */
+            grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
 
         /* Use shared admin-styles for stat cards */
+        .metrics-grid > .stat-card {
+            min-width: 0;
+        }
+
+        .metrics-grid .stat-header > div:first-child {
+            min-width: 0;
+        }
+
+        .metrics-grid .stat-label {
+            overflow-wrap: anywhere;
+            line-height: 1.25;
+        }
+
+        .metrics-grid .stat-value {
+            line-height: 1.15;
+        }
+
         .stat-card .subtitle {
             color: #6b7280;
             font-size: 0.8rem;
             margin-top: 5px;
+            overflow-wrap: anywhere;
         }
 
         /* Collapsible Section Styles */
@@ -333,7 +355,7 @@
 
         .stats-summary {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
             gap: 15px;
             margin-bottom: 20px;
         }
@@ -348,12 +370,17 @@
             ;
         }
 
+        .stats-summary .stat-box {
+            min-width: 0;
+        }
+
         .stat-box .label {
             color: #7f8c8d;
             font-size: 12px;
             margin-bottom: 5px;
             text-transform: uppercase;
             letter-spacing: 0.3px;
+            overflow-wrap: anywhere;
         }
 
         .stat-box .value {
@@ -606,44 +633,158 @@
 
         @media (max-width: 768px) {
             .reports-container {
-                padding: 15px;
+                padding: 14px;
+                margin: 10px auto;
             }
 
             .page-header {
                 flex-direction: column;
-                gap: 15px;
+                gap: 12px;
                 align-items: flex-start;
+                margin-bottom: 18px;
+                padding-bottom: 12px;
+            }
+
+            .page-header h1 {
+                font-size: 1.35rem;
+                line-height: 1.2;
+            }
+
+            .export-dropdown,
+            .export-btn {
+                width: 100%;
+            }
+
+            .export-btn {
+                justify-content: center;
+            }
+
+            .export-menu {
+                left: 0;
+                right: 0;
+                min-width: 0;
             }
 
             .period-filter {
+                flex-wrap: wrap;
                 gap: 6px;
+                margin-bottom: 18px;
             }
 
             .period-btn {
-                padding: 6px 12px;
-                font-size: 0.8rem;
+                padding: 6px 10px;
+                font-size: 0.78rem;
+                flex: 0 0 auto;
+                white-space: nowrap;
             }
 
             .metrics-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 12px;
+                margin-bottom: 20px;
+            }
+
+            .metrics-grid > .stat-card {
+                padding: 14px;
+                border-radius: 12px;
+            }
+
+            .metrics-grid .stat-label {
+                font-size: 0.72rem;
+                letter-spacing: 0.02em;
+            }
+
+            .metrics-grid .stat-value {
+                font-size: 1.5rem;
+                margin-top: 4px;
+            }
+
+            .metrics-grid .stat-icon,
+            .metrics-grid .stat-icon svg {
+                width: 32px !important;
+                height: 32px !important;
+            }
+
+            .metrics-grid .stat-card .subtitle {
+                font-size: 0.7rem;
             }
 
             .stats-summary {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px;
             }
 
-            .bar-label {
-                min-width: 80px;
-                font-size: 0.75rem;
+            .stat-box {
+                padding: 12px;
+            }
+
+            .stat-box .value {
+                font-size: 1.25rem;
+            }
+
+            .section-header {
+                padding: 12px 14px;
+            }
+
+            .section-header h2 {
+                font-size: 0.85rem;
+            }
+
+            .section-content {
+                padding: 14px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
             }
 
             .reports-table {
+                min-width: 520px;
                 font-size: 0.8rem;
             }
 
             .reports-table th,
             .reports-table td {
                 padding: 8px 6px;
+            }
+
+            .bar-row {
+                gap: 8px;
+            }
+
+            .bar-label {
+                min-width: 80px;
+                max-width: 40%;
+                font-size: 0.75rem;
+                text-align: left;
+                overflow-wrap: anywhere;
+            }
+
+            .bar-count {
+                min-width: 34px;
+                font-size: 0.78rem;
+            }
+
+            .detailed-reports-section {
+                padding: 16px;
+            }
+
+            .reports-grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .empty-state {
+                padding: 24px 12px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .metrics-grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .metrics-grid .stat-icon,
+            .metrics-grid .stat-icon svg {
+                width: 28px !important;
+                height: 28px !important;
             }
         }
     </style>

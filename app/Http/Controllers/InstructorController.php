@@ -633,7 +633,9 @@ class InstructorController extends Controller
                 'email',
                 Rule::unique('instructors', 'email')->ignore($instructor->id),
             ],
-            'contact' => 'nullable|string|max:13|regex:/^(09\d{9}|\+639\d{9}|9\d{9})$/',
+            // Array syntax: the regex alternation pipes must not be parsed as
+            // rule separators (which the pipe-delimited string form does).
+            'contact' => ['nullable', 'string', 'max:13', 'regex:/^(09\d{9}|\+639\d{9}|9\d{9})$/'],
             'license_number' => 'nullable|string|max:50',
             'availability' => 'required|in:available,unavailable',
             'current_password' => 'nullable|required_with:new_password',

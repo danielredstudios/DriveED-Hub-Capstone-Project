@@ -116,6 +116,23 @@ class EnrollmentRequest extends Model
         return $this->hasMany(Progress::class , 'enrollment_request_id');
     }
 
+    /**
+     * Transition requests (formerly "phase progressions") raised against this
+     * enrollment by the student's license upload.
+     */
+    public function phaseProgressions()
+    {
+        return $this->hasMany(PhaseProgression::class , 'enrollment_id');
+    }
+
+    /**
+     * The most recent transition request, whichever state it is in.
+     */
+    public function latestPhaseProgression()
+    {
+        return $this->hasOne(PhaseProgression::class , 'enrollment_id')->latestOfMany('requested_at');
+    }
+
     public function bookings()
     {
         return $this->hasMany(Booking::class , 'enrollment_request_id');
@@ -213,9 +230,6 @@ class EnrollmentRequest extends Model
         $adminId = \Illuminate\Support\Facades\Auth::guard('admin')->id();
         $this->complete($adminId);
 
-        // Automatically resolve any pending Phase Progression request for Graduation
-        $this->resolvePendingPhaseRequest('completed', $adminId);
-
         // Unlock the student
         if ($this->learner) {
             $this->learner->unlockFromCourse();
@@ -245,7 +259,7 @@ class EnrollmentRequest extends Model
             'theoretical_pass_notes' => $notes,
         ]);
 
-        // Automatically resolve any pending Phase Progression request for Practical transition
+        // Confirm the student's pending license-triggered transition request.
         $this->resolvePendingPhaseRequest('practical', $adminId, $notes);
 
         if ($this->learner && !$this->learner->hasPassedTheoretical()) {
@@ -254,11 +268,95 @@ class EnrollmentRequest extends Model
     }
 
     /**
-     * Resolve any pending phase progression request for a specific target phase
+     * Is this enrollment a Bundle/Combo (TDC + PDC in one) enrollment?
+     */
+    public function isCombo(): bool
+    {
+        return ($this->course->course_type ?? null) === 'combo';
+    }
+
+    /**
+     * The student's transition state for a Bundle/Combo enrollment.
+     *
+     * pending     — license uploaded, awaiting the school admin
+     * progressing — confirmed, the practical phase is unlocked
+     * rejected    — sent back for a corrected license
+     * null        — nothing submitted yet
+     */
+    public function getTransitionStateAttribute(): ?string
+    {
+        if (!$this->isCombo()) {
+            return null;
+        }
+
+        $latest = $this->relationLoaded('latestPhaseProgression')
+            ? $this->getRelation('latestPhaseProgression')
+            : $this->latestPhaseProgression()->first();
+
+        if (!$latest) {
+            return $this->theoretical_passed ? 'progressing' : null;
+        }
+
+        return $latest->progress_state;
+    }
+
+    /**
+     * Student-facing label for the transition state.
+     */
+    public function getTransitionStateLabelAttribute(): ?string
+    {
+        return match ($this->transition_state) {
+            'progressing' => 'Progressing',
+            'pending' => 'Pending',
+            'rejected' => 'Needs Attention',
+            default => null,
+        };
+    }
+
+    /**
+     * Does this enrollment need the student to upload a license so the
+     * practical phase can be unlocked?
+     */
+    public function awaitsLicenseForPractical(): bool
+    {
+        if (!$this->isCombo()) {
+            return false;
+        }
+
+        if ($this->status !== 'approved') {
+            return false;
+        }
+
+        // Already confirmed for practical — nothing to submit.
+        if ($this->theoretical_passed) {
+            return false;
+        }
+
+        $learner = $this->learner;
+
+        if (!$learner) {
+            return false;
+        }
+
+        // A pending or approved request is already in flight.
+        $openRequest = $this->phaseProgressions()
+            ->whereIn('status', ['pending', 'approved'])
+            ->exists();
+
+        if ($openRequest) {
+            return false;
+        }
+
+        return $learner->hasNoLicense() || $learner->isLicenseRejected() || $learner->hasDraftLicense();
+    }
+
+    /**
+     * Confirm any pending transition request targeting a specific phase.
+     * Used when an admin action independently unlocks that phase.
      */
     public function resolvePendingPhaseRequest(string $toPhase, int $adminId, string $notes = null): void
     {
-        $request = \App\Models\PhaseProgression::where('enrollment_id', $this->id)
+        $request = PhaseProgression::where('enrollment_id', $this->id)
             ->where('to_phase', $toPhase)
             ->where('status', 'pending')
             ->first();
@@ -268,7 +366,7 @@ class EnrollmentRequest extends Model
                 'status' => 'approved',
                 'reviewed_by' => $adminId,
                 'reviewed_at' => now(),
-                'admin_notes' => $notes ?? "Automatically approved via Training Hub action."
+                'admin_notes' => $notes ?? "Confirmed alongside the training phase update."
             ]);
         }
     }

@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\SessionCompletion;
 use App\Models\EnrollmentRequest;
 use App\Models\Instructor;
-use App\Models\PhaseProgression;
 use App\Models\School;
 use App\Models\Notification;
 use App\Http\Requests\StoreSessionCompletionRequest;
@@ -205,8 +204,9 @@ class SessionCompletionController extends Controller
                 'logged_by' => $instructor->id,
             ]);
 
-            // Auto-progression trigger: check if hours requirement is met
-            $this->checkAndTriggerProgression($enrollment, $school);
+            // Phase transition is student-driven (license upload -> admin
+            // confirmation on the Enrollment Request). Logging hours no
+            // longer opens a transition request on its own.
 
             // Notify student about new session completion
             if ($enrollment->learner) {
@@ -447,70 +447,5 @@ class SessionCompletionController extends Controller
         ];
 
         return response()->json($stats);
-    }
-
-    /**
-     * Check if hours requirement is met and trigger a phase progression request
-     */
-    private function checkAndTriggerProgression(EnrollmentRequest $enrollmentRequest, School $school): void
-    {
-        $course = $enrollmentRequest->course;
-        if (!$course || !$course->hours_required || $course->hours_required <= 0) {
-            return;
-        }
-
-        // Calculate total hours from all completed sessions
-        $totalHours = $enrollmentRequest->sessionCompletions()
-            ->where('status', 'completed')
-            ->sum('hours_completed');
-
-        // Check if hours requirement is met
-        if ($totalHours < $course->hours_required) {
-            return;
-        }
-
-        // Determine the phase transition based on course type
-        $fromPhase = $course->isTheoretical() ? 'theoretical' : 'practical';
-        $toPhase = $course->isTheoretical() ? 'practical' : 'completed';
-
-        // Don't create duplicate pending requests
-        $existingRequest = PhaseProgression::where('enrollment_id', $enrollmentRequest->id)
-            ->where('from_phase', $fromPhase)
-            ->where('to_phase', $toPhase)
-            ->whereIn('status', ['pending', 'approved'])
-            ->first();
-
-        if ($existingRequest) {
-            return;
-        }
-
-        PhaseProgression::create([
-            'enrollment_id' => $enrollmentRequest->id,
-            'school_id' => $school->id,
-            'from_phase' => $fromPhase,
-            'to_phase' => $toPhase,
-            'requested_at' => now(),
-            'status' => 'pending',
-        ]);
-
-        // Notify school admins about the pending progression request
-        $admins = \App\Models\Admin::where('school_id', $school->id)->get();
-        foreach ($admins as $admin) {
-            try {
-                Notification::send(
-                    $admin,
-                    'phase_progression_pending',
-                    'Phase Progression Request',
-                    "Student {$enrollmentRequest->learner->first_name} {$enrollmentRequest->learner->last_name} has completed {$fromPhase} hours and is ready for {$toPhase} phase.",
-                    'enrollment',
-                    "/{$school->slug}/admin/phase-progressions"
-                );
-            }
-            catch (\Exception $e) {
-                Log::warning('Failed to send progression notification to admin: ' . $e->getMessage());
-            }
-        }
-
-        Log::info("Phase progression triggered: Enrollment #{$enrollmentRequest->id} ({$fromPhase} → {$toPhase}), Total hours: {$totalHours}/{$course->hours_required}");
     }
 }

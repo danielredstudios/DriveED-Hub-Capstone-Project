@@ -383,6 +383,8 @@ class BookingController extends Controller
             'scheduled_at' => 'required|date|after:now',
             'notes' => 'nullable|string',
             'status' => 'nullable|in:scheduled,completed,cancelled,no-show',
+        ], [
+            'scheduled_at.after' => 'That schedule has already passed. Please choose an available schedule.',
         ]);
 
         // Layer 2: Fail-Closed Retrieval
@@ -425,7 +427,6 @@ class BookingController extends Controller
         }
 
         $now = \Carbon\Carbon::now($schoolTimezone);
-        $queueEnabled = $settings?->enable_booking_queue ?? true;
         $bookingCutoffHours = $settings?->booking_cutoff_hours ?? 0;
         $advanceBookingDays = $settings?->advance_booking_days ?? 0;
 
@@ -456,8 +457,8 @@ class BookingController extends Controller
             return back()->withErrors(['scheduled_at' => $message]);
         }
 
-        // Set initial status based on queue setting
-        $validated['status'] = $queueEnabled ? 'pending' : 'scheduled';
+        // Set initial status - always scheduled for student bookings
+        $validated['status'] = 'scheduled';
 
         // Set booking_date
         $validated['booking_date'] = $validated['scheduled_at'];
@@ -714,7 +715,7 @@ class BookingController extends Controller
             }
         }
 
-        $booking = DB::transaction(function () use ($validated, $school, $queueEnabled) {
+        $booking = DB::transaction(function () use ($validated, $school) {
             $booking = Booking::create($validated);
             $booking->load(['student', 'instructor', 'course', 'timeSlot']);
 
@@ -741,14 +742,12 @@ class BookingController extends Controller
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success' => true,
-                'message' => $queueEnabled ? 'Schedule added to queue successfully' : 'Schedule created successfully',
+                'message' => 'Schedule created successfully',
                 'booking' => $booking
             ], 201);
         }
 
-        $message = $queueEnabled
-            ? 'Schedule added to your queue! It will be confirmed automatically in ' . ($settings->booking_queue_days ?? 3) . ' days.'
-            : 'Schedule created successfully';
+        $message = 'Schedule created successfully';
 
         return redirect()->route('schools.student.schedule', $school->slug)
             ->with('success', $message);

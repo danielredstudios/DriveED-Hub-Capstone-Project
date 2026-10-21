@@ -24,7 +24,6 @@ use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\ReportController;
 use App\Services\FinancialService;
 use App\Models\TimeSlot;
-use App\Models\PhaseProgression;
 use App\Rules\StrongPassword;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -147,7 +146,6 @@ class AdminController extends Controller
 
             // Pending action counts for dashboard
             $pendingEnrollments = $admin->scopeToBranch(EnrollmentRequest::where('school_id', $school->id))->where('status', 'pending')->count();
-            $pendingProgressions = $admin->scopeToBranch(PhaseProgression::where('school_id', $school->id))->where('status', 'pending')->count();
 
             // Calculate monthly revenue (approved payments received this month) - F-004 Remediation
             try {
@@ -192,7 +190,6 @@ class AdminController extends Controller
                 'studentsThisMonth' => $studentsThisMonth,
                 'instructorsThisMonth' => $instructorsThisMonth,
                 'pendingEnrollments' => $pendingEnrollments,
-                'pendingProgressions' => $pendingProgressions,
                 'monthlyRevenue' => $monthlyRevenue,
                 'activeEnrollments' => $activeEnrollments,
                 'alertThreshold' => $alertThreshold = ($school->schoolSetting?->alert_threshold_pending ?? 50),
@@ -1429,6 +1426,8 @@ class AdminController extends Controller
                 // Login page settings
                 'login_header_layout' => 'nullable|in:horizontal,vertical,centered,logo-only',
                 'login_logo_image' => 'nullable|string|max:255',
+                'login_logo' => 'nullable|file|mimes:jpeg,png,jpg,webp,svg|max:' . (($school->schoolSetting->max_file_size_mb ?? 5) * 1024),
+                'remove_login_logo' => 'nullable|boolean',
                 'login_logo_position' => 'nullable|in:left,center,right',
                 'login_logo_size' => 'nullable|integer|min:20|max:100',
                 'login_show_school_name' => 'nullable|boolean',
@@ -1513,6 +1512,20 @@ class AdminController extends Controller
                 $loginBgImagePath = $request->file('login_page_bg_image')->store('backgrounds/' . $school->slug . '/login', 'public');
             }
 
+            // Handle login header logo upload. Admins upload the file here
+            // instead of placing it in storage/app/public by hand.
+            $loginLogoPath = $schoolSetting->login_logo_image;
+            if ($request->hasFile('login_logo')) {
+                if ($loginLogoPath) {
+                    Storage::disk('public')->delete($loginLogoPath);
+                }
+
+                $loginLogoPath = $request->file('login_logo')->store('logos/' . $school->slug, 'public');
+            } elseif ($request->boolean('remove_login_logo') && $loginLogoPath) {
+                Storage::disk('public')->delete($loginLogoPath);
+                $loginLogoPath = null;
+            }
+
             $schoolSetting->fill([
                 'primary_color' => $request->primary_color ?? '#2563eb',
                 'secondary_color' => $request->secondary_color ?? '#fbbf24',
@@ -1572,7 +1585,7 @@ class AdminController extends Controller
                 'min_pdc_duration_minutes' => $request->min_pdc_duration_minutes ?? 60,
                 // Login page settings
                 'login_header_layout' => $request->login_header_layout ?? 'horizontal',
-                'login_logo_image' => $request->login_logo_image,
+                'login_logo_image' => $loginLogoPath,
                 'login_logo_position' => $request->login_logo_position ?? 'left',
                 'login_logo_size' => $request->login_logo_size ?? 40,
                 'login_show_school_name' => $request->has('login_show_school_name'),

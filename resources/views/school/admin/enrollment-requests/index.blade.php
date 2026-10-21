@@ -444,6 +444,86 @@
         display: inline-block;
     }
 
+    .transition-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+    }
+
+    .transition-pending { background: #fef3c7; color: #92400e; }
+    .transition-progressing { background: #d1fae5; color: #065f46; }
+    .transition-rejected { background: #fee2e2; color: #991b1b; }
+
+    /* Bundle/Combo transition panel inside the verification modal */
+    .v-transition-panel {
+        margin: 0 24px 24px;
+        padding: 16px 18px;
+        border: 1px solid #dbeafe;
+        background: #f8fbff;
+        border-radius: 10px;
+    }
+
+    .v-transition-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .v-transition-title {
+        font-weight: 700;
+        color: #1e3a8a;
+        font-size: 0.95rem;
+    }
+
+    .v-transition-sub {
+        font-size: 0.8rem;
+        color: #64748b;
+        margin-top: 2px;
+    }
+
+    .v-transition-state {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .v-transition-state.state-progressing { background: #d1fae5; color: #065f46; }
+    .v-transition-state.state-rejected { background: #fee2e2; color: #991b1b; }
+
+    .v-transition-notes {
+        margin-top: 10px;
+        font-size: 0.82rem;
+        color: #475569;
+        line-height: 1.5;
+    }
+
+    .v-transition-actions {
+        margin-top: 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .v-transition-input {
+        flex: 1 1 240px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 0.82rem;
+    }
+
     .branch-scope-banner {
         padding: 12px 18px;
         background: #eff6ff;
@@ -1291,6 +1371,12 @@
                                 <span class="status-badge status-{{ $request->status }}">
                                     {{ ucfirst($request->status) }}
                                 </span>
+                                @if($request->transition_state_label)
+                                    <span class="transition-badge transition-{{ $request->transition_state }}"
+                                        title="Bundle transition to the practical phase">
+                                        {{ $request->transition_state_label }}
+                                    </span>
+                                @endif
                             </div>
                         </td>
                         <td>
@@ -1388,6 +1474,9 @@
                 </div>
                 <div class="d-flex align-items-center gap-2">
                     <span class="status-badge status-{{ $request->status }}">{{ ucfirst($request->status) }}</span>
+                    @if($request->transition_state_label)
+                        <span class="transition-badge transition-{{ $request->transition_state }}">{{ $request->transition_state_label }}</span>
+                    @endif
                 </div>
             </div>
             <div class="mobile-card-row">
@@ -1904,6 +1993,10 @@ function openVerificationModal(enrollmentId) {
 
             // Initial check for final approval
             checkIfFullyVerified(enrollmentId, data.license_status, data.payment_status, data.cancellation_requested, data.status);
+
+            // Bundle/Combo transition raised by the student's license upload
+            populateTransitionPanel(data, isFinalized);
+
             
             // Show content
             document.getElementById('v-modal-loading').style.display = 'none';
@@ -2016,6 +2109,159 @@ function verifyLicenseAjax() {
         }
     })
     .catch(err => Toast.error('An error occurred during verification.'))
+    .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    });
+}
+
+/**
+ * Bundle/Combo transition panel.
+ * The student's license upload raises the request; confirming here verifies
+ * the license and unlocks the practical phase.
+ */
+function populateTransitionPanel(data, isFinalized) {
+    const panel = document.getElementById('v-transition-panel');
+    if (!panel) return;
+
+    const transition = data.transition;
+
+    if (!transition) {
+        panel.style.display = 'none';
+        panel.dataset.confirmUrl = '';
+        panel.dataset.rejectUrl = '';
+        return;
+    }
+
+    panel.style.display = 'block';
+    panel.dataset.confirmUrl = transition.confirm_url || '';
+    panel.dataset.rejectUrl = transition.reject_url || '';
+
+    const stateEl = document.getElementById('v-transition-state');
+    stateEl.textContent = transition.state_label || 'Pending';
+    stateEl.className = 'v-transition-state state-' + (transition.state || 'pending');
+
+    const sub = document.getElementById('v-transition-sub');
+    sub.textContent = `From ${capitalize(transition.from_phase)} to ${capitalize(transition.to_phase)}`;
+    if (transition.submitted_at) {
+        sub.textContent += ` \u00b7 submitted ${formatDateTime(transition.submitted_at)}`;
+    }
+
+    const notesWrap = document.getElementById('v-transition-notes-wrap');
+    if (transition.student_notes) {
+        document.getElementById('v-transition-notes').textContent = transition.student_notes;
+        notesWrap.style.display = 'block';
+    } else {
+        notesWrap.style.display = 'none';
+    }
+
+    const adminNotesWrap = document.getElementById('v-transition-admin-notes-wrap');
+    if (transition.admin_notes) {
+        document.getElementById('v-transition-admin-notes').textContent = transition.admin_notes;
+        adminNotesWrap.style.display = 'block';
+    } else {
+        adminNotesWrap.style.display = 'none';
+    }
+
+    // Actions only apply while the request is still pending and the record is open.
+    const actions = document.getElementById('v-transition-actions');
+    const canAct = transition.status === 'pending' && !isFinalized;
+    actions.style.display = canAct ? 'flex' : 'none';
+}
+
+function capitalize(value) {
+    if (!value) return '';
+    return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+function formatDateTime(value) {
+    const parsed = new Date(value);
+    if (isNaN(parsed.getTime())) return '';
+    return parsed.toLocaleString();
+}
+
+function confirmTransitionAjax() {
+    const panel = document.getElementById('v-transition-panel');
+    if (!panel || !panel.dataset.confirmUrl) return;
+
+    const btn = document.getElementById('v-btn-confirm-transition');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = 'Wait...';
+
+    const reason = (document.getElementById('v-transition-reason').value || '').trim();
+
+    fetch(panel.dataset.confirmUrl, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ admin_notes: reason || null })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            Toast.success(data.message);
+            updatePanelStatus('license', 'verified');
+            const stateEl = document.getElementById('v-transition-state');
+            stateEl.textContent = data.transition_label || 'Progressing';
+            stateEl.className = 'v-transition-state state-progressing';
+            document.getElementById('v-transition-actions').style.display = 'none';
+        } else {
+            Toast.error(data.message);
+        }
+    })
+    .catch(() => Toast.error('An error occurred while confirming the transition.'))
+    .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    });
+}
+
+function rejectTransitionAjax() {
+    const panel = document.getElementById('v-transition-panel');
+    if (!panel || !panel.dataset.rejectUrl) return;
+
+    const reason = (document.getElementById('v-transition-reason').value || '').trim();
+    if (!reason) {
+        Toast.error('Add a reason so the student knows what to correct.');
+        return;
+    }
+
+    if (!confirm('Send this license back to the student for a new upload?')) return;
+
+    const btn = panel.querySelector('.v-btn-panel-reject');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = 'Wait...';
+
+    fetch(panel.dataset.rejectUrl, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ admin_notes: reason })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            Toast.success(data.message);
+            updatePanelStatus('license', 'rejected');
+            const stateEl = document.getElementById('v-transition-state');
+            stateEl.textContent = data.transition_label || 'Needs Attention';
+            stateEl.className = 'v-transition-state state-rejected';
+            document.getElementById('v-transition-actions').style.display = 'none';
+        } else {
+            Toast.error(data.message);
+        }
+    })
+    .catch(() => Toast.error('An error occurred while rejecting the transition.'))
     .finally(() => {
         btn.disabled = false;
         btn.innerHTML = originalText;
@@ -2261,6 +2507,33 @@ function finalApproveFromModal() {
                             Approve Payment
                         </button>
                     </div>
+                </div>
+            </div>
+
+            {{-- Bundle/Combo transition: the student uploaded a license to move into the practical phase --}}
+            <div id="v-transition-panel" class="v-transition-panel" style="display: none;">
+                <div class="v-transition-head">
+                    <div>
+                        <div class="v-transition-title">Bundle Transition to Practical Phase</div>
+                        <div class="v-transition-sub" id="v-transition-sub">-</div>
+                    </div>
+                    <span class="v-transition-state" id="v-transition-state">PENDING</span>
+                </div>
+                <div id="v-transition-notes-wrap" class="v-transition-notes" style="display: none;">
+                    <strong>Student note:</strong> <span id="v-transition-notes">-</span>
+                </div>
+                <div id="v-transition-admin-notes-wrap" class="v-transition-notes" style="display: none;">
+                    <strong>Review note:</strong> <span id="v-transition-admin-notes">-</span>
+                </div>
+                <div class="v-transition-actions" id="v-transition-actions" style="display: none;">
+                    <input type="text" id="v-transition-reason" class="v-transition-input"
+                        placeholder="Reason (required when sending back for a new license)" maxlength="500">
+                    <button type="button" class="v-btn-panel v-btn-panel-reject" onclick="rejectTransitionAjax()">
+                        Send Back for New License
+                    </button>
+                    <button type="button" id="v-btn-confirm-transition" class="v-btn-panel v-btn-panel-approve" onclick="confirmTransitionAjax()">
+                        Confirm Transition
+                    </button>
                 </div>
             </div>
         </div>

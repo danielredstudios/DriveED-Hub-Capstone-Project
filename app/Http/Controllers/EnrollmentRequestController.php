@@ -31,7 +31,7 @@ class EnrollmentRequestController extends Controller
         $admin = Auth::guard('admin')->user();
 
         $baseQuery = EnrollmentRequest::where('school_id', $school->id)
-            ->with(['learner', 'course', 'package', 'approvedBy', 'branchRelation']);
+            ->with(['learner', 'course', 'package', 'approvedBy', 'branchRelation', 'latestPhaseProgression']);
 
         $admin->scopeToBranch($baseQuery);
 
@@ -794,6 +794,187 @@ class EnrollmentRequestController extends Controller
     }
 
     /**
+     * Confirm a Bundle/Combo student's transition into the practical phase.
+     *
+     * The student raises the request by uploading their student license from
+     * the dashboard. Confirming here verifies that license and unlocks the
+     * practical phase of their bundle enrollment.
+     */
+    public function confirmTransition(Request $request, School $school, EnrollmentRequest $enrollmentRequest)
+    {
+        $validated = $request->validate([
+            'admin_notes' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        /** @var \App\Models\Admin $admin */
+        $admin = Auth::guard('admin')->user();
+        if (!$admin || $admin->school_id !== (int) $school->id) {
+            abort(403, 'Unauthorized action.');
+        }
+        if ($admin->isBranchSecretary() && !$admin->canAccessBranch($enrollmentRequest->branch_id)) {
+            abort(403, 'You do not have access to this enrollment request.');
+        }
+
+        if ($enrollmentRequest->school_id !== $school->id) {
+            abort(404);
+        }
+
+        if (!$enrollmentRequest->isCombo()) {
+            return $this->transitionAdminResponse($request, false, 'This enrollment is not a Bundle/Combo course.', 422);
+        }
+
+        if ($enrollmentRequest->status !== 'approved') {
+            return $this->transitionAdminResponse($request, false, 'Only active enrollments can transition phases.', 422);
+        }
+
+        $transition = $enrollmentRequest->phaseProgressions()
+            ->where('status', 'pending')
+            ->latest('requested_at')
+            ->first();
+
+        if (!$transition) {
+            return $this->transitionAdminResponse($request, false, 'There is no pending transition request for this enrollment.', 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            $student = $enrollmentRequest->learner;
+
+            // Verify the license that came in with the request.
+            if ($student && empty($student->student_license_verified_at)) {
+                $student->update([
+                    'student_license_status' => 'verified',
+                    'student_license_verified_at' => now(),
+                    'student_license_verified_by' => $admin->id,
+                    'student_license_rejection_reason' => null,
+                ]);
+            }
+
+            $transition->approve($admin->id, $validated['admin_notes'] ?? null);
+
+            // Unlock the practical phase on the enrollment and the student.
+            $enrollmentRequest->markTheoreticalPassed($admin->id, $validated['admin_notes'] ?? null);
+
+            if ($student) {
+                try {
+                    Notification::send(
+                        $student,
+                        'phase_progression_approved',
+                        'Transition Confirmed',
+                        "Your license is verified and your practical phase for {$enrollmentRequest->course->title} is now unlocked.",
+                        'success',
+                        "/{$school->slug}/student"
+                    );
+                } catch (\Exception $e) {
+                    Log::warning('Failed to send transition confirmation notification: ' . $e->getMessage());
+                }
+            }
+
+            DB::commit();
+
+            return $this->transitionAdminResponse($request, true, 'Transition confirmed. The practical phase is now unlocked.', 200, [
+                'transition_state' => 'progressing',
+                'transition_label' => 'Progressing',
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to confirm bundle transition: ' . $e->getMessage());
+
+            return $this->transitionAdminResponse($request, false, 'Failed to confirm the transition. Please try again.', 500);
+        }
+    }
+
+    /**
+     * Send a Bundle/Combo transition back to the student for a corrected
+     * license, keeping the enrollment in the theoretical phase.
+     */
+    public function rejectTransition(Request $request, School $school, EnrollmentRequest $enrollmentRequest)
+    {
+        $validated = $request->validate([
+            'admin_notes' => ['required', 'string', 'max:500'],
+        ], [
+            'admin_notes.required' => 'Tell the student why the license was not accepted.',
+        ]);
+
+        /** @var \App\Models\Admin $admin */
+        $admin = Auth::guard('admin')->user();
+        if (!$admin || $admin->school_id !== (int) $school->id) {
+            abort(403, 'Unauthorized action.');
+        }
+        if ($admin->isBranchSecretary() && !$admin->canAccessBranch($enrollmentRequest->branch_id)) {
+            abort(403, 'You do not have access to this enrollment request.');
+        }
+
+        if ($enrollmentRequest->school_id !== $school->id) {
+            abort(404);
+        }
+
+        $transition = $enrollmentRequest->phaseProgressions()
+            ->where('status', 'pending')
+            ->latest('requested_at')
+            ->first();
+
+        if (!$transition) {
+            return $this->transitionAdminResponse($request, false, 'There is no pending transition request for this enrollment.', 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            $transition->reject($admin->id, $validated['admin_notes']);
+
+            $student = $enrollmentRequest->learner;
+            if ($student) {
+                $student->update([
+                    'student_license_status' => 'rejected',
+                    'student_license_rejection_reason' => $validated['admin_notes'],
+                    'student_license_verified_at' => null,
+                    'student_license_verified_by' => null,
+                ]);
+
+                try {
+                    Notification::send(
+                        $student,
+                        'phase_progression_rejected',
+                        'License Needs Attention',
+                        "Your license for {$enrollmentRequest->course->title} was not accepted: {$validated['admin_notes']}",
+                        'warning',
+                        "/{$school->slug}/student"
+                    );
+                } catch (\Exception $e) {
+                    Log::warning('Failed to send transition rejection notification: ' . $e->getMessage());
+                }
+            }
+
+            DB::commit();
+
+            return $this->transitionAdminResponse($request, true, 'Transition request rejected and the student notified.', 200, [
+                'transition_state' => 'rejected',
+                'transition_label' => 'Needs Attention',
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to reject bundle transition: ' . $e->getMessage());
+
+            return $this->transitionAdminResponse($request, false, 'Failed to reject the transition. Please try again.', 500);
+        }
+    }
+
+    /**
+     * JSON for the Enrollment Request modal, redirect for plain form posts.
+     */
+    private function transitionAdminResponse(Request $request, bool $success, string $message, int $status = 200, array $extra = [])
+    {
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json(array_merge([
+                'success' => $success,
+                'message' => $message,
+            ], $extra), $status);
+        }
+
+        return redirect()->back()->with($success ? 'success' : 'error', $message);
+    }
+
+    /**
      * Bulk approve enrollment requests
      */
     public function bulkApprove(Request $request, School $school)
@@ -1356,6 +1537,11 @@ class EnrollmentRequestController extends Controller
             $licenseUrl = route('schools.admin.enrollments.viewLicense', ['school' => $school->slug, 'student' => $enrollmentRequest->learner->id]);
         }
 
+        // Bundle/Combo transition raised by the student's license upload.
+        $transition = $enrollmentRequest->isCombo()
+            ? $enrollmentRequest->latestPhaseProgression()->with('submittedBy')->first()
+            : null;
+
         return response()->json([
             'id' => $enrollmentRequest->id,
             'student_name' => $enrollmentRequest->learner->name,
@@ -1372,6 +1558,26 @@ class EnrollmentRequestController extends Controller
             'remarks' => $enrollmentRequest->remarks,
             'cancellation_requested' => (bool) $enrollmentRequest->cancellation_requested,
             'cancellation_reason' => $enrollmentRequest->cancellation_reason,
+            // Bundle/Combo phase transition (license-triggered)
+            'is_combo' => $enrollmentRequest->isCombo(),
+            'theoretical_passed' => (bool) $enrollmentRequest->theoretical_passed,
+            'transition' => $transition ? [
+                'id' => $transition->id,
+                'status' => $transition->status,
+                'state' => $transition->progress_state,
+                'state_label' => $transition->progress_state_label,
+                'from_phase' => $transition->from_phase,
+                'to_phase' => $transition->to_phase,
+                'student_notes' => $transition->student_notes,
+                'submitted_at' => $transition->requested_at?->toIso8601String(),
+                'reviewed_at' => $transition->reviewed_at?->toIso8601String(),
+                'admin_notes' => $transition->admin_notes,
+                'license_url' => $transition->license_path
+                    ? route('schools.admin.enrollments.viewLicense', ['school' => $school->slug, 'student' => $enrollmentRequest->learner->id])
+                    : null,
+                'confirm_url' => route('schools.admin.enrollments.confirm-transition', ['school' => $school->slug, 'enrollmentRequest' => $enrollmentRequest->id]),
+                'reject_url' => route('schools.admin.enrollments.reject-transition', ['school' => $school->slug, 'enrollmentRequest' => $enrollmentRequest->id]),
+            ] : null,
             // Paths/Routes
             'license_url' => $licenseUrl,
             'receipt_url' => $enrollmentRequest->payment_proof_path

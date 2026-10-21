@@ -361,12 +361,6 @@
                 <a href="{{ school_route('admin.payments.index') }}" class="quick-action-btn" onclick="loadContent(this.href); return false;">
                     Payments
                 </a>
-                <a href="{{ school_route('admin.phase-progressions.index') }}" class="quick-action-btn" onclick="loadContent(this.href); return false;">
-                    Phase Progressions
-                    @if(($pendingProgressions ?? 0) > 0)
-                        <span class="pending-badge">{{ $pendingProgressions }}</span>
-                    @endif
-                </a>
             </div>
         </div>
     </div>

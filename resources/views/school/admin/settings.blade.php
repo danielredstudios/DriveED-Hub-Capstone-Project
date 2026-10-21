@@ -393,6 +393,25 @@
         margin-top: 5px;
     }
 
+    .current-logo-image {
+        max-height: 80px;
+        max-width: 240px;
+        padding: 8px;
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        object-fit: contain;
+    }
+
+    .current-logo-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 8px;
+        font-size: 0.85rem;
+        color: #dc2626;
+    }
+
     .opacity-control-row {
         display: flex;
         align-items: center;
@@ -2158,9 +2177,22 @@
 
                     <!-- Logo Settings -->
                     <div class="form-group">
-                        <label class="form-label">Logo Image Path (optional)</label>
-                        <input type="text" class="form-control" name="login_logo_image" value="{{ old('login_logo_image', $settings->login_logo_image ?? '') }}" placeholder="e.g., logos/school-logo.png">
-                        <small class="text-muted">Upload logo to storage/app/public/ folder first</small>
+                        <label class="form-label">School Logo (optional)</label>
+                        <input type="file" class="form-control" name="login_logo" accept="image/png,image/jpeg,image/webp,image/svg+xml">
+                        @error('login_logo')
+                            <small class="text-danger help-text-block">{{ $message }}</small>
+                        @enderror
+                        <small class="text-muted">PNG, JPG, WebP, or SVG up to {{ $settings->max_file_size_mb ?? 5 }}MB. A transparent PNG works best.</small>
+                        @if($settings && $settings->login_logo_image)
+                            <div class="current-bg-wrap">
+                                <img src="{{ asset('storage/' . $settings->login_logo_image) }}" alt="Current login header logo" class="current-logo-image">
+                                <p class="current-bg-caption">Current logo</p>
+                                <label class="current-logo-actions">
+                                    <input type="checkbox" name="remove_login_logo" value="1" class="checkbox-inline">
+                                    Remove this logo
+                                </label>
+                            </div>
+                        @endif
                     </div>
 
                     <div class="form-row form-row-two">

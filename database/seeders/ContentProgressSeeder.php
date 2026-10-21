@@ -314,16 +314,18 @@ class ContentProgressSeeder extends Seeder
                         $sessionCount += $this->insertSessions($school->id, $enrollId, $instrId, 'theoretical', $hoursReq, $enrollDaysAgo);
                         $enrollmentCount++;
 
-                        // Phase progression (theoretical -> practical)
+                        // Phase progression (theoretical -> practical), opened by the
+                        // student's license upload and confirmed by the school admin.
                         $phaseStatus = ['pending', 'approved', 'approved'][$sIdx % 3];
                         DB::table('phase_progression_requests')->insert([
-                            'enrollment_id' => $enrollId, 'school_id' => $school->id,
-                            'from_phase' => 'theoretical', 'to_phase' => 'practical',
+                            'enrollment_id' => $enrollId, 'school_id' => $school->id, 'branch_id' => $branchId,
+                            'from_phase' => 'theoretical', 'to_phase' => 'practical', 'trigger' => 'license',
+                            'submitted_by' => $studentId,
                             'requested_at' => now()->subDays(rand(1, 5))->format('Y-m-d H:i:s'),
                             'status' => $phaseStatus,
                             'reviewed_at' => $phaseStatus !== 'pending' ? now()->subDays(rand(0, 2))->format('Y-m-d H:i:s') : null,
                             'reviewed_by' => $phaseStatus !== 'pending' ? $adminId : null,
-                            'admin_notes' => $phaseStatus !== 'pending' ? 'Approved. Student completed all theoretical hours.' : null,
+                            'admin_notes' => $phaseStatus !== 'pending' ? 'License verified. Practical phase unlocked.' : null,
                             'created_at' => $now, 'updated_at' => $now,
                         ]);
                         $phaseCount++;
@@ -437,18 +439,6 @@ class ContentProgressSeeder extends Seeder
 
                         $sessionCount += $this->insertSessions($school->id, $enrollId, $instrId, 'practical', $hoursReq, $enrollDaysAgo);
                         $enrollmentCount++;
-
-                        DB::table('phase_progression_requests')->insert([
-                            'enrollment_id' => $enrollId, 'school_id' => $school->id,
-                            'from_phase' => 'practical', 'to_phase' => 'completed',
-                            'requested_at' => now()->subDays(rand(2, 8))->format('Y-m-d H:i:s'),
-                            'status' => 'approved',
-                            'reviewed_at' => now()->subDays(rand(0, 2))->format('Y-m-d H:i:s'),
-                            'reviewed_by' => $adminId,
-                            'admin_notes' => 'Student completed all required practical driving hours.',
-                            'created_at' => $now, 'updated_at' => $now,
-                        ]);
-                        $phaseCount++;
 
                         DB::table('progresses')->updateOrInsert(
                             ['student_id' => $studentId, 'course_id' => $course->id],

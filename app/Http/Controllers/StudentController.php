@@ -476,12 +476,12 @@ class StudentController extends Controller
         // Theoretical status
         $hasPassedTheoretical = $studentModel ? $studentModel->hasPassedTheoretical() : false;
         $canEnrollPractical = $studentModel ? $studentModel->canEnrollPractical() : false;
-        
+
         // Enrolled course info (primary active enrollment) – dynamically prioritize practical/current course
         $allStudentEnrollments = EnrollmentRequest::where('learner_id', $student->id)
             ->where('school_id', $school->id)
             ->whereNotIn('status', ['rejected', 'cancelled'])
-            ->with(['course', 'sessionCompletions'])
+            ->with(['course', 'sessionCompletions', 'latestPhaseProgression'])
             ->orderBy('id', 'desc')
             ->get();
 
@@ -529,7 +529,38 @@ class StudentController extends Controller
             'hasPassedTheoretical' => $hasPassedTheoretical,
             'canEnrollPractical' => $canEnrollPractical,
             'recentGrades' => $recentGrades,
+            'bundleTransitions' => $this->buildBundleTransitions($allStudentEnrollments),
         ]);
+    }
+
+    /**
+     * Describe every Bundle/Combo enrollment the student holds so the
+     * dashboard can render the license submission pop-up and the current
+     * transition state (Pending / Progressing / Needs Attention).
+     */
+    private function buildBundleTransitions($enrollments): array
+    {
+        return $enrollments
+            ->filter(fn ($enrollment) => $enrollment->isCombo())
+            ->map(function ($enrollment) {
+                $latest = $enrollment->latestPhaseProgression;
+
+                return [
+                    'enrollment_id' => $enrollment->id,
+                    'course_title' => $enrollment->course->title ?? 'Bundle Course',
+                    'status' => $enrollment->status,
+                    'state' => $enrollment->transition_state,
+                    'state_label' => $enrollment->transition_state_label,
+                    'awaiting_license' => $enrollment->awaitsLicenseForPractical(),
+                    'theoretical_passed' => (bool) $enrollment->theoretical_passed,
+                    'needs_new_license' => $enrollment->learner ? $enrollment->learner->isLicenseRejected() : false,
+                    'rejection_reason' => $enrollment->learner->student_license_rejection_reason ?? null,
+                    'submitted_at' => $latest?->requested_at?->toIso8601String(),
+                    'reviewed_at' => $latest?->reviewed_at?->toIso8601String(),
+                ];
+            })
+            ->values()
+            ->all();
     }
 
     public function profile(Request $request, School $school)
@@ -756,6 +787,145 @@ class StudentController extends Controller
         }
     }
 
+    /**
+     * Submit the student driver's license for a Bundle/Combo enrollment.
+     *
+     * This is the pop-up on the student dashboard. The upload both stores
+     * the license and opens a transition request that the school admin
+     * confirms from the Enrollment Request page. Confirming it unlocks the
+     * practical phase of the bundle.
+     */
+    public function submitTransitionLicense(Request $request, School $school)
+    {
+        /** @var \App\Models\Student|null $student */
+        $student = Auth::guard('student')->user();
+
+        if (!$student || !$student->isStudent() || (int) $student->school_id !== (int) $school->id) {
+            abort(403, 'Only active students can submit a license.');
+        }
+
+        $validated = $request->validate([
+            'student_license' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'enrollment_id' => 'required|integer',
+            'notes' => 'nullable|string|max:500',
+        ], [
+            'student_license.required' => 'Please select your student license to upload.',
+            'student_license.mimes' => 'File must be PDF, JPG, or PNG format.',
+            'student_license.max' => 'File size must not exceed 5MB.',
+            'enrollment_id.required' => 'Choose the bundle enrollment this license belongs to.',
+        ]);
+
+        // The enrollment must belong to this student, this school, and be an
+        // approved Bundle/Combo enrollment awaiting the practical phase.
+        $enrollment = EnrollmentRequest::where('id', $validated['enrollment_id'])
+            ->where('learner_id', $student->id)
+            ->where('school_id', $school->id)
+            ->with(['course', 'learner'])
+            ->first();
+
+        if (!$enrollment) {
+            return $this->transitionResponse($request, false, 'Enrollment not found.', 404);
+        }
+
+        if (!$enrollment->isCombo()) {
+            return $this->transitionResponse($request, false, 'This enrollment is not a Bundle/Combo course.', 422);
+        }
+
+        if ($enrollment->status !== 'approved') {
+            return $this->transitionResponse($request, false, 'This enrollment is not active yet.', 422);
+        }
+
+        if ($enrollment->theoretical_passed) {
+            return $this->transitionResponse($request, false, 'Your practical phase is already unlocked.', 422);
+        }
+
+        $openRequest = $enrollment->phaseProgressions()
+            ->whereIn('status', ['pending', 'approved'])
+            ->exists();
+
+        if ($openRequest) {
+            return $this->transitionResponse($request, false, 'Your license is already submitted and awaiting confirmation.', 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            if ($student->student_license_path) {
+                Storage::disk('local')->delete($student->student_license_path);
+            }
+
+            $uploadedFile = $request->file('student_license');
+            $path = $uploadedFile->store('student-licenses', 'local');
+
+            $student->update([
+                'student_license_path' => $path,
+                'student_license_data' => null,
+                'student_license_mime_type' => $uploadedFile->getMimeType(),
+                'student_license_filename' => $uploadedFile->getClientOriginalName(),
+                'student_license_status' => 'pending',
+                'student_license_verified_at' => null,
+                'student_license_verified_by' => null,
+                'student_license_rejection_reason' => null,
+            ]);
+
+            $transition = PhaseProgression::openFromLicense(
+                $enrollment,
+                $student,
+                $path,
+                $validated['notes'] ?? null,
+                'theoretical',
+                'practical',
+            );
+
+            // Let the school's staff know a bundle is waiting on confirmation.
+            $admins = Admin::where('school_id', $school->id)->where('is_active', true)->get();
+            foreach ($admins as $admin) {
+                Notification::send(
+                    $admin,
+                    'phase_progression_pending',
+                    'Bundle Transition Request',
+                    "{$student->name} uploaded a student license for {$enrollment->course->title}. Confirm the practical phase transition.",
+                    'license',
+                    "/{$school->slug}/admin/enrollments"
+                );
+            }
+
+            DB::commit();
+
+            return $this->transitionResponse($request, true, 'License submitted. Your school will confirm your transition to the practical phase.', 200, [
+                'transition_state' => $transition->progress_state,
+                'transition_label' => $transition->progress_state_label,
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            throw $e;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to submit bundle transition license', [
+                'error' => $e->getMessage(),
+                'student_id' => $student->id,
+                'enrollment_id' => $enrollment->id,
+            ]);
+
+            return $this->transitionResponse($request, false, 'Failed to submit your license. Please try again.', 500);
+        }
+    }
+
+    /**
+     * Respond as JSON for the dashboard pop-up, or redirect for a plain
+     * form post so both entry points behave.
+     */
+    private function transitionResponse(Request $request, bool $success, string $message, int $status = 200, array $extra = [])
+    {
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json(array_merge([
+                'success' => $success,
+                'message' => $message,
+            ], $extra), $status);
+        }
+
+        return redirect()->back()->with($success ? 'success' : 'error', $message);
+    }
+
     public function schedule(Request $request, School $school)
     {
         $student = Auth::guard('student')->user();
@@ -843,7 +1013,25 @@ class StudentController extends Controller
                 ->orderBy('start_time')
                 ->get()
             : collect();
-        
+
+        // Drop any slot whose start has already passed. upcoming() already does
+        // this in SQL, but re-checking on the hydrated models keeps a stale or
+        // timezone-shifted slot from ever reaching "Available Schedules".
+        $availableTimeSlots = $availableTimeSlots
+            ->filter(function ($timeSlot) use ($schoolTimezone, $schoolNow) {
+                if (! $timeSlot->date || ! $timeSlot->start_time) {
+                    return false;
+                }
+
+                $startsAt = Carbon::parse(
+                    $timeSlot->date->format('Y-m-d') . ' ' . $timeSlot->start_time,
+                    $schoolTimezone
+                );
+
+                return $startsAt->gt($schoolNow);
+            })
+            ->values();
+
         // Group available schedules by date
         $groupedAvailableSchedules = $availableTimeSlots->groupBy(function($timeSlot) {
             return Carbon::parse($timeSlot->date)->format('Y-m-d');
@@ -879,6 +1067,8 @@ class StudentController extends Controller
             'enrollmentRequests' => $enrollmentRequests,
             'availableTimeSlots' => $availableTimeSlots,
             'groupedAvailableSchedules' => $groupedAvailableSchedules,
+            'schoolTimezone' => $schoolTimezone,
+            'schoolNow' => $schoolNow,
             'todayDate' => $todayDate,
             'queueEnabled' => $queueEnabled,
             'queueDays' => $queueDays,

@@ -23,7 +23,6 @@ use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\ModuleLessonController;
 use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\PhaseProgressionController;
 use App\Http\Controllers\AdminManagementController;
 use App\Http\Controllers\QuestionBankController;
 use App\Http\Controllers\AssessmentController;
@@ -341,6 +340,10 @@ Route::prefix('{school:slug}')
                             Route::post('/student/{student}/verify-license', [EnrollmentRequestController::class , 'verifyLicense'])->name('verifyLicense');
                             Route::post('/student/{student}/reject-license', [EnrollmentRequestController::class , 'rejectLicense'])->name('rejectLicense');
 
+                            // Bundle/Combo phase transition (student uploads license -> admin confirms)
+                            Route::post('/{enrollmentRequest}/confirm-transition', [EnrollmentRequestController::class, 'confirmTransition'])->name('confirm-transition');
+                            Route::post('/{enrollmentRequest}/reject-transition', [EnrollmentRequestController::class, 'rejectTransition'])->name('reject-transition');
+
                             // API routes for the Quick-Verify Modal
                             Route::prefix('api')->name('api.')->group(function () {
                                 Route::get('/{enrollmentRequest}', [EnrollmentRequestController::class, 'apiShow'])->name('show');
@@ -380,13 +383,9 @@ Route::prefix('{school:slug}')
                         }
                         );
 
-                        // Phase progression management (Admin reviews student phase transitions)
-                        Route::prefix('phase-progressions')->name('phase-progressions.')->group(function () {
-                            Route::get('/', [PhaseProgressionController::class , 'index'])->name('index');
-                            Route::post('/{phaseProgression}/approve', [PhaseProgressionController::class , 'approve'])->name('approve');
-                            Route::post('/{phaseProgression}/reject', [PhaseProgressionController::class , 'reject'])->name('reject');
-                        }
-                        );
+                        // Phase transitions are confirmed from the Enrollment Request page
+                        // (Bundle/Combo students upload a license, an admin confirms the
+                        // practical phase transition there). No standalone page remains.
 
                         // Course modules and lessons management (LMS content)
                         Route::get('/materials', [CourseModuleController::class , 'materialsHub'])->name('materials.index');
@@ -574,6 +573,8 @@ Route::prefix('{school:slug}')
                     Route::get('/courses', [CourseController::class , 'index'])->name('courses.index');
                     Route::get('/courses/{course}', [CourseController::class , 'show'])->name('courses.show');
                     Route::post('/upload-license', [StudentController::class, 'uploadLicense'])->name('uploadLicense');
+                    // Bundle/Combo: pop-up submission that opens a phase transition
+                    Route::post('/submit-transition-license', [StudentController::class, 'submitTransitionLicense'])->name('submitTransitionLicense');
                     Route::post('/enroll/{course}', [StudentController::class, 'enroll'])->name('enroll');
 
                     // Booking queue management (used in schedule page)

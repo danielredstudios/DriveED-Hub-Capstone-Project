@@ -45,10 +45,14 @@ class BranchController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'address' => 'nullable|string|max:500',
-            'contact_number' => 'nullable|string|max:13|regex:/^(09\d{9}|\+639\d{9}|9\d{9})$/',
+            // Array syntax keeps the regex alternation pipes from being read as
+            // rule separators (the pipe-delimited string form breaks the regex).
+            'contact_number' => ['nullable', 'string', 'max:13', 'regex:/^(09\d{9}|\+639\d{9}|9\d{9})$/'],
             'email' => 'nullable|email|max:255',
             'is_active' => 'sometimes|boolean',
             'sort_order' => 'sometimes|integer|min:0',
+        ], [
+            'contact_number.regex' => 'Enter a valid PH mobile number, e.g. 9123456789.',
         ]);
 
         $validated['school_id'] = $school->id;
@@ -105,10 +109,14 @@ class BranchController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'address' => 'nullable|string|max:500',
-            'contact_number' => 'nullable|string|max:13|regex:/^(09\d{9}|\+639\d{9}|9\d{9})$/',
+            // Array syntax keeps the regex alternation pipes from being read as
+            // rule separators (the pipe-delimited string form breaks the regex).
+            'contact_number' => ['nullable', 'string', 'max:13', 'regex:/^(09\d{9}|\+639\d{9}|9\d{9})$/'],
             'email' => 'nullable|email|max:255',
             'is_active' => 'sometimes|boolean',
             'sort_order' => 'sometimes|integer|min:0',
+        ], [
+            'contact_number.regex' => 'Enter a valid PH mobile number, e.g. 9123456789.',
         ]);
 
         // Normalize contact number

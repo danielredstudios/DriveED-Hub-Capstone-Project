@@ -852,6 +852,20 @@
 <script>
     const branchesBaseUrl = '{{ url($school->slug . "/admin/branches") }}';
     const csrfToken = '{{ csrf_token() }}';
+    const enforcePhContact = {{ ($settings->enforce_ph_contact ?? true) ? 'true' : 'false' }};
+
+    // The contact field shows a fixed "+63" prefix and holds only the 10-digit
+    // local number. Stored numbers are "+639xxxxxxxxx", so strip the prefix
+    // before prefilling or editing would corrupt the value.
+    function toLocalContact(value) {
+        if (!enforcePhContact) return value || '';
+
+        let digits = String(value || '').replace(/\D+/g, '');
+        if (digits.indexOf('63') === 0 && digits.length === 12) digits = digits.substring(2);
+        if (digits.indexOf('0') === 0) digits = digits.substring(1);
+
+        return digits.substring(0, 10);
+    }
 
     function enforceNumericOnly(input) {
         if (!input) return;
@@ -908,7 +922,7 @@
 
         document.getElementById('branchName').value = data.name || '';
         document.getElementById('branchAddress').value = data.address || '';
-        document.getElementById('branchContact').value = data.contact_number || '';
+        document.getElementById('branchContact').value = toLocalContact(data.contact_number);
         document.getElementById('branchEmail').value = data.email || '';
         document.getElementById('branchSortOrder').value = data.sort_order || 0;
 
@@ -940,7 +954,7 @@
 
         document.getElementById('branchName').value = branch.name || '';
         document.getElementById('branchAddress').value = branch.address || '';
-        document.getElementById('branchContact').value = branch.contact_number || '';
+        document.getElementById('branchContact').value = toLocalContact(branch.contact_number);
         document.getElementById('branchEmail').value = branch.email || '';
         document.getElementById('branchSortOrder').value = branch.sort_order || 0;
 
