@@ -926,6 +926,7 @@
 </style>
 
 <div class="admin-container">
+    @include('partials.session-report-export')
     <!-- Page Header -->
     <div class="page-header">
         <div class="page-header-left">

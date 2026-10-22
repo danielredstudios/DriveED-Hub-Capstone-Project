@@ -402,7 +402,7 @@ class InstructorTimeSlotController extends Controller
         \App\Models\Instructor::where('id', $instructor->id)->update($data);
 
         return redirect()
-            ->route('schools.instructor.profile', $school)
+            ->route($request->boolean('return_to_settings') ? 'schools.instructor.settings' : 'schools.instructor.profile', $school)
             ->with('success', 'Profile updated successfully.');
     }
 

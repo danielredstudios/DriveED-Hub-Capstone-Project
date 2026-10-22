@@ -1598,6 +1598,7 @@
     </style>
 
     <div class="timeslots-container">
+        @include('partials.session-report-export')
         <div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 3px solid var(--primary-color);">
             <div>
                 <h1 class="page-title">Manage Schedule</h1>
@@ -2008,7 +2009,7 @@
                 <h5><i class="bi bi-calendar-plus"></i> Create Schedule</h5>
                 <button type="button" class="btn-close" onclick="closeCreateModal()">&times;</button>
             </div>
-            <form id="createScheduleForm" method="POST" action="{{ route('schools.admin.schedules.create', $school) }}">
+            <form id="createScheduleForm" method="POST" action="{{ route('schools.admin.schedules.create', $school) }}" data-no-ajax="1">
                 @csrf
                 <div class="modal-body">
                     <div id="createScheduleErrors" class="alert alert-danger" style="display: none; margin-bottom: 20px;"></div>
@@ -2467,7 +2468,7 @@
                 <h5><i class="bi bi-pencil-square"></i> Edit Schedule</h5>
                 <button type="button" class="btn-close" onclick="closeEditModal()">&times;</button>
             </div>
-            <form method="POST" id="editScheduleForm">
+            <form method="POST" id="editScheduleForm" data-no-ajax="1">
                 @csrf
                 @method('PUT')
                 <div class="modal-body">
@@ -2837,12 +2838,16 @@
         // AJAX Form Handling
         async function handleScheduleSubmit(formId, errorContainerId, successMessage) {
             const form = document.getElementById(formId);
+            if (!form || form.dataset.scheduleSubmitBound) return;
+            form.dataset.scheduleSubmitBound = '1';
             const errorContainer = document.getElementById(errorContainerId);
             const submitBtn = form.querySelector('button[type="submit"]');
             const originalBtnHtml = submitBtn.innerHTML;
 
             form.addEventListener('submit', async function(e) {
                 e.preventDefault();
+                if (form.dataset.submitting === '1') return;
+                form.dataset.submitting = '1';
                 
                 // Reset errors
                 errorContainer.style.display = 'none';
@@ -2866,20 +2871,14 @@
                     const data = await response.json();
 
                     if (response.ok) {
-                        if (typeof Toast !== 'undefined' && Toast.success) {
-                            Toast.success(data.message || successMessage);
-                        } else if (typeof showToast !== 'undefined') {
-                            showToast('success', data.message || successMessage);
-                        }
-                        
-                        // Wait a bit and reload to show changes
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1000);
+                        sessionStorage.setItem('adminScheduleToast', JSON.stringify({message: data.message || successMessage, type: 'success'}));
+                        window.location.reload();
                     } else if (response.status === 422) {
+                        const validationMessages = Object.values(data.errors || {}).flat();
+                        if (window.Toast) Toast.error(validationMessages[0] || data.message || 'Please check the schedule details and try again.');
                         // Validation errors
                         errorContainer.style.display = 'block';
-                        let errorHtml = '<strong>Please fix the following errors:</strong><ul style="margin-top: 10px; padding-left: 20px;">';
+                        let errorHtml = '<strong>Please check the following items:</strong><ul style="margin-top: 10px; padding-left: 20px;">';
                         for (const field in data.errors) {
                             data.errors[field].forEach(err => {
                                 errorHtml += `<li>${err}</li>`;
@@ -2892,13 +2891,15 @@
                         const modalContent = form.closest('.modal-content');
                         if (modalContent) modalContent.scrollTop = 0;
                     } else {
-                        throw new Error(data.message || 'An unexpected error occurred.');
+                        throw new Error(data.message || 'An unexpected issue occurred. Please try again.');
                     }
                 } catch (error) {
                     console.error('Submission error:', error);
+                    if (window.Toast) Toast.error(error.message || 'Unable to save the schedule right now. Please try again.');
                     errorContainer.style.display = 'block';
                     errorContainer.innerHTML = `<strong>Error:</strong> ${error.message}`;
                 } finally {
+                    delete form.dataset.submitting;
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = originalBtnHtml;
                 }
@@ -3312,7 +3313,7 @@
                     <div class="col-md-6" id="editMaxStudentsGroup" style="${slotData.sessionType === 'practical' ? 'display:none' : 'display:block'}">
                         <div class="form-group">
                             <label class="form-label">Max Students (Seats)</label>
-                            <input type="number" name="max_students" class="form-control" value="${slotData.maxStudents}" min="1">
+                            <input type="number" name="max_students" class="form-control" value="${Math.max(1, Number(slotData.maxStudents) || 30)}" min="1" ${slotData.sessionType === 'practical' ? 'disabled' : ''}>
                         </div>
                     </div>
                 </div>
@@ -3340,6 +3341,8 @@
             const type = document.getElementById('editSessionType').value;
             const instructorsGroup = document.getElementById('editMaxInstructorsGroup');
             const studentsGroup = document.getElementById('editMaxStudentsGroup');
+            const studentCapacity = studentsGroup?.querySelector('input[name="max_students"]');
+            if (studentCapacity) studentCapacity.disabled = type === 'practical';
 
             if (type === 'practical') {
                 // PDC: No Seats, but show Instructors

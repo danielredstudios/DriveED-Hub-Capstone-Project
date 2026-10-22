@@ -1,6 +1,6 @@
 @extends($isAjax ?? false ? 'layouts.ajax' : 'layouts.app')
 
-@section('title', 'Instructor Profile')
+@section('title', request()->routeIs('schools.instructor.settings') ? 'Settings' : 'Instructor Profile')
 
 @section('content')
     @php
@@ -462,26 +462,11 @@
     <div class="admin-container">
         <div class="page-header">
             <div class="page-header-left">
-                <h1 class="page-title">Profile</h1>
+                <h1 class="page-title">{{ request()->routeIs('schools.instructor.settings') ? 'Settings' : 'Profile' }}</h1>
                 <p class="page-subtitle">View and manage your profile information</p>
             </div>
         </div>
 
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                @if(session('success'))
-                    showToast("{{ session('success') }}", 'success');
-                @endif
-                @if(session('error'))
-                    showToast("{{ session('error') }}", 'error');
-                @endif
-                @if($errors->any())
-                    @foreach($errors->all() as $error)
-                        showToast("{{ $error }}", 'error');
-                    @endforeach
-                @endif
-            });
-        </script>
 
 
 
@@ -621,7 +606,8 @@
             </div>
 
             <div id="editForm" class="edit-form">
-                <form method="POST" action="{{ $schoolRoute('instructor.profile.update') }}">
+                <form method="POST" action="{{ $schoolRoute('instructor.profile.update') }}" data-no-ajax="1">
+                    <input type="hidden" name="return_to_settings" value="{{ request()->routeIs('schools.instructor.settings') ? '1' : '0' }}">
                     @csrf
                     @method('PUT')
 

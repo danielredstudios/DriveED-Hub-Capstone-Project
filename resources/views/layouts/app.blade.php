@@ -2095,6 +2095,7 @@
                         <span class="nav-category-arrow">&#9660;</span>
                     </div>
                     <div class="nav-category-items">
+                        <a href="{{ $schoolRoute('instructor.settings') }}" class="nav-item" data-page="settings">Settings</a>
                         <a href="{{ $schoolRoute('instructor.theoretical.index') }}" class="nav-item"
                             data-page="theoretical">Theoretical Training</a>
                         <a href="{{ $schoolRoute('instructor.materials.index') }}" class="nav-item"
@@ -2117,6 +2118,7 @@
                 @else
                     {{-- Student Navigation --}}
                     <a href="{{ $schoolRoute('student.dashboard') }}" class="nav-item" data-page="dashboard">Dashboard</a>
+                    <a href="{{ $schoolRoute('student.settings') }}" class="nav-item" data-page="settings">Settings</a>
 
                     <div class="nav-divider"></div>
 

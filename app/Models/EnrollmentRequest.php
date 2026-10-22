@@ -347,7 +347,7 @@ class EnrollmentRequest extends Model
             return false;
         }
 
-        return $learner->hasNoLicense() || $learner->isLicenseRejected() || $learner->hasDraftLicense();
+        return true;
     }
 
     /**

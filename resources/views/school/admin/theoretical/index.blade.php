@@ -368,6 +368,7 @@
                                         <div class="user-info">
                                             <div class="user-name">{{ $enrollment->student->name ?? 'N/A' }}</div>
                                             <div class="user-email">{{ $enrollment->student->email ?? 'N/A' }}</div>
+                                            @if($enrollment->student) @include('school.admin.theoretical.claim-button', ['claimStudent' => $enrollment->student]) @endif
                                         </div>
                                     </div>
                                 </td>
@@ -460,6 +461,7 @@
                                         <div class="user-info">
                                             <div class="user-name">{{ $enrollment->student->name ?? 'N/A' }}</div>
                                             <div class="user-email">{{ $enrollment->student->email ?? 'N/A' }}</div>
+                                            @if($enrollment->student) @include('school.admin.theoretical.claim-button', ['claimStudent' => $enrollment->student]) @endif
                                         </div>
                                     </div>
                                 </td>
@@ -533,6 +535,7 @@
                                         <div class="user-info">
                                             <div class="user-name">{{ $enrollment->student->name ?? 'N/A' }}</div>
                                             <div class="user-email">{{ $enrollment->student->email ?? 'N/A' }}</div>
+                                            @if($enrollment->student) @include('school.admin.theoretical.claim-button', ['claimStudent' => $enrollment->student]) @endif
                                         </div>
                                     </div>
                                 </td>
@@ -600,6 +603,7 @@
                                         <div class="user-info">
                                             <div class="user-name">{{ $student->name ?? 'N/A' }}</div>
                                             <div class="user-email">{{ $student->email ?? 'N/A' }}</div>
+                                            @include('school.admin.theoretical.claim-button', ['claimStudent' => $student])
                                         </div>
                                     </div>
                                 </td>
@@ -642,6 +646,7 @@
     </div>
 </div>
 
+@include('school.admin.theoretical.claim-dialog')
 <!-- Confirm Modal -->
 <div class="modal-overlay" id="confirmModal">
     <div class="modal-box">

@@ -1327,6 +1327,7 @@
 </style>
 
 <div class="schedule-container">
+    @include('partials.session-report-export')
     <div class="schedule-header">
         <h1>Schedule</h1>
         <div class="main-toggle">

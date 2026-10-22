@@ -208,7 +208,9 @@
         // Universal notification function
         window.showToast = function(arg1, arg2, arg3) {
             const normalized = normalizeToastArgs(arg1, arg2, arg3);
-            const message = normalized.message;
+            const path = window.location.pathname;
+            const module = /\/(settings|profile)(\/|$)/.test(path) ? 'Settings' : /\/(schedules?|my-schedule)(\/|$)/.test(path) ? 'Schedule' : '';
+            const message = module ? `${module}: ${normalized.message}` : normalized.message;
             const type = normalized.type === 'danger' ? 'error' : normalized.type;
             const duration = normalized.duration;
 
@@ -217,6 +219,8 @@
 
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
+            toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+            toast.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
             
             // Progress tracking
             let remainingTime = duration;
@@ -268,6 +272,8 @@
             }
 
             function removeToast() {
+                clearTimeout(timerId);
+                clearInterval(progressInterval);
                 toast.classList.add('toast-fade-out');
                 setTimeout(() => {
                     if (toast.parentElement) toast.remove();
@@ -316,29 +322,36 @@
 
         // Initialize from session on load
         document.addEventListener('DOMContentLoaded', function() {
+            if (/\/admin\/schedules(\/|$)/.test(window.location.pathname)) {
+                const queued = sessionStorage.getItem('adminScheduleToast');
+                sessionStorage.removeItem('adminScheduleToast');
+                if (queued) {
+                    try { showToast(JSON.parse(queued)); } catch (error) { console.warn('Invalid saved schedule feedback.'); }
+                }
+            }
             @if(session('success'))
-                showToast("{!! addslashes(session('success')) !!}", 'success');
+                showToast(@json(session('success')), 'success');
             @endif
 
             @if(session('error'))
-                showToast("{!! addslashes(session('error')) !!}", 'error', 7000);
+                showToast(@json(session('error')), 'error', 7000);
             @endif
 
             @if(session('status'))
-                showToast("{!! addslashes(session('status')) !!}", 'info');
+                showToast(@json(session('status')), 'info');
             @endif
 
             @if(session('info'))
-                showToast("{!! addslashes(session('info')) !!}", 'info');
+                showToast(@json(session('info')), 'info');
             @endif
 
             @if(session('warning'))
-                showToast("{!! addslashes(session('warning')) !!}", 'warning', 7000);
+                showToast(@json(session('warning')), 'warning', 7000);
             @endif
 
             @if($errors->any())
                 @foreach($errors->all() as $error)
-                    showToast("{!! addslashes($error) !!}", 'error', 8000);
+                    showToast(@json($error), 'error', 8000);
                 @endforeach
             @endif
         });

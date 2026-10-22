@@ -1,4 +1,24 @@
-# Phase Progression Page: Implementation Context
+# Bundle license transitions: current workflow
+
+The standalone Phase Progression page has been removed. Students with approved
+Bundle/Combo enrollments upload their student license through the dashboard
+pop-up. Existing profile licenses do not hide this submission option.
+
+Submission opens a transition request labeled **Pending**. The enrollment itself
+remains approved. School Admins review the document in **Enrollment Requests**
+and confirm the transition to verify the license and unlock practical training.
+The transition then displays **Progressing**. Rejection requires a reason,
+displays **Needs Attention**, and allows a corrected submission.
+
+Missing or replaced documents cannot be confirmed. Failed submissions preserve
+the previous file. Completed and unapproved enrollments do not offer uploads.
+Completing training hours does not automatically open a transition request.
+
+The internal `phase_progression_requests` table and `PhaseProgression` model
+remain in use. Run focused regression checks with
+`php tests/verify-bundle-transitions.php`.
+
+## Historical context (superseded by the workflow above)
 
 ## Purpose
 The Phase Progression Page is responsible for managing and displaying the workflow that governs a student's advancement through the required phases of their enrollment (typically: theoretical → practical → completed). It enables authorized users (such as admins) to review, approve, or reject requests for phase transitions, ensuring that all business rules and prerequisites are enforced before a student can progress.

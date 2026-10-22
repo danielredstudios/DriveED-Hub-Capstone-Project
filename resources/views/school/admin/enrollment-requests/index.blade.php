@@ -1995,7 +1995,7 @@ function openVerificationModal(enrollmentId) {
             checkIfFullyVerified(enrollmentId, data.license_status, data.payment_status, data.cancellation_requested, data.status);
 
             // Bundle/Combo transition raised by the student's license upload
-            populateTransitionPanel(data, isFinalized);
+            populateTransitionPanel(data);
 
             
             // Show content
@@ -2120,7 +2120,7 @@ function verifyLicenseAjax() {
  * The student's license upload raises the request; confirming here verifies
  * the license and unlocks the practical phase.
  */
-function populateTransitionPanel(data, isFinalized) {
+function populateTransitionPanel(data) {
     const panel = document.getElementById('v-transition-panel');
     if (!panel) return;
 
@@ -2163,10 +2163,11 @@ function populateTransitionPanel(data, isFinalized) {
         adminNotesWrap.style.display = 'none';
     }
 
-    // Actions only apply while the request is still pending and the record is open.
+    // Bundle transitions happen after the enrollment has been approved.
     const actions = document.getElementById('v-transition-actions');
-    const canAct = transition.status === 'pending' && !isFinalized;
+    const canAct = transition.status === 'pending' && data.status === 'approved';
     actions.style.display = canAct ? 'flex' : 'none';
+    document.getElementById('v-transition-reason').value = '';
 }
 
 function capitalize(value) {
@@ -2178,6 +2179,13 @@ function formatDateTime(value) {
     const parsed = new Date(value);
     if (isNaN(parsed.getTime())) return '';
     return parsed.toLocaleString();
+}
+
+function updateTransitionBadges(state, label) {
+    document.querySelectorAll(`[data-request-id="${currentEnrollmentId}"] .transition-badge`).forEach(badge => {
+        badge.className = 'transition-badge transition-' + state;
+        badge.textContent = label;
+    });
 }
 
 function confirmTransitionAjax() {
@@ -2209,6 +2217,7 @@ function confirmTransitionAjax() {
             const stateEl = document.getElementById('v-transition-state');
             stateEl.textContent = data.transition_label || 'Progressing';
             stateEl.className = 'v-transition-state state-progressing';
+            updateTransitionBadges('progressing', data.transition_label || 'Progressing');
             document.getElementById('v-transition-actions').style.display = 'none';
         } else {
             Toast.error(data.message);
@@ -2256,6 +2265,7 @@ function rejectTransitionAjax() {
             const stateEl = document.getElementById('v-transition-state');
             stateEl.textContent = data.transition_label || 'Needs Attention';
             stateEl.className = 'v-transition-state state-rejected';
+            updateTransitionBadges('rejected', data.transition_label || 'Needs Attention');
             document.getElementById('v-transition-actions').style.display = 'none';
         } else {
             Toast.error(data.message);

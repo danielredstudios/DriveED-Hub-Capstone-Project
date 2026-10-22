@@ -401,21 +401,6 @@
         <h1 class="profile-page-title">Profile</h1>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            @if(session('success'))
-                Toast.success("{{ session('success') }}");
-            @endif
-            @if(session('error'))
-                Toast.error("{{ session('error') }}");
-            @endif
-            @if($errors->any())
-                @foreach($errors->all() as $error)
-                    Toast.error("{{ $error }}");
-                @endforeach
-            @endif
-        });
-    </script>
     <div class="profile-card">
         <div id="profileView">
             <div class="profile-card-header">
@@ -466,7 +451,7 @@
         </div>
 
         <div id="editForm" class="edit-form">
-            <form method="POST" action="{{ school_route('admin.profile.update') }}">
+            <form method="POST" action="{{ school_route('admin.profile.update') }}" data-no-ajax="1">
                 @csrf
                 @method('PUT')
 

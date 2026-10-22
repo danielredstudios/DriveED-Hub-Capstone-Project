@@ -828,12 +828,21 @@ class EnrollmentRequestController extends Controller
         }
 
         $transition = $enrollmentRequest->phaseProgressions()
+            ->where('trigger', 'license')
+            ->where('to_phase', 'practical')
             ->where('status', 'pending')
             ->latest('requested_at')
             ->first();
 
         if (!$transition) {
             return $this->transitionAdminResponse($request, false, 'There is no pending transition request for this enrollment.', 422);
+        }
+
+        $student = $enrollmentRequest->learner;
+        if (!$student || !$transition->license_path
+            || $transition->license_path !== $student->student_license_path
+            || !Storage::disk('local')->exists($transition->license_path)) {
+            return $this->transitionAdminResponse($request, false, 'The submitted license is missing or has been replaced. Ask the student to resubmit it before confirming.', 422);
         }
 
         DB::beginTransaction();

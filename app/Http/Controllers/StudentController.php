@@ -530,6 +530,8 @@ class StudentController extends Controller
             'canEnrollPractical' => $canEnrollPractical,
             'recentGrades' => $recentGrades,
             'bundleTransitions' => $this->buildBundleTransitions($allStudentEnrollments),
+            'claimNotice' => Notification::forSchool($school->id)->forNotifiable($student)
+                ->where('type', 'certificate_claim_ready')->latest('id')->first(),
         ]);
     }
 
@@ -541,7 +543,7 @@ class StudentController extends Controller
     private function buildBundleTransitions($enrollments): array
     {
         return $enrollments
-            ->filter(fn ($enrollment) => $enrollment->isCombo())
+            ->filter(fn ($enrollment) => $enrollment->isCombo() && $enrollment->status === 'approved')
             ->map(function ($enrollment) {
                 $latest = $enrollment->latestPhaseProgression;
 
@@ -670,7 +672,7 @@ class StudentController extends Controller
         \App\Models\Student::where('id', $student->id)->update($data);
 
         return redirect()
-            ->route('schools.student.profile', $school)
+            ->route($request->boolean('return_to_settings') ? 'schools.student.settings' : 'schools.student.profile', $school)
             ->with('success', 'Profile updated successfully.');
     }
 
@@ -847,14 +849,21 @@ class StudentController extends Controller
             return $this->transitionResponse($request, false, 'Your license is already submitted and awaiting confirmation.', 422);
         }
 
+        $path = null;
         DB::beginTransaction();
         try {
-            if ($student->student_license_path) {
-                Storage::disk('local')->delete($student->student_license_path);
+            $enrollment = EnrollmentRequest::whereKey($enrollment->id)->lockForUpdate()->firstOrFail();
+            if (!$enrollment->awaitsLicenseForPractical()) {
+                DB::rollBack();
+
+                return $this->transitionResponse($request, false, 'This enrollment is no longer awaiting a license submission.', 422);
             }
 
             $uploadedFile = $request->file('student_license');
             $path = $uploadedFile->store('student-licenses', 'local');
+            if (!$path) {
+                throw new \RuntimeException('The student license could not be stored.');
+            }
 
             $student->update([
                 'student_license_path' => $path,
@@ -897,9 +906,15 @@ class StudentController extends Controller
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
+            if ($path) {
+                Storage::disk('local')->delete($path);
+            }
             throw $e;
         } catch (\Exception $e) {
             DB::rollBack();
+            if ($path) {
+                Storage::disk('local')->delete($path);
+            }
             Log::error('Failed to submit bundle transition license', [
                 'error' => $e->getMessage(),
                 'student_id' => $student->id,

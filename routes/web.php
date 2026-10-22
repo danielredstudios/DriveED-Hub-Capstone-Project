@@ -23,6 +23,8 @@ use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\ModuleLessonController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ClaimNoticeController;
+use App\Http\Controllers\SessionReportController;
 use App\Http\Controllers\AdminManagementController;
 use App\Http\Controllers\QuestionBankController;
 use App\Http\Controllers\AssessmentController;
@@ -229,6 +231,8 @@ Route::prefix('{school:slug}')
 
                     // School settings
                     Route::get('/settings', [AdminController::class , 'settings'])->name('settings');
+                    Route::post('/students/{student}/claim-notice', [ClaimNoticeController::class, 'store'])->name('students.claim-notice');
+                    Route::get('/session-report/{format}', [SessionReportController::class, 'download'])->whereIn('format', ['pdf', 'xlsx'])->name('session-report');
                     Route::post('/settings', [AdminController::class , 'updateSettings'])->name('settings.update');
 
                     // Invitation management
@@ -435,10 +439,12 @@ Route::prefix('{school:slug}')
                     Route::get('/', [InstructorController::class , 'dashboard'])->name('dashboard');
 
                     Route::get('/my-schedule', [InstructorTimeSlotController::class , 'mySchedule'])->name('schedule');
+                    Route::get('/session-report/{format}', [SessionReportController::class, 'download'])->whereIn('format', ['pdf', 'xlsx'])->name('session-report');
                     Route::post('/timeslots/{id}/toggle', [InstructorTimeSlotController::class , 'toggle'])->name('timeslots.toggle');
                     Route::post('/timeslots/{id}/request-removal', [InstructorTimeSlotController::class , 'requestRemoval'])->name('timeslots.requestRemoval');
 
                     Route::get('/profile', [InstructorTimeSlotController::class , 'profile'])->name('profile');
+                    Route::get('/settings', [InstructorTimeSlotController::class, 'profile'])->name('settings');
                     Route::put('/profile', [InstructorTimeSlotController::class , 'updateProfile'])->name('profile.update');
                     Route::post('/profile/picture', [InstructorTimeSlotController::class , 'updateProfilePicture'])->name('profile.picture');
                     Route::post('/upload-license', [InstructorTimeSlotController::class , 'uploadLicense'])->name('uploadLicense');
@@ -566,6 +572,7 @@ Route::prefix('{school:slug}')
                     Route::get('/', [StudentController::class , 'dashboard'])->name('dashboard');
 
                     Route::get('/profile', [StudentController::class , 'profile'])->name('profile');
+                    Route::get('/settings', [StudentController::class, 'profile'])->name('settings');
                     Route::put('/profile', [StudentController::class , 'updateProfile'])->name('profile.update');
                     Route::post('/profile/picture', [StudentController::class , 'updateProfilePicture'])->name('profile.picture');
 
@@ -596,6 +603,7 @@ Route::prefix('{school:slug}')
 
                     // Student schedule
                     Route::get('/schedule', [StudentController::class , 'schedule'])->name('schedule');
+                    Route::get('/session-report/{format}', [SessionReportController::class, 'download'])->whereIn('format', ['pdf', 'xlsx'])->name('session-report');
 
                     // Student's current course (single enrollment view)
                     Route::get('/my-course', [StudentController::class , 'myCourse'])->name('my-course');

@@ -1135,21 +1135,6 @@
             <p class="page-subtitle">Personalize your school's appearance with colors, styles, and branding</p>
         </div>
     </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            @if(session('success'))
-                Toast.success("{{ session('success') }}");
-            @endif
-            @if(session('error'))
-                Toast.error("{{ session('error') }}");
-            @endif
-            @if($errors->any())
-                @foreach($errors->all() as $error)
-                    Toast.error("{{ $error }}");
-                @endforeach
-            @endif
-        });
-    </script>
 
     <!-- Section Navigation -->
     <div class="tabs-container tabs-container-frame" id="settingsNavigation">

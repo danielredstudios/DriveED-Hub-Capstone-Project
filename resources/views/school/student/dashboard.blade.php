@@ -725,6 +725,7 @@
         </div>
     </div>
 
+    @include('school.student.partials.claim-notice')
     @include('school.student.partials.license-guide', ['student' => $student, 'primaryEnrollment' => $primaryEnrollment ?? null, 'activeEnrollments' => $activeEnrollments ?? collect()])
 
     @include('school.student.partials.bundle-transition', ['school' => $school, 'bundleTransitions' => $bundleTransitions ?? []])
