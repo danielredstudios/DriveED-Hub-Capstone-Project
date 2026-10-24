@@ -621,10 +621,13 @@
                                 <p class="payment-alert-text" style="color: #7f1d1d;">Your driver's license was not accepted. Please re-upload a clear copy to proceed.</p>
                             </div>
                         </div>
-                        <a href="{{ route('schools.guest.dashboard', $school) }}#license-section" 
-                           class="btn-payment-complete" style="background: #ef4444; box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.2);">
+                        <button type="button" 
+                                class="btn-payment-complete open-license-modal" 
+                                style="background: #ef4444; border: 0; cursor: pointer; box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.2);"
+                                data-license-url="{{ route('schools.guest.uploadLicense', $school) }}"
+                                data-rejection-reason="{{ $guest->student_license_rejection_reason ?? '' }}">
                             <i class="fas fa-upload"></i>Re-upload Now
-                        </a>
+                        </button>
                     </div>
                     @endif
 
@@ -639,10 +642,16 @@
                                 <p class="payment-alert-text" style="color: #c2410c;">Your payment proof was not accepted. This usually happens if the reference number is incorrect or the receipt is unreadable. Please re-upload to proceed.</p>
                             </div>
                         </div>
-                        <a href="{{ route('schools.guest.payment.show', ['school' => $school->slug, 'enrollment_request_id' => $request->id]) }}" 
-                           class="btn-payment-complete" style="background: #f97316; box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.2);">
+                        <button type="button" 
+                                class="btn-payment-complete open-payment-modal" 
+                                style="background: #f97316; border: 0; cursor: pointer; box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.2);"
+                                data-enrollment-id="{{ $request->id }}"
+                                data-course-title="{{ $request->course?->title ?? 'Course' }}"
+                                data-amount="{{ number_format($request->price, 2) }}"
+                                data-submit-url="{{ route('schools.guest.payment.submit', ['school' => $school->slug, 'enrollment_request_id' => $request->id]) }}"
+                                data-mode="reupload">
                             <i class="fas fa-redo"></i>Re-upload Receipt
-                        </a>
+                        </button>
                     </div>
                     @elseif($request->status === 'pending' && !$request->payment_proof_path)
                     <div class="payment-alert">
@@ -655,10 +664,16 @@
                                 <p class="payment-alert-text">We haven't received your GCash proof yet. Please complete this step to start your course.</p>
                             </div>
                         </div>
-                        <a href="{{ route('schools.guest.payment.show', ['school' => $school->slug, 'enrollment_request_id' => $request->id]) }}" 
-                           class="btn-payment-complete">
+                        <button type="button" 
+                                class="btn-payment-complete open-payment-modal"
+                                style="border: 0; cursor: pointer;"
+                                data-enrollment-id="{{ $request->id }}"
+                                data-course-title="{{ $request->course?->title ?? 'Course' }}"
+                                data-amount="{{ number_format($request->price, 2) }}"
+                                data-submit-url="{{ route('schools.guest.payment.submit', ['school' => $school->slug, 'enrollment_request_id' => $request->id]) }}"
+                                data-mode="initial">
                             <i class="fas fa-credit-card"></i>Complete Payment Now
-                        </a>
+                        </button>
                     </div>
                     @endif
 
@@ -960,4 +975,7 @@
         });
     });
 </script>
+
+@include('school.partials.enrollment-payment-modal')
+@include('school.partials.enrollment-license-modal')
 @endsection

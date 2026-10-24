@@ -122,7 +122,7 @@ class CourseController extends Controller
                     ->where('school_id', '=', $school->id)
                     ->whereIn('status', ['pending', 'approved', 'completed'])
                     ->orderBy('created_at', 'desc')
-                    ->get(['course_id', 'status', 'payment_status', 'payment_proof_path']);
+                    ->get(['id', 'course_id', 'status', 'payment_status', 'payment_proof_path', 'price']);
                 foreach ($requests as $req) {
                     if (array_key_exists($req->course_id, $enrollmentStatuses)) {
                         continue;
@@ -130,6 +130,8 @@ class CourseController extends Controller
 
                     $enrollmentStatuses[$req->course_id] = $req->status;
                     $enrollmentDetails[$req->course_id] = [
+                        'id' => $req->id,
+                        'price' => $req->price,
                         'payment_status' => $req->payment_status,
                         'has_payment_proof' => !empty($req->payment_proof_path),
                     ];

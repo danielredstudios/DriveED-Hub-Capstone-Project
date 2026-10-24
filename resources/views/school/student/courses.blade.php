@@ -674,7 +674,20 @@
                     @if($pendingStatusNote)
                         <div class="pending-status-note {{ $pendingStatusNoteClass }}">{{ $pendingStatusNote }}</div>
                     @endif
-                    <button class="btn-enroll btn-enroll-pending" disabled>{{ $pendingButtonText }}</button>
+                    @if((!$hasPaymentProof || in_array($paymentStatus, ['rejected', 'revision_required'], true)) && !empty($enrollDetail['id']))
+                        <button type="button" 
+                                class="btn-enroll open-payment-modal" 
+                                style="cursor: pointer; opacity: 1; background: {{ in_array($paymentStatus, ['rejected', 'revision_required'], true) ? '#ea580c' : $primaryColor }}; color: #ffffff;"
+                                data-enrollment-id="{{ $enrollDetail['id'] }}"
+                                data-course-title="{{ $course->title }}"
+                                data-amount="{{ number_format($enrollDetail['price'] ?? $course->price, 2) }}"
+                                data-submit-url="{{ route('schools.student.payment.submit', ['school' => $school->slug, 'enrollment_request_id' => $enrollDetail['id']]) }}"
+                                data-mode="{{ in_array($paymentStatus, ['rejected', 'revision_required'], true) ? 'reupload' : 'initial' }}">
+                            {{ $pendingButtonText }}
+                        </button>
+                    @else
+                        <button class="btn-enroll btn-enroll-pending" disabled>{{ $pendingButtonText }}</button>
+                    @endif
                 @elseif($enrollStatus === 'completed')
                     <button class="btn-enroll" onclick="bookCourse({{ $course->id }})">View Course</button>
                 @elseif($course->isFull())
@@ -718,4 +731,8 @@ function bookCourse(courseId) {
     window.location.href = '/' + schoolSlug + '/student/courses/' + courseId;
 }
 </script>
+
+@include('school.partials.enrollment-payment-modal')
+@include('school.partials.enrollment-license-modal')
+
 @endsection

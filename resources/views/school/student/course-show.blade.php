@@ -409,7 +409,18 @@
                         ⌛ {{ $pendingEnrollmentTitle ?? 'Enrollment Pending' }}
                     </div>
                     <p class="text-sm text-center text-gray-600 mb-4">{{ $pendingEnrollmentMessage ?? 'Your application is currently under review by our team.' }}</p>
-                    @if($pendingEnrollmentActionUrl)
+                    @if($existingRequest && ($pendingEnrollmentActionLabel === 'Upload Payment Proof' || $pendingEnrollmentActionLabel === 'Update Payment Submission'))
+                        <button type="button" 
+                                class="btn-enroll-action text-center block open-payment-modal" 
+                                style="cursor: pointer; border: none; width: 100%; text-decoration: none;"
+                                data-enrollment-id="{{ $existingRequest->id }}"
+                                data-course-title="{{ $course->title }}"
+                                data-amount="{{ number_format($existingRequest->price, 2) }}"
+                                data-submit-url="{{ route('schools.student.payment.submit', ['school' => $school->slug, 'enrollment_request_id' => $existingRequest->id]) }}"
+                                data-mode="{{ $pendingEnrollmentActionLabel === 'Update Payment Submission' ? 'reupload' : 'initial' }}">
+                            {{ $pendingEnrollmentActionLabel }}
+                        </button>
+                    @elseif($pendingEnrollmentActionUrl)
                         <a href="{{ $pendingEnrollmentActionUrl }}" class="btn-enroll-action text-center block" style="text-decoration: none;">
                             {{ $pendingEnrollmentActionLabel }}
                         </a>
@@ -446,6 +457,14 @@
                             <div class="status-alert status-pending" style="text-align: left;">
                                 <strong>Theoretical completion required.</strong>
                                 <div class="mt-2">You must pass a Theoretical Driving Course (TDC) before enrolling in this practical course.</div>
+                            </div>
+                        @elseif($studentLicenseStatus === 'rejected')
+                            <div class="status-alert status-pending" style="background: #fee2e2; border-color: #fecaca; color: #991b1b; text-align: left; margin-bottom: 12px;">
+                                <strong>Driver's License Rejected</strong>
+                                <div class="mt-1 mb-2">{{ $student->student_license_rejection_reason ?: 'Your driver\'s license was not accepted. Please re-upload a clear copy to proceed.' }}</div>
+                                <button type="button" class="btn btn-sm btn-danger open-license-modal" style="background:#dc2626;color:#fff;border:0;border-radius:6px;padding:6px 12px;font-weight:600;cursor:pointer;" data-license-url="{{ route('schools.student.uploadLicense', $school) }}" data-rejection-reason="{{ $student->student_license_rejection_reason ?? '' }}">
+                                    Re-upload License
+                                </button>
                             </div>
                         @elseif($studentLicenseStatus === 'verified')
                             <div class="status-alert status-approved">
@@ -587,5 +606,8 @@
         }
     }
 </script>
+
+@include('school.partials.enrollment-payment-modal')
+@include('school.partials.enrollment-license-modal')
 
 @endsection

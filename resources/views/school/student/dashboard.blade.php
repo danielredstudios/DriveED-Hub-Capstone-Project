@@ -725,6 +725,63 @@
         </div>
     </div>
 
+    @if(($student->student_license_status ?? '') === 'rejected')
+    <div style="background: #fee2e2; border: 1px solid #fecaca; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 40px; height: 40px; border-radius: 8px; background: #fecaca; color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">
+                <i class="fas fa-id-card"></i>
+            </div>
+            <div>
+                <strong style="color: #991b1b; display: block; font-size: 1rem;">Driver's License Rejected</strong>
+                <p style="color: #7f1d1d; margin: 0; font-size: 0.88rem;">{{ $student->student_license_rejection_reason ?: 'Your previously submitted driver\'s license was not accepted. Please re-upload a clear copy.' }}</p>
+            </div>
+        </div>
+        <button type="button" 
+                class="open-license-modal" 
+                style="background: #ef4444; color: #ffffff; border: 0; border-radius: 8px; padding: 10px 18px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem;"
+                data-license-url="{{ route('schools.student.uploadLicense', $school) }}"
+                data-rejection-reason="{{ $student->student_license_rejection_reason ?? '' }}">
+            <i class="fas fa-upload"></i> Re-upload License
+        </button>
+    </div>
+    @endif
+
+    @foreach($actionableEnrollments ?? [] as $pendingReq)
+        @php
+            $pStatus = $pendingReq->payment_status ?? 'pending';
+            $isReceiptRejected = in_array($pStatus, ['rejected', 'revision_required'], true);
+            $isReceiptNeeded = empty($pendingReq->payment_proof_path) && !$isReceiptRejected;
+        @endphp
+        @if($isReceiptRejected || $isReceiptNeeded)
+        <div style="background: {{ $isReceiptRejected ? '#fff7ed' : '#f0fdf4' }}; border: 1px solid {{ $isReceiptRejected ? '#ffedd5' : '#bbf7d0' }}; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 40px; height: 40px; border-radius: 8px; background: {{ $isReceiptRejected ? '#ffedd5' : '#dcfce7' }}; color: {{ $isReceiptRejected ? '#ea580c' : '#16a34a' }}; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">
+                    <i class="fas {{ $isReceiptRejected ? 'fa-exclamation-triangle' : 'fa-receipt' }}"></i>
+                </div>
+                <div>
+                    <strong style="color: {{ $isReceiptRejected ? '#9a3412' : '#166534' }}; display: block; font-size: 1rem;">
+                        {{ $isReceiptRejected ? 'Payment Receipt Update Needed' : 'Payment Receipt Required' }}
+                    </strong>
+                    <p style="color: {{ $isReceiptRejected ? '#c2410c' : '#15803d' }}; margin: 0; font-size: 0.88rem;">
+                        {{ $pendingReq->course?->title ?? 'Course' }} (₱{{ number_format($pendingReq->price, 2) }}) — {{ $isReceiptRejected ? 'Your payment receipt was not accepted. Please re-upload.' : 'Please submit your proof of payment to complete enrollment.' }}
+                    </p>
+                </div>
+            </div>
+            <button type="button" 
+                    class="open-payment-modal" 
+                    style="background: {{ $isReceiptRejected ? '#ea580c' : '#16a34a' }}; color: #ffffff; border: 0; border-radius: 8px; padding: 10px 18px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem;"
+                    data-enrollment-id="{{ $pendingReq->id }}"
+                    data-course-title="{{ $pendingReq->course?->title ?? 'Course' }}"
+                    data-amount="{{ number_format($pendingReq->price, 2) }}"
+                    data-submit-url="{{ route('schools.student.payment.submit', ['school' => $school->slug, 'enrollment_request_id' => $pendingReq->id]) }}"
+                    data-mode="{{ $isReceiptRejected ? 'reupload' : 'initial' }}">
+                <i class="fas {{ $isReceiptRejected ? 'fa-redo' : 'fa-credit-card' }}"></i>
+                {{ $isReceiptRejected ? 'Re-upload Receipt' : 'Upload Receipt' }}
+            </button>
+        </div>
+        @endif
+    @endforeach
+
     @include('school.student.partials.license-expiration-alert', ['student' => $student, 'school' => $school])
     @include('school.student.partials.claim-notice')
     @include('school.student.partials.license-guide', ['student' => $student, 'primaryEnrollment' => $primaryEnrollment ?? null, 'activeEnrollments' => $activeEnrollments ?? collect()])
@@ -1095,4 +1152,8 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+
+@include('school.partials.enrollment-payment-modal')
+@include('school.partials.enrollment-license-modal')
+
 @endsection

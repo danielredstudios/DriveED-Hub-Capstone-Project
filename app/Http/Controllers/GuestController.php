@@ -369,11 +369,12 @@ class GuestController extends Controller
         ]);
 
         return redirect()
-            ->route('schools.guest.payment.show', [
+            ->route('schools.guest.enrollmentRequests', [
                 'school' => $school->slug,
-                'enrollment_request_id' => $enrollmentRequest->id
+                'open_payment_modal' => $enrollmentRequest->id
             ])
-            ->with('success', 'Step 1 of 2 Complete! Please submit your payment details below.');
+            ->with('open_payment_modal', $enrollmentRequest->id)
+            ->with('success', 'Enrollment request submitted! Please submit your payment receipt in the pop-up modal below.');
     }
 
     /**
@@ -414,10 +415,7 @@ class GuestController extends Controller
         $paymentConcierge = $this->buildEnrollmentPaymentConcierge($enrollmentRequest);
         if (!$paymentConcierge['allow_submission']) {
             return redirect()
-                ->route('schools.guest.payment.show', [
-                    'school' => $school->slug,
-                    'enrollment_request_id' => $enrollmentRequest->id,
-                ])
+                ->back()
                 ->with($this->resolveGuestFlashKey($paymentConcierge['level']), $paymentConcierge['message']);
         }
 
@@ -507,6 +505,18 @@ class GuestController extends Controller
                     'payment',
                     "/{$school->slug}/admin/enrollments"
                 );
+            }
+
+            if ($request->filled('redirect_to')) {
+                return redirect($request->input('redirect_to'))->with('success', $isRevisionMode
+                    ? 'Updated payment details submitted. An admin will review your update shortly.'
+                    : 'Payment details submitted successfully! An admin will verify your payment shortly.');
+            }
+
+            if ($request->header('referer')) {
+                return redirect()->back()->with('success', $isRevisionMode
+                    ? 'Updated payment details submitted. An admin will review your update shortly.'
+                    : 'Payment details submitted successfully! An admin will verify your payment shortly.');
             }
 
             return redirect()

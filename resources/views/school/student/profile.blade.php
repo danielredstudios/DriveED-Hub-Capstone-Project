@@ -809,7 +809,14 @@
 
                 <div class="info-row">
                     <span class="info-label">License Status:</span>
-                    <span class="info-value">{{ $student->student_license_status ? ucfirst(str_replace('_', ' ', $student->student_license_status)) : 'None' }}</span>
+                    <span class="info-value">
+                        {{ $student->student_license_status ? ucfirst(str_replace('_', ' ', $student->student_license_status)) : 'None' }}
+                        @if($student->student_license_status === 'rejected')
+                            <button type="button" class="btn btn-sm btn-danger open-license-modal" style="background:#dc2626;color:#fff;border:0;border-radius:6px;padding:3px 8px;font-size:0.75rem;font-weight:600;margin-left:8px;cursor:pointer;" data-license-url="{{ route('schools.student.uploadLicense', $school) }}" data-rejection-reason="{{ $student->student_license_rejection_reason ?? '' }}">
+                                Re-upload
+                            </button>
+                        @endif
+                    </span>
                 </div>
 
                 <div class="info-row">
@@ -1143,4 +1150,7 @@
 
 
 </script>
+
+@include('school.partials.enrollment-license-modal')
+
 @endsection

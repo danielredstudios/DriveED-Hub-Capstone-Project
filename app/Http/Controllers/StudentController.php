@@ -208,8 +208,13 @@ class StudentController extends Controller
         ]);
 
         return redirect()
-            ->route('schools.student.payment.show', ['school' => $school->slug, 'enrollment_request_id' => $enrollmentRequest->id])
-            ->with('success', 'Step 1 of 2 Complete! Please submit your payment details below.');
+            ->route('schools.student.courses.show', [
+                'school' => $school->slug,
+                'course' => $course->id,
+                'open_payment_modal' => $enrollmentRequest->id
+            ])
+            ->with('open_payment_modal', $enrollmentRequest->id)
+            ->with('success', 'Enrollment request created! Please upload your payment receipt below.');
     }
 
     /**
@@ -254,7 +259,7 @@ class StudentController extends Controller
         $paymentConcierge = $this->buildEnrollmentPaymentConcierge($enrollmentRequest);
         if (!$paymentConcierge['allow_submission']) {
             return redirect()
-                ->route('schools.student.payment.show', ['school' => $school->slug, 'enrollment_request_id' => $enrollmentRequest->id])
+                ->back()
                 ->with('info', $paymentConcierge['message']);
         }
 
@@ -331,6 +336,18 @@ class StudentController extends Controller
                 Notification::send($admin, 'payment_submitted', 'New Payment Verification Request',
                     "{$student->name} has submitted a payment for enrollment #{$enrollmentRequest->id}.",
                     'payment', "/{$school->slug}/admin/enrollments");
+            }
+
+            if ($request->filled('redirect_to')) {
+                return redirect($request->input('redirect_to'))->with('success', $isRevisionMode
+                    ? 'Updated payment details submitted. An admin will review your update shortly.'
+                    : 'Payment details submitted successfully! An admin will verify your payment shortly.');
+            }
+
+            if ($request->header('referer')) {
+                return redirect()->back()->with('success', $isRevisionMode
+                    ? 'Updated payment details submitted. An admin will review your update shortly.'
+                    : 'Payment details submitted successfully! An admin will verify your payment shortly.');
             }
 
             return redirect()
@@ -540,6 +557,11 @@ class StudentController extends Controller
                 'is_expiring_soon' => $studentModel->isLicenseExpiringSoon(60),
                 'days_remaining' => $studentModel->getLicenseDaysRemaining(),
             ] : null,
+            'actionableEnrollments' => EnrollmentRequest::where('learner_id', $student->id)
+                ->where('school_id', $school->id)
+                ->where('status', 'pending')
+                ->with('course')
+                ->get(),
         ]);
     }
 

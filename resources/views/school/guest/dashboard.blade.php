@@ -724,6 +724,27 @@
         }
     @endphp
 
+    @if($guest->student_license_status === 'rejected')
+    <div style="background: #fee2e2; border: 1px solid #fecaca; border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 40px; height: 40px; border-radius: 8px; background: #fecaca; color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">
+                <i class="fas fa-id-card"></i>
+            </div>
+            <div>
+                <strong style="color: #991b1b; display: block; font-size: 1rem;">Driver's License Rejected</strong>
+                <p style="color: #7f1d1d; margin: 0; font-size: 0.88rem;">{{ $guest->student_license_rejection_reason ?: 'Your previously submitted driver\'s license was not accepted. Please re-upload a clear copy to continue.' }}</p>
+            </div>
+        </div>
+        <button type="button" 
+                class="open-license-modal" 
+                style="background: #ef4444; color: #ffffff; border: 0; border-radius: 8px; padding: 10px 18px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem;"
+                data-license-url="{{ route('schools.guest.uploadLicense', $school) }}"
+                data-rejection-reason="{{ $guest->student_license_rejection_reason ?? '' }}">
+            <i class="fas fa-upload"></i> Re-upload License
+        </button>
+    </div>
+    @endif
+
     @if(!$step3Done)
     <div class="onboarding-section">
         <div class="onboarding-header">
@@ -787,15 +808,27 @@
                 <div class="step-action">
                     @if($step2Done && $pendingRequest)
                         @if($pendingEnrollmentStage === 'payment_needed')
-                            <a href="{{ route('schools.guest.payment.show', ['school' => $school->slug, 'enrollment_request_id' => $pendingRequest->id]) }}" 
-                               class="btn-step primary">
+                            <button type="button" 
+                                    class="btn-step primary open-payment-modal" 
+                                    style="border: 0; cursor: pointer;"
+                                    data-enrollment-id="{{ $pendingRequest->id }}"
+                                    data-course-title="{{ $pendingRequest->course->title }}"
+                                    data-amount="{{ number_format($pendingRequest->price, 2) }}"
+                                    data-submit-url="{{ route('schools.guest.payment.submit', ['school' => $school->slug, 'enrollment_request_id' => $pendingRequest->id]) }}"
+                                    data-mode="initial">
                                 Submit Payment Details
-                            </a>
+                            </button>
                         @elseif($pendingEnrollmentStage === 'payment_update_required')
-                            <a href="{{ route('schools.guest.payment.show', ['school' => $school->slug, 'enrollment_request_id' => $pendingRequest->id]) }}" 
-                               class="btn-step primary">
+                            <button type="button" 
+                                    class="btn-step primary open-payment-modal" 
+                                    style="border: 0; cursor: pointer; background: #f97316;"
+                                    data-enrollment-id="{{ $pendingRequest->id }}"
+                                    data-course-title="{{ $pendingRequest->course->title }}"
+                                    data-amount="{{ number_format($pendingRequest->price, 2) }}"
+                                    data-submit-url="{{ route('schools.guest.payment.submit', ['school' => $school->slug, 'enrollment_request_id' => $pendingRequest->id]) }}"
+                                    data-mode="reupload">
                                 Update Payment Details
-                            </a>
+                            </button>
                         @elseif($pendingEnrollmentStage === 'awaiting_approval')
                             <span class="step-badge done">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="icon-12"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
@@ -1305,5 +1338,8 @@
     });
 </script>
 @endif
+
+@include('school.partials.enrollment-payment-modal')
+@include('school.partials.enrollment-license-modal')
 
 @endsection
