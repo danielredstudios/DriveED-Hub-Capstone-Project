@@ -15,6 +15,9 @@ Schedule::command('bookings:confirm-queued')->daily();
 // Send session reminders for sessions happening in the next 24 hours (runs daily at 7 AM)
 Schedule::command('reminders:sessions --hours=24')->dailyAt('07:00');
 
+// Check driver's license expirations daily at 8 AM
+Schedule::command('license:check-expirations')->dailyAt('08:00');
+
 Artisan::command('mail:test {to}', function (string $to) {
     try {
         Mail::raw('DriveED SMTP test email. If you received this, mail setup works.', function ($message) use ($to) {

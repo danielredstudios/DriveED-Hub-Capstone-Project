@@ -55,7 +55,7 @@
     }
     
     .btn-export-pdf {
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        background: #ef4444;
         color: white;
     }
     
@@ -66,7 +66,7 @@
     }
     
     .btn-export-excel {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        background: #10b981;
         color: white;
     }
     
@@ -81,7 +81,7 @@
         display: inline-flex;
         align-items: center;
         padding: 6px 12px;
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        background: #10b981;
         color: white;
         border: none;
         border-radius: 6px;
@@ -113,7 +113,7 @@
     }
 
     .admin-table thead {
-        background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
+        background: {{ $primaryColor }};
         color: #ffffff;
     }
 

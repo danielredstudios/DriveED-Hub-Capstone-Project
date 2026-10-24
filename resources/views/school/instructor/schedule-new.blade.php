@@ -7,14 +7,12 @@
     $settings = $school?->schoolSetting;
     $primaryColor = $settings?->primary_color ?? '#3498db';
     $secondaryColor = $settings?->secondary_color ?? '#2ecc71';
-    $useGradient = $settings?->use_gradient_header ?? false;
+    $useGradient = false;
     $buttonRadius = $settings?->button_border_radius ?? 10;
     $cardRadius = $settings?->border_radius ?? 12;
     
-    // Header/Button Primary Style
-    $primaryStyle = $useGradient 
-        ? "linear-gradient(135deg, $primaryColor 0%, $secondaryColor 100%)" 
-        : $primaryColor;
+    // Header/Button Primary Style (solid)
+    $primaryStyle = $primaryColor;
 @endphp
 
 

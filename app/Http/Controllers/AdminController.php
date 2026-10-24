@@ -297,7 +297,7 @@ class AdminController extends Controller
             $studentItems = collect();
             if ($filtersApplied && $activeRoleFilter !== 'instructor') {
                 $studentItems = $filteredStudentQuery
-                    ->select('id', 'branch_id', 'name', 'email', 'contact', 'address', 'status', 'profile_picture', 'last_login_at', 'last_logout_at')
+                    ->select('id', 'branch_id', 'name', 'email', 'contact', 'address', 'status', 'profile_picture', 'last_login_at', 'last_logout_at', 'license_number', 'license_expiration_date')
                     ->orderBy('name')
                     ->get()
                     ->map(function ($student) {
@@ -310,7 +310,9 @@ class AdminController extends Controller
                             'role' => 'student',
                             'address' => $student->address,
                             'profile_picture' => $student->profile_picture,
-                            'license_number' => null,
+                            'license_number' => $student->license_number,
+                            'license_expiration_date' => $student->license_expiration_date?->format('Y-m-d'),
+                            'license_status_badge' => $student->getLicenseStatusBadge(),
                             'license_image' => null,
                             'license_status' => null,
                             'license_rejection_reason' => null,
@@ -326,7 +328,7 @@ class AdminController extends Controller
             $instructorItems = collect();
             if ($filtersApplied && $activeRoleFilter !== 'student') {
                 $instructorItems = $filteredInstructorQuery
-                    ->select('id', 'branch_id', 'name', 'email', 'contact', 'address', 'license_number', 'license_image', 'license_status', 'license_rejection_reason', 'restriction_codes', 'course_specializations', 'status', 'availability', 'profile_picture', 'last_login_at', 'last_logout_at')
+                    ->select('id', 'branch_id', 'name', 'email', 'contact', 'address', 'license_number', 'license_expiration_date', 'license_image', 'license_status', 'license_rejection_reason', 'restriction_codes', 'course_specializations', 'status', 'availability', 'profile_picture', 'last_login_at', 'last_logout_at')
                     ->orderBy('name')
                     ->get()
                     ->map(function ($instructor) {
@@ -340,6 +342,8 @@ class AdminController extends Controller
                             'address' => $instructor->address,
                             'profile_picture' => $instructor->profile_picture,
                             'license_number' => $instructor->license_number,
+                            'license_expiration_date' => $instructor->license_expiration_date?->format('Y-m-d'),
+                            'license_status_badge' => $instructor->getLicenseStatusBadge(),
                             'license_image' => $instructor->license_image,
                             'license_status' => $instructor->license_status,
                             'license_rejection_reason' => $instructor->license_rejection_reason,
@@ -607,6 +611,8 @@ class AdminController extends Controller
                 ],
                 'contact' => ['required', 'string', 'max:13', 'regex:/^(09\d{9}|\+639\d{9}|9\d{9})$/'],
                 'address' => 'required|string|max:255',
+                'license_number' => 'nullable|string|max:50',
+                'license_expiration_date' => 'nullable|date',
                 'password' => ['nullable', 'string', new StrongPassword()],
                 'branch_id' => [
                     'nullable',
@@ -633,7 +639,13 @@ class AdminController extends Controller
 
             DB::beginTransaction();
 
-            $data = $request->only('name', 'email', 'contact', 'address', 'branch_id');
+            $data = $request->only('name', 'email', 'contact', 'address', 'branch_id', 'license_number', 'license_expiration_date');
+            if (array_key_exists('license_number', $data)) {
+                $data['license_number'] = !empty($data['license_number']) ? trim($data['license_number']) : null;
+            }
+            if (array_key_exists('license_expiration_date', $data)) {
+                $data['license_expiration_date'] = !empty($data['license_expiration_date']) ? $data['license_expiration_date'] : null;
+            }
 
             // Normalize contact
             if (!empty($data['contact'])) {
@@ -737,6 +749,7 @@ class AdminController extends Controller
                 ],
                 'contact' => ['required', 'string', 'max:13', 'regex:/^(09\d{9}|\+639\d{9}|9\d{9})$/'],
                 'license_number' => 'required|string|max:50',
+                'license_expiration_date' => 'nullable|date',
                 'license_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
                 'address' => 'required|string|max:255',
                 'availability' => 'required|in:available,unavailable',
@@ -771,7 +784,10 @@ class AdminController extends Controller
                     ->with('error', 'This demo account has locked name, email, and password.');
             }
 
-            $data = $request->only('name', 'email', 'contact', 'license_number', 'address', 'branch_id', 'availability');
+            $data = $request->only('name', 'email', 'contact', 'license_number', 'license_expiration_date', 'address', 'branch_id', 'availability');
+            if (array_key_exists('license_expiration_date', $data)) {
+                $data['license_expiration_date'] = !empty($data['license_expiration_date']) ? $data['license_expiration_date'] : null;
+            }
             $data['course_specializations'] = $request->input('course_specializations', []);
 
             // Normalize contact

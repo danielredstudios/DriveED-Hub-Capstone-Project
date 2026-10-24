@@ -127,7 +127,7 @@
     .progress-fill {
         height: 100%;
         border-radius: 999px;
-        background: linear-gradient(90deg, {{ $primaryColor }}, {{ $secondaryColor }});
+        background: {{ $primaryColor }};
         transition: width 0.4s ease;
     }
 

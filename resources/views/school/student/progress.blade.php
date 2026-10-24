@@ -57,13 +57,7 @@
 .progress-percentage {
     font-size: 3rem;
     font-weight: 700;
-    @if($settings->use_gradient_header ?? true)
-        background: linear-gradient(135deg, {{ $primaryColor }}, {{ $secondaryColor }});
-    @else
-        background: {{ $primaryColor }};
-    @endif
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: {{ $primaryColor }};
 }
 
 .progress-bar-container {
@@ -77,11 +71,7 @@
 
 .progress-bar-fill {
     height: 100%;
-    @if($settings->use_gradient_header ?? true)
-        background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
-    @else
-        background: {{ $primaryColor }};
-    @endif
+    background: {{ $primaryColor }};
     display: flex;
     align-items: center;
     justify-content: flex-end;

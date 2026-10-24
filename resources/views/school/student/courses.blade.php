@@ -126,7 +126,7 @@
     
     .course-banner {
         height: 160px;
-        background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
+        background: {{ $primaryColor }};
         display: flex;
         align-items: center;
         justify-content: center;
@@ -148,7 +148,7 @@
         position: absolute;
         top: 10px;
         left: 10px;
-        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        background: #f59e0b;
         color: white;
         padding: 5px 12px;
         border-radius: 20px;
@@ -169,15 +169,15 @@
     }
 
     .enrollment-status-badge.status-pending {
-        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        background: #f59e0b;
     }
 
     .enrollment-status-badge.status-approved {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        background: #10b981;
     }
 
     .enrollment-status-badge.status-completed {
-        background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+        background: #6b7280;
     }
     
     .course-body {

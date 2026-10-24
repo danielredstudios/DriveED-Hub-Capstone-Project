@@ -50,7 +50,7 @@
     .report-placeholder-icon-wrap {
         width: 80px;
         height: 80px;
-        background: linear-gradient(135deg, {{ $primaryColor }} 0%, #1d4ed8 100%);
+        background: {{ $primaryColor }};
         border-radius: 50%;
         margin: 0 auto 20px;
         display: flex;

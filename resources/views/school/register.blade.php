@@ -224,11 +224,7 @@
         .submit-btn {
             width: 100%;
             padding: 10px;
-            @if($settings?->use_gradient_header ?? false)
-                background: linear-gradient(135deg, {{ $settings?->primary_color ?? '#2563eb' }} 0%, {{ $settings?->secondary_color ?? '#1e40af' }} 100%);
-            @else
-                background: {{ $settings?->primary_color ?? '#2563eb' }};
-            @endif
+            background: {{ $settings?->primary_color ?? '#2563eb' }};
             color: white;
             border: none;
             border-radius: 8px;

@@ -45,7 +45,7 @@
     }
 
     .badge-count {
-        background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+        background: #ef4444;
         color: white;
         padding: 4px 12px;
         border-radius: 20px;
@@ -154,17 +154,17 @@
     }
 
     .status-pending {
-        background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+        background: #f59e0b;
         color: white;
     }
 
     .status-approved {
-        background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
+        background: #10b981;
         color: white;
     }
 
     .status-rejected {
-        background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+        background: #ef4444;
         color: white;
     }
 
@@ -232,7 +232,7 @@
     }
 
     .btn-approve {
-        background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
+        background: #10b981;
         color: white;
     }
 
@@ -242,7 +242,7 @@
     }
 
     .btn-reject {
-        background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+        background: #ef4444;
         color: white;
     }
 
@@ -304,7 +304,7 @@
     }
 
     .modal-header {
-        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        background: {{ $primaryColor ?? '#2563eb' }};
         color: white;
         padding: 32px;
         border-radius: 16px 16px 0 0;

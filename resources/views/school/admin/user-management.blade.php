@@ -35,11 +35,7 @@
             --primary-rgb:
                 {{ implode(',', sscanf($primaryColor, '#%02x%02x%02x')) }}
             ;
-            --header-gradient: linear-gradient(135deg,
-                    {{ $primaryColor }}
-                    0%,
-                    {{ $secondaryColor }}
-                    100%);
+            --header-gradient: {{ $primaryColor }};
             --border-radius: 20px;
             --button-border-radius: 12px;
 
@@ -52,7 +48,7 @@
                 {{ $secondaryColor }}
             ;
             --btn-secondary-text: #ffffff;
-            --btn-gradient: var(--header-gradient);
+            --btn-gradient: var(--primary-color);
         }
 
         .admin-mgmt-container {
@@ -227,10 +223,8 @@
 
         .btn-create {
             padding: 10px 20px;
-            @if(($settings->button_style ?? 'solid') === 'gradient')
-                background: var(--btn-gradient);
-            @else background: var(--btn-primary-bg);
-            @endif color: var(--btn-primary-text);
+            background: var(--btn-primary-bg);
+            color: var(--btn-primary-text);
             border: none;
             border-radius: var(--button-border-radius);
             font-size: 1rem;
@@ -1056,7 +1050,7 @@
         }
 
         .btn-cancel {
-            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+            background: #6b7280;
             color: white;
             flex: 1;
             padding: 16px 24px;
@@ -1074,7 +1068,7 @@
         }
 
         .btn-submit {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: #10b981;
             color: white;
             flex: 1;
             padding: 16px 24px;
@@ -1178,7 +1172,7 @@
         }
 
         .profile-modal-header {
-            background: linear-gradient(135deg, var(--primary-color), #4f46e5);
+            background: var(--primary-color);
             padding: 35px 30px;
             position: relative;
             color: white;
@@ -2044,6 +2038,28 @@
                                                         @endforeach
                                                     </div>
                                                 @endif
+                                                @if(!empty($user->license_status_badge))
+                                                    <div class="mt-1">
+                                                        <span class="badge" style="background: {{ $user->license_status_badge['bg'] }}; color: {{ $user->license_status_badge['text_color'] }}; font-size: 0.72rem; padding: 3px 7px;">
+                                                            {{ $user->license_status_badge['label'] }}
+                                                        </span>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        @elseif($user->role === 'student' && (!empty($user->license_number) || !empty($user->license_expiration_date)))
+                                            <div class="d-flex flex-column gap-1">
+                                                @if(!empty($user->license_number))
+                                                    <span style="font-size: 0.8rem; font-weight: 600; color: #1f2937;">{{ $user->license_number }}</span>
+                                                @endif
+                                                @if(!empty($user->license_status_badge))
+                                                    <div>
+                                                        <span class="badge" style="background: {{ $user->license_status_badge['bg'] }}; color: {{ $user->license_status_badge['text_color'] }}; font-size: 0.72rem; padding: 3px 7px;">
+                                                            {{ $user->license_status_badge['label'] }}
+                                                        </span>
+                                                    </div>
+                                                @elseif(!empty($user->license_expiration_date))
+                                                    <span style="font-size: 0.75rem; color: #6b7280;">Expires: {{ $user->license_expiration_date }}</span>
+                                                @endif
                                             </div>
                                         @else
                                             <span class="text-muted small">—</span>
@@ -2079,6 +2095,8 @@
                                                     data-address="{{ $user->address }}"
                                                     data-branch="{{ $branches->find($user->branch_id)->name ?? 'Not Assigned' }}"
                                                     data-status="{{ $user->status }}"
+                                                    data-license="{{ $user->license_number }}"
+                                                    data-license-expiration="{{ $user->license_expiration_date }}"
                                                     data-profile-picture="{{ $user->profile_picture ? asset('storage/' . $user->profile_picture) : '' }}"
                                                     data-last-login="{{ ($user->last_login_at ?? null) ? \Illuminate\Support\Carbon::parse($user->last_login_at)->diffForHumans() : 'Never' }}"
                                                     data-last-logout="{{ ($user->last_logout_at ?? null) ? \Illuminate\Support\Carbon::parse($user->last_logout_at)->diffForHumans() : 'Never' }}"
@@ -2097,6 +2115,7 @@
                                                     data-branch="{{ $branches->find($user->branch_id)->name ?? 'Not Assigned' }}"
                                                     data-status="{{ $user->status }}"
                                                     data-license="{{ $user->license_number }}"
+                                                    data-license-expiration="{{ $user->license_expiration_date }}"
                                                     data-license-image="{{ $user->license_image ? asset('storage/' . $user->license_image) : '' }}"
                                                     data-license-status="{{ $user->license_status }}"
                                                     data-restrictions="{{ json_encode($user->restriction_codes ?? []) }}"
@@ -2118,6 +2137,8 @@
                                                     data-id="{{ $user->id }}" data-name="{{ $user->name }}"
                                                     data-email="{{ $user->email }}" data-contact="{{ $user->contact }}"
                                                     data-address="{{ $user->address }}" data-branch="{{ $user->branch_id }}"
+                                                    data-license="{{ $user->license_number }}"
+                                                    data-license-expiration="{{ $user->license_expiration_date }}"
                                                     title="Edit Student">
                                                     <i class="bi bi-pencil-square"></i>
                                                     <span>Edit</span>
@@ -2126,7 +2147,9 @@
                                                 <button type="button" class="btn-action btn-info js-edit-user" data-role="instructor"
                                                     data-id="{{ $user->id }}" data-name="{{ $user->name }}"
                                                     data-email="{{ $user->email }}" data-contact="{{ $user->contact }}"
-                                                    data-license="{{ $user->license_number }}" data-address="{{ $user->address }}"
+                                                    data-license="{{ $user->license_number }}"
+                                                    data-license-expiration="{{ $user->license_expiration_date }}"
+                                                    data-address="{{ $user->address }}"
                                                     data-availability="{{ $user->availability }}" data-branch="{{ $user->branch_id }}"
                                                     data-specializations="{{ json_encode($user->course_specializations ?? []) }}"
                                                     title="Edit Instructor">
@@ -2353,6 +2376,15 @@
                             </select>
                         </div>
                     @endif
+                    <div class="form-group">
+                        <label>Driver's License / Permit Number</label>
+                        <input type="text" id="edit_student_license_number" name="license_number" placeholder="e.g. N01-23-456789">
+                    </div>
+                    <div class="form-group">
+                        <label>License Expiration Date</label>
+                        <input type="date" id="edit_student_license_expiration" name="license_expiration_date">
+                        <p class="field-help">Automated reminder alerts will notify the student before this date.</p>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeEditStudentModal()"
@@ -2528,6 +2560,11 @@
                     <div class="form-group">
                         <label>License Number <span class="required-indicator">*</span></label>
                         <input type="text" id="edit_instructor_license" name="license_number" required>
+                    </div>
+                    <div class="form-group">
+                        <label>License Expiration Date</label>
+                        <input type="date" id="edit_instructor_license_expiration" name="license_expiration_date">
+                        <p class="field-help">Reminders will warn when accreditation renewal is approaching.</p>
                     </div>
                     <div class="form-group">
                         <label>Address <span class="required-indicator">*</span></label>
@@ -2858,7 +2895,7 @@
             setInviteFormLoadingState(document.getElementById('createStudentInviteForm'), false);
         }
 
-        function editStudent(id, name, email, contact, address, branchId) {
+        function editStudent(id, name, email, contact, address, branchId, license, licenseExpiration) {
             const form = document.getElementById('editStudentForm');
             form.action = `${window.studentBaseUrl}/${id}`;
             document.getElementById('edit_student_name').value = name || '';
@@ -2874,6 +2911,12 @@
             document.getElementById('edit_student_address').value = address || '';
             const branchSelect = document.getElementById('edit_student_branch');
             if (branchSelect) branchSelect.value = branchId || '';
+
+            const licenseField = document.getElementById('edit_student_license_number');
+            if (licenseField) licenseField.value = license || '';
+            const expiryField = document.getElementById('edit_student_license_expiration');
+            if (expiryField) expiryField.value = licenseExpiration || '';
+
             document.getElementById('editStudentModal').style.display = 'flex';
         }
 
@@ -2898,7 +2941,9 @@
                         btn.dataset.email,
                         btn.dataset.contact,
                         btn.dataset.address,
-                        btn.dataset.branch
+                        btn.dataset.branch,
+                        btn.dataset.license,
+                        btn.dataset.licenseExpiration
                     );
                 } else if (role === 'instructor') {
                     editInstructor(
@@ -2910,7 +2955,8 @@
                         btn.dataset.address,
                         btn.dataset.branch,
                         btn.dataset.specializations,
-                        btn.dataset.availability
+                        btn.dataset.availability,
+                        btn.dataset.licenseExpiration
                     );
                 }
             }
@@ -3014,7 +3060,7 @@
             setInviteFormLoadingState(document.getElementById('createInstructorInviteForm'), false);
         }
 
-        function editInstructor(id, name, email, contact, license, address, branchId, specializations, availability) {
+        function editInstructor(id, name, email, contact, license, address, branchId, specializations, availability, licenseExpiration) {
             const form = document.getElementById('editInstructorForm');
             form.action = `${window.instructorBaseUrl}/${id}`;
             document.getElementById('edit_instructor_name').value = name || '';
@@ -3031,6 +3077,10 @@
             }
             document.getElementById('edit_instructor_contact').value = displayContact;
             document.getElementById('edit_instructor_license').value = license || '';
+
+            const expField = document.getElementById('edit_instructor_license_expiration');
+            if (expField) expField.value = licenseExpiration || '';
+
             document.getElementById('edit_instructor_address').value = address || '';
             const availabilitySelect = document.getElementById('edit_instructor_availability');
             if (availabilitySelect) availabilitySelect.value = availability || 'available';
@@ -3241,7 +3291,7 @@
             } catch (e) { console.error(e); }
 
             content.innerHTML = `
-                <div class="profile-modal-header" style="padding: 20px 25px; background: linear-gradient(135deg, #6366f1, #a855f7);">
+                <div class="profile-modal-header" style="padding: 20px 25px; background: #6366f1;">
                     <h3 style="margin: 0; color: white !important;"><i class="bi bi-shield-check me-2"></i>Verify License</h3>
                     <button type="button" class="btn-close-modal" onclick="toggleLicenseVerificationMode(false)" style="position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2); border: none; border-radius: 8px; color: white; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer;">×</button>
                 </div>

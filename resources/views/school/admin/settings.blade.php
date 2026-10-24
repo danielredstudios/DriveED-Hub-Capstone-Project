@@ -461,11 +461,7 @@
     .save-button {
         width: 100%;
         padding: 12px;
-        @if(($settings->button_style ?? 'solid') === 'gradient')
-        background: linear-gradient(135deg, var(--btn-primary-bg) 0%, var(--btn-secondary-bg) 100%);
-        @else
         background: var(--btn-primary-bg);
-        @endif
         color: var(--btn-primary-text);
         border: none;
         border-radius: var(--button-border-radius);
@@ -1795,10 +1791,9 @@
                     <label class="form-label">Button Style</label>
                     <select class="form-select" id="button_style" name="button_style" onchange="toggleButtonGradient(); updatePreview()">
                         <option value="solid" {{ old('button_style', $settings->button_style ?? 'solid') == 'solid' ? 'selected' : '' }}>Solid Color</option>
-                        <option value="gradient" {{ old('button_style', $settings->button_style ?? 'solid') == 'gradient' ? 'selected' : '' }}>Gradient (Primary → Secondary)</option>
                     </select>
                     <small class="help-text-muted help-text-block">
-                        Gradient creates a smooth blend from Primary to Secondary color
+                        Buttons maintain a consistent solid brand color
                     </small>
                 </div>
 
@@ -1916,13 +1911,12 @@
                 
                 <div class="section-inputs">
                 <div class="form-group">
-                    <label class="form-label">Use Gradient Header</label>
+                    <label class="form-label">Header Background Style</label>
                     <select class="form-select" id="use_gradient_header" name="use_gradient_header" onchange="updatePreview()">
-                        <option value="1" {{ old('use_gradient_header', $settings->use_gradient_header ?? false) ? 'selected' : '' }}>Yes - Use Gradient (Primary → Secondary)</option>
-                        <option value="0" {{ !old('use_gradient_header', $settings->use_gradient_header ?? false) ? 'selected' : '' }}>No - Use Solid Primary Color</option>
+                        <option value="0" selected>Solid Primary Color</option>
                     </select>
                     <small class="help-text-muted help-text-block">
-                        Applies to calendar header and other gradient elements
+                        Applies solid primary color to calendar and section headers
                     </small>
                 </div>
 
@@ -2268,13 +2262,10 @@
                     <div class="form-group">
                         <label class="form-label">Header Background Type</label>
                         <select class="form-control form-control-compact" name="login_header_bg_type">
-                            <option value="gradient" {{ old('login_header_bg_type', $settings->login_header_bg_type ?? 'gradient') == 'gradient' ? 'selected' : '' }}>
-                                Gradient (uses primary & secondary colors)
-                            </option>
-                            <option value="solid" {{ old('login_header_bg_type', $settings->login_header_bg_type ?? 'gradient') == 'solid' ? 'selected' : '' }}>
+                            <option value="solid" {{ old('login_header_bg_type', $settings->login_header_bg_type ?? 'solid') == 'solid' ? 'selected' : '' }}>
                                 Solid Color
                             </option>
-                            <option value="image" {{ old('login_header_bg_type', $settings->login_header_bg_type ?? 'gradient') == 'image' ? 'selected' : '' }}>
+                            <option value="image" {{ old('login_header_bg_type', $settings->login_header_bg_type ?? 'solid') == 'image' ? 'selected' : '' }}>
                                 Background Image
                             </option>
                         </select>
@@ -2891,9 +2882,7 @@ function updatePreview() {
     const buttonDanger = document.getElementById('button_danger_bg').value;
     
     if (document.getElementById('button-primary-preview')) {
-        const primaryBg = buttonStyle === 'gradient' 
-            ? `linear-gradient(135deg, ${buttonPrimary} 0%, ${buttonSecondary} 100%)`
-            : buttonPrimary;
+        const primaryBg = buttonPrimary;
         
         document.getElementById('button-primary-preview').style.cssText = `background: ${primaryBg}; color: white; border-radius: ${buttonBorderRadius}; padding: 10px 20px; border: none; font-weight: 600;`;
         document.getElementById('button-secondary-preview').style.cssText = `background: ${buttonSecondary}; color: white; border-radius: ${buttonBorderRadius}; padding: 10px 20px; border: none; font-weight: 600;`;
@@ -2912,16 +2901,13 @@ function updatePreview() {
     // Calendar & Header
     const primaryColor = document.getElementById('primary_color').value;
     const secondaryColor = document.getElementById('secondary_color').value;
-    const useGradient = document.getElementById('use_gradient_header').value === '1';
     const headerTextColor = document.getElementById('header_text_color').value;
     const calendarDayBorder = document.getElementById('calendar_day_border').value;
     const calendarDayHover = document.getElementById('calendar_day_hover').value;
     const calendarTodayColor = document.getElementById('calendar_today_color').value;
     
     if (document.getElementById('calendar-header-preview')) {
-        const headerBg = useGradient 
-            ? `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`
-            : primaryColor;
+        const headerBg = primaryColor;
         
         document.getElementById('calendar-header-preview').style.cssText = `background: ${headerBg}; color: ${headerTextColor}; padding: 20px 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);`;
         

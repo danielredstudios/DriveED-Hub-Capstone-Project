@@ -11,7 +11,7 @@
     $settings = $school?->schoolSetting;
     $primaryColor = $settings->primary_color ?? '#2563eb';
     $secondaryColor = $settings->secondary_color ?? '#1d4ed8';
-    $useGradient = $settings?->use_gradient_header;
+    $useGradient = false;
 @endphp
 
 @include('school.admin.partials.admin-styles')
@@ -195,11 +195,7 @@
     .btn-create {
         height: 40px;
         padding: 0 16px;
-        @if($useGradient)
-            background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
-        @else
-            background: {{ $primaryColor }};
-        @endif
+        background: {{ $primaryColor }};
         color: white;
         border: none;
         border-radius: 10px;
@@ -252,11 +248,7 @@
     }
 
     .branch-table thead {
-        @if($useGradient)
-            background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
-        @else
-            background: {{ $primaryColor }};
-        @endif
+        background: {{ $primaryColor }};
         color: white;
     }
 
@@ -400,11 +392,7 @@
     }
 
     .modal-header {
-        @if($useGradient)
-            background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
-        @else
-            background: {{ $primaryColor }};
-        @endif
+        background: {{ $primaryColor }};
         color: white !important;
         padding: 32px !important;
         border-bottom: none !important;
@@ -524,11 +512,7 @@
 
     .btn-primary {
         padding: 10px 20px;
-        @if($useGradient)
-            background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
-        @else
-            background: {{ $primaryColor }};
-        @endif
+        background: {{ $primaryColor }};
         color: white;
         border: none;
         border-radius: 8px;

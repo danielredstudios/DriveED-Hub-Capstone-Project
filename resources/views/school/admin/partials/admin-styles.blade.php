@@ -4,7 +4,7 @@
     $primaryColor = blank($settings?->primary_color) ? '#2563eb' : $settings->primary_color;
     $secondaryColor = blank($settings?->secondary_color) ? '#1d4ed8' : $settings->secondary_color;
     $accentColor = blank($settings?->accent_color) ? '#1e40af' : $settings->accent_color;
-    $useGradient = $settings?->use_gradient_header ?? true;
+    $useGradient = false;
     $headerTextColor = blank($settings?->header_text_color) ? '#ffffff' : $settings->header_text_color;
 @endphp
 
@@ -139,7 +139,7 @@
         background: #10b981;
     }
     .stat-card.growth .stat-icon {
-        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        background: #d1fae5;
         color: #047857;
     }
 
@@ -161,7 +161,7 @@
         background: #ef4444;
     }
     .stat-card.danger .stat-icon {
-        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        background: #fee2e2;
         color: #b91c1c;
     }
 
@@ -183,7 +183,7 @@
         background: #10b981;
     }
     .stat-card.success .stat-icon {
-        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        background: #d1fae5;
         color: #047857;
     }
 
@@ -194,7 +194,7 @@
         background: #f59e0b;
     }
     .stat-card.warning .stat-icon {
-        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        background: #fef3c7;
         color: #92400e;
     }
 
@@ -205,7 +205,7 @@
         background: #f59e0b;
     }
     .stat-card.pending .stat-icon {
-        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        background: #fef3c7;
         color: #92400e;
     }
 
@@ -216,7 +216,7 @@
         background: #6b7280;
     }
     .stat-card.inactive .stat-icon {
-        background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+        background: #f3f4f6;
         color: #374151;
     }
 
@@ -296,11 +296,7 @@
     }
 
     .content-card-header {
-        @if($useGradient)
-            background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
-        @else
-            background: {{ $primaryColor }};
-        @endif
+        background: {{ $primaryColor }};
         color: #ffffff;
         padding: 15px 20px;
         font-weight: 600;
@@ -428,11 +424,7 @@
     }
 
     .btn-primary {
-        @if($useGradient)
-            background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
-        @else
-            background: {{ $primaryColor }};
-        @endif
+        background: {{ $primaryColor }};
         color: white;
     }
 
@@ -442,7 +434,7 @@
     }
 
     .btn-success {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        background: #10b981;
         color: white;
     }
 
@@ -452,7 +444,7 @@
     }
 
     .btn-warning {
-        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        background: #f59e0b;
         color: white;
     }
 
@@ -462,7 +454,7 @@
     }
 
     .btn-info {
-        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        background: #6366f1;
         color: white;
     }
 
@@ -472,7 +464,7 @@
     }
 
     .btn-danger {
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        background: #ef4444;
         color: white;
     }
 
@@ -497,11 +489,7 @@
     }
 
     .btn-outline:hover {
-        @if($useGradient)
-            background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
-        @else
-            background: {{ $primaryColor }};
-        @endif
+        background: {{ $primaryColor }};
         color: white;
     }
 
@@ -522,11 +510,7 @@
     }
 
     .admin-table th {
-        @if($useGradient)
-            background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
-        @else
-            background: {{ $primaryColor }};
-        @endif
+        background: {{ $primaryColor }};
         color: #ffffff;
         padding: 14px 16px;
         text-align: left;
@@ -695,11 +679,7 @@
     }
 
     .filter-btn.active {
-        @if($useGradient)
-            background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
-        @else
-            background: {{ $primaryColor }};
-        @endif
+        background: {{ $primaryColor }};
         color: white;
         border-color: transparent;
     }
@@ -767,11 +747,7 @@
     }
 
     .modal-header {
-        @if($useGradient)
-            background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
-        @else
-            background: {{ $primaryColor }};
-        @endif
+        background: {{ $primaryColor }};
         color: #ffffff;
         padding: 20px;
         display: flex;
@@ -903,22 +879,22 @@
     }
 
     .flash-message.success {
-        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        background: #d1fae5;
         border-left: 4px solid #10b981;
     }
 
     .flash-message.error {
-        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        background: #fee2e2;
         border-left: 4px solid #ef4444;
     }
 
     .flash-message.warning {
-        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        background: #fef3c7;
         border-left: 4px solid #f59e0b;
     }
 
     .flash-message.info {
-        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        background: #dbeafe;
         border-left: 4px solid #3b82f6;
     }
 
@@ -1608,7 +1584,7 @@ document.addEventListener('DOMContentLoaded', function() {
     align-items: center;
     justify-content: center;
     gap: 10px;
-    background: {{ $useGradient ? "linear-gradient(135deg, $primaryColor 0%, $secondaryColor 100%)" : $primaryColor }};
+    background: {{ $primaryColor }};
     color: white;
     box-shadow: 0 4px 14px {{ $primaryColor }}40;
 }

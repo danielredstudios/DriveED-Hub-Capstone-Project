@@ -236,24 +236,24 @@
     
     .level-badge.emergency,
     .level-badge.critical {
-        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        background: #fee2e2;
         color: #991b1b;
     }
     
     .level-badge.alert,
     .level-badge.error {
-        background: linear-gradient(135deg, #ffedd5, #fed7aa);
+        background: #ffedd5;
         color: #9a3412;
     }
     
     .level-badge.warning {
-        background: linear-gradient(135deg, #fef3c7, #fde68a);
+        background: #fef3c7;
         color: #92400e;
     }
     
     .level-badge.notice,
     .level-badge.info {
-        background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+        background: #dbeafe;
         color: #1e40af;
     }
     
@@ -274,12 +274,12 @@
     }
     
     .status-badge.resolved {
-        background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+        background: #d1fae5;
         color: #065f46;
     }
     
     .status-badge.unresolved {
-        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        background: #fee2e2;
         color: #991b1b;
     }
     

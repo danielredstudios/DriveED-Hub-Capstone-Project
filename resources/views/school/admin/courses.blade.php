@@ -44,16 +44,8 @@
 
         .btn-create {
             padding: 12px 24px;
-            @if($settings?->use_gradient_header)
-                background: linear-gradient(135deg,
-                        {{ $settings->primary_color }}
-                        0%,
-                        {{ $settings->secondary_color }}
-                        100%);
-            @else background:
-                {{ $settings->primary_color }}
-                ;
-            @endif color: white;
+            background: {{ $settings->primary_color ?? '#2563eb' }};
+            color: white;
             border: none;
             border-radius: 10px;
             font-size: 1rem;
@@ -122,16 +114,8 @@
             width: 100%;
             height: 220px;
             object-fit: cover;
-            @if($settings?->use_gradient_header)
-                background: linear-gradient(135deg,
-                        {{ $settings->primary_color }}
-                        0%,
-                        {{ $settings->secondary_color }}
-                        100%);
-            @else background:
-                {{ $settings->primary_color }}
-                ;
-            @endif display: flex;
+            background: {{ $settings->primary_color ?? '#2563eb' }};
+            display: flex;
             align-items: center;
             justify-content: center;
             color: white;
@@ -433,8 +417,6 @@
             max-height: 280px;
             overflow: hidden;
             position: relative;
-            mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
-            -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
             cursor: pointer;
         }
 
@@ -673,9 +655,7 @@
         }
 
         .preview-guest-hero {
-            background:
-                {{ $settings?->use_gradient_header ? 'linear-gradient(135deg, ' . $settings->primary_color . ' 0%, ' . $settings->secondary_color . ' 100%)' : ($settings->primary_color ?? '#2563eb') }}
-            ;
+            background: {{ $settings->primary_color ?? '#2563eb' }};
             padding: 40px;
             color: white;
             text-align: left;
@@ -1239,16 +1219,8 @@
             border-radius: 10px;
             object-fit: cover;
             flex-shrink: 0;
-            @if($settings?->use_gradient_header)
-                background: linear-gradient(135deg,
-                        {{ $settings->primary_color }}
-                        0%,
-                        {{ $settings->secondary_color }}
-                        100%);
-            @else background:
-                {{ $settings->primary_color ?? '#2563eb' }}
-                ;
-            @endif display: flex;
+            background: {{ $settings->primary_color ?? '#2563eb' }};
+            display: flex;
             align-items: center;
             justify-content: center;
             color: white;
@@ -1354,7 +1326,7 @@
         }
 
         .btn-export-pdf {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            background: #ef4444;
             color: white;
         }
 

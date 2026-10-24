@@ -20,7 +20,7 @@
         $sidebarBg = $settings->sidebar_bg_color ?? '#ffffff';
         $sidebarText = $settings->sidebar_text_color ?? '#333333';
         $sidebarHover = $settings->sidebar_hover_color ?? '#f5f5f5';
-        $useGradient = $settings->use_gradient_header ?? true;
+        $useGradient = false;
 
         // Background settings
         $backgroundType = $settings->background_type ?? 'color';
@@ -33,10 +33,8 @@
         $accentRgb = sscanf($accentColor, "#%02x%02x%02x");
         $backgroundRgb = sscanf($backgroundColor, "#%02x%02x%02x");
 
-        // Generate header background
-        $headerBg = $useGradient
-            ? "linear-gradient(135deg, {$primaryColor} 0%, {$secondaryColor} 100%)"
-            : $primaryColor;
+        // Header background (solid primary color)
+        $headerBg = $primaryColor;
 
         // Generate body background
         if ($backgroundType === 'image' && $backgroundImage) {
@@ -736,9 +734,7 @@
             top: 0;
             height: 100%;
             width: 4px;
-            background:
-                {{ $useGradient ? "linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%)" : "var(--primary-color)" }}
-            ;
+            background: var(--primary-color);
             transform: scaleY(0);
             transition: transform 0.3s ease;
         }
@@ -819,9 +815,7 @@
             top: 0;
             height: 100%;
             width: 4px;
-            background:
-                {{ $useGradient ? "linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%)" : "var(--primary-color)" }}
-            ;
+            background: var(--primary-color);
             transform: scaleY(0);
             transition: transform 0.3s ease;
             z-index: -1;
@@ -895,10 +889,8 @@
         .btn-primary,
         button.btn-primary,
         input[type="submit"].btn-primary {
-            @if(($settings->button_style ?? 'solid') === 'gradient')
-                background: linear-gradient(135deg, var(--btn-primary-bg) 0%, var(--btn-secondary-bg) 100%);
-            @else background: var(--btn-primary-bg);
-            @endif color: var(--btn-primary-text);
+            background: var(--btn-primary-bg);
+            color: var(--btn-primary-text);
         }
 
         .btn-primary:hover {

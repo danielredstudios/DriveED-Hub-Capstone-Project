@@ -51,7 +51,7 @@
 
     .progress-bar {
         height: 100%;
-        background: linear-gradient(90deg, {{ $primaryColor }}, {{ $secondaryColor }});
+        background: {{ $primaryColor }};
         border-radius: 4px;
     }
 

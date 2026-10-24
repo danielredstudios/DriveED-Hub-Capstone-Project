@@ -22,10 +22,22 @@ class SessionReportController extends Controller
             'start' => 'nullable|date_format:Y-m-d',
             'end' => ['nullable', 'date_format:Y-m-d', ...($request->filled('start') ? ['after_or_equal:start'] : [])],
             'student_id' => 'nullable|integer',
+            'session_id' => 'nullable|integer',
+            'booking_id' => 'nullable|integer',
         ]);
 
         $bookings = Booking::where('school_id', $school->id)->with(['student', 'instructor', 'course', 'timeSlot']);
         $logs = SessionCompletion::where('school_id', $school->id)->with(['enrollment.learner', 'enrollment.course', 'instructor']);
+
+        // Per-session filtering
+        if (!empty($filters['session_id'])) {
+            $logs->where('id', $filters['session_id']);
+            $bookings->whereRaw('0 = 1');
+        } elseif (!empty($filters['booking_id'])) {
+            $bookings->where('id', $filters['booking_id']);
+            $logs->whereRaw('0 = 1');
+        }
+
         if ($role === 'student') {
             $bookings->where('student_id', $user->id);
             $logs->whereHas('enrollment', fn ($q) => $q->where('learner_id', $user->id));
@@ -73,17 +85,27 @@ class SessionReportController extends Controller
             'skills' => '', 'source' => 'Completed session #'.$s->id,
         ]))->sortBy('date')->values();
 
+        $isPerSession = !empty($filters['session_id']) || !empty($filters['booking_id']);
+        $targetId = $filters['session_id'] ?? ($filters['booking_id'] ?? null);
+
+        $periodText = $isPerSession
+            ? (!empty($filters['session_id']) ? 'Single Session Record #'.$filters['session_id'] : 'Single Booked Lesson #'.($filters['booking_id'] ?? ''))
+            : (($filters['start'] ?? 'Beginning').' to '.($filters['end'] ?? 'Present'));
+
         $data = [
             'school' => $school, 'rows' => $rows, 'generatedAt' => now(),
             'preparedFor' => $user->name.' ('.ucfirst($role).')',
-            'period' => ($filters['start'] ?? 'Beginning').' to '.($filters['end'] ?? 'Present'),
+            'period' => $periodText,
             'summary' => [
                 'Booked lessons' => $bookings->count(), 'Completed sessions' => $logs->count(),
                 'Graded lessons' => $bookings->whereNotNull('session_grade')->count(),
                 'Completed training hours' => round($logs->sum('hours_completed'), 1),
             ],
         ];
-        $filename = 'training-records-'.$school->slug.'-'.now()->format('Y-m-d');
+
+        $filename = $isPerSession
+            ? 'session-log-'.$targetId.'-'.$school->slug.'-'.now()->format('Y-m-d')
+            : 'session-logs-'.$school->slug.'-'.now()->format('Y-m-d');
         if ($format === 'pdf') {
             $pdf = Pdf::loadView('exports.session-report-pdf', $data)->setPaper('a4', 'landscape');
             $pdf->render();

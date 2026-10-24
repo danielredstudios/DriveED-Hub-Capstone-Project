@@ -28,23 +28,21 @@
     $showWelcomeText = $settings?->login_show_welcome_text ?? false;
     $welcomePosition = $settings?->login_welcome_position ?? 'right';
     $welcomeSize = $settings?->login_welcome_size ?? 16;
-    $headerBgType = $settings?->login_header_bg_type ?? 'gradient';
+    $headerBgType = $settings?->login_header_bg_type ?? 'solid';
     $headerBgColor = $settings?->login_header_bg_color;
     $headerBgImage = $settings?->login_header_bg_image;
     $headerHeight = $settings?->login_header_height ?? 60;
     $headerTextColor = $settings?->login_header_text_color ?? '#ffffff';
     $headerShadow = $settings?->login_header_shadow ?? true;
     
-    // Check if gradient is enabled
-    $useGradient = $settings?->use_gradient_header ?? false;
+    // Gradients disabled to ensure consistent flat color system
+    $useGradient = false;
     
     // Generate header background
     if ($headerBgType === 'solid' && $headerBgColor) {
         $headerBackground = $headerBgColor;
     } elseif ($headerBgType === 'image' && $headerBgImage) {
         $headerBackground = "url('" . asset('storage/' . $headerBgImage) . "')";
-    } elseif ($useGradient) {
-        $headerBackground = "linear-gradient(135deg, {$primaryColor} 0%, {$secondaryColor} 100%)";
     } else {
         $headerBackground = $primaryColor;
     }
@@ -183,8 +181,8 @@
         --primary-color: {{ $primaryColor }};
         --secondary-color: {{ $secondaryColor }};
         --header-height: {{ $headerHeight }}px;
-        --primary-gradient: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $primaryColor }}dd 100%);
-        --secondary-gradient: linear-gradient(135deg, {{ $secondaryColor }} 0%, {{ $secondaryColor }}dd 100%);
+        --primary-gradient: {{ $primaryColor }};
+        --secondary-gradient: {{ $secondaryColor }};
         --school-bg: url('{{ $backgroundImage }}');
     }
 

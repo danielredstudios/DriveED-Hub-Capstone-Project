@@ -8,7 +8,7 @@
     $settings = $school?->schoolSetting;
     $primaryColor = $settings?->primary_color ?? '#2563eb';
     $secondaryColor = $settings?->secondary_color ?? '#1d4ed8';
-    $useGradient = $settings?->use_gradient_header ?? true;
+    $useGradient = false;
 @endphp
 
 @include('school.admin.partials.admin-styles')
@@ -149,11 +149,7 @@
         justify-content: center;
         gap: 8px;
         padding: 14px 16px;
-        @if($useGradient)
-        background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
-        @else
         background: {{ $primaryColor }};
-        @endif
         color: white;
         text-decoration: none;
         border-radius: 10px;

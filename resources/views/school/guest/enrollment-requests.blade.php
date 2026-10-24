@@ -56,7 +56,7 @@
     
     .request-card-header {
         padding: 20px;
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        background: #f8f9fa;
         border-bottom: 1px solid #dee2e6;
         display: flex;
         justify-content: space-between;
@@ -79,17 +79,17 @@
     }
     
     .status-badge.pending {
-        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        background: #fef3c7;
         color: #92400e;
     }
     
     .status-badge.approved {
-        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        background: #d1fae5;
         color: #065f46;
     }
     
     .status-badge.rejected {
-        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        background: #fee2e2;
         color: #991b1b;
     }
     
@@ -188,7 +188,7 @@
 
     .timeline-connector-fill {
         height: 100%;
-        background: linear-gradient(90deg, {{ $primaryColor }}, {{ $secondaryColor }});
+        background: {{ $primaryColor }};
         border-radius: 2px;
         transition: width 0.6s ease;
     }
@@ -323,7 +323,7 @@
     }
     
     .btn-payment-complete {
-        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+        background: #f59e0b;
         color: white !important;
         padding: 12px 28px;
         border-radius: 12px;
@@ -370,12 +370,12 @@
     }
 
     .status-badge.completed {
-        background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+        background: #e0e7ff;
         color: #3730a3;
     }
 
     .status-badge.cancelled {
-        background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+        background: #f3f4f6;
         color: #374151;
     }
 
@@ -471,7 +471,7 @@
     }
 
     .withdraw-modal .modal-header {
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        background: #ef4444;
         color: #ffffff;
         padding: 16px 20px;
         border: 0;
@@ -532,7 +532,7 @@
     }
 
     .withdraw-modal-btn.danger {
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        background: #ef4444;
         color: #ffffff;
         box-shadow: 0 8px 15px -3px rgba(239, 68, 68, 0.2);
     }

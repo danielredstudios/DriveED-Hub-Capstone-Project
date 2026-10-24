@@ -160,7 +160,7 @@
     }
 
     .badge-primary {
-        background: linear-gradient(135deg, {{ $primaryColor }}22 0%, {{ $primaryColor }}33 100%);
+        background: {{ $primaryColor }}22;
         color: {{ $primaryColor }};
     }
 
@@ -224,15 +224,15 @@
     }
 
     .progress-bar-fill.high {
-        background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+        background: #10b981;
     }
 
     .progress-bar-fill.mid {
-        background: linear-gradient(90deg, #f59e0b 0%, #eab308 100%);
+        background: #f59e0b;
     }
 
     .progress-bar-fill.low {
-        background: linear-gradient(90deg, #ef4444 0%, #f97316 100%);
+        background: #ef4444;
     }
 
     .icon-size-16 {
@@ -256,7 +256,7 @@
     }
 
     thead {
-        background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
+        background: {{ $primaryColor }};
         color: white;
     }
 
@@ -365,7 +365,7 @@
     }
 
     .btn-submit.success {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        background: #10b981;
         color: white;
     }
 
@@ -703,7 +703,7 @@
                         </div>
                     </div>
                     <div class="progress-bar-container">
-                        <div class="progress-bar-fill {{ $pdcClass }}" style="background: linear-gradient(90deg, {{ $secondaryColor }} 0%, {{ $primaryColor }} 100%);" data-progress="{{ max($pdcProgress, 5) }}">
+                        <div class="progress-bar-fill {{ $pdcClass }}" style="background: {{ $primaryColor }};" data-progress="{{ max($pdcProgress, 5) }}">
                             {{ $pdcProgress }}%
                         </div>
                     </div>

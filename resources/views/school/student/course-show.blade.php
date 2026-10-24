@@ -83,7 +83,7 @@
 
     .course-header-banner {
         height: 300px;
-        background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
+        background: {{ $primaryColor }};
         border-radius: 20px;
         overflow: hidden;
         position: relative;
@@ -107,7 +107,7 @@
         left: 0;
         right: 0;
         padding: 40px;
-        background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%);
+        background: rgba(0, 0, 0, 0.6);
         color: white;
     }
 

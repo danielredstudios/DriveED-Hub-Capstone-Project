@@ -376,12 +376,12 @@
         }
 
         .legend-indicator-open {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: #10b981;
             margin: 0 5px;
         }
 
         .legend-indicator-assigned {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            background: #3b82f6;
             margin: 0 5px 0 15px;
         }
 
@@ -765,11 +765,7 @@
         }
 
         .date-header {
-            background: linear-gradient(135deg,
-                    {{ $primaryColor }}
-                    0%,
-                    {{ $secondaryColor }}
-                    100%);
+            background: {{ $primaryColor }};
             color: white;
             padding: 15px 20px;
             font-size: 1.1rem;
@@ -906,12 +902,12 @@
         }
 
         .modal-header.modal-success {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: #10b981;
             color: white;
         }
 
         .modal-header.modal-primary {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            background: #3b82f6;
             color: white;
         }
 
@@ -988,11 +984,7 @@
         }
 
         select[multiple] option:checked {
-            background: linear-gradient(135deg,
-                    {{ $primaryColor }}
-                    0%,
-                    {{ $secondaryColor }}
-                    100%);
+            background: {{ $primaryColor }};
             color: white;
             font-weight: 500;
         }
@@ -1068,22 +1060,18 @@
 
         .modal-header {
             position: relative;
-            background: linear-gradient(135deg,
-                    {{ $primaryColor }}
-                    0%,
-                    {{ $secondaryColor }}
-                    100%);
+            background: {{ $primaryColor }};
             color: white;
             padding: 32px;
             border-radius: 16px 16px 0 0;
         }
 
         .modal-header.modal-success {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: #10b981;
         }
 
         .modal-header.modal-primary {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            background: #3b82f6;
         }
 
         .modal-header h5 {
@@ -1142,11 +1130,7 @@
             align-items: center;
             margin-bottom: 25px;
             padding: 15px 20px;
-            background: linear-gradient(135deg,
-                    {{ $primaryColor }}
-                    0%,
-                    {{ $secondaryColor }}
-                    100%);
+            background: {{ $primaryColor }};
             border-radius: 10px;
             color: white;
         }
@@ -1277,14 +1261,14 @@
             background: #64748b; /* Slate: Standard indicator */
         }
 
-        /* Header & Navigation (Branded Gradient) */
+        /* Header & Navigation */
         .calendar-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 25px;
             padding: 15px 24px;
-            background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
+            background: {{ $primaryColor }};
             border-radius: 12px;
             color: white;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
@@ -1349,7 +1333,7 @@
         }
 
         .btn-export-pdf {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            background: #ef4444;
             color: white;
         }
 

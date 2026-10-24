@@ -254,7 +254,7 @@
 
     /* Today's Lesson Section */
     .todays-lesson-section {
-        background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $primaryColor }}dd 100%);
+        background: {{ $primaryColor }};
         border-radius: {{ $borderRadius }}px {{ $borderRadius }}px 0 0;
         padding: 18px 20px;
         color: white;
@@ -725,6 +725,7 @@
         </div>
     </div>
 
+    @include('school.student.partials.license-expiration-alert', ['student' => $student, 'school' => $school])
     @include('school.student.partials.claim-notice')
     @include('school.student.partials.license-guide', ['student' => $student, 'primaryEnrollment' => $primaryEnrollment ?? null, 'activeEnrollments' => $activeEnrollments ?? collect()])
 

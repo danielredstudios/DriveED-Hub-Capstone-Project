@@ -130,7 +130,7 @@
         }
 
         .history-table thead {
-            background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
+            background: {{ $primaryColor }};
             color: #ffffff;
         }
 

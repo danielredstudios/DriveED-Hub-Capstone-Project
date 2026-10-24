@@ -9,7 +9,7 @@
     $settings = $school?->schoolSetting;
     $primaryColor = blank($settings?->primary_color) ? '#2563eb' : $settings->primary_color;
     $secondaryColor = blank($settings?->secondary_color) ? '#1d4ed8' : $settings->secondary_color;
-    $useGradient = $settings?->use_gradient_header ?? true;
+    $useGradient = false;
 @endphp
 
 @include('school.admin.partials.admin-styles')
@@ -24,11 +24,7 @@
     
     .quick-action-btn {
         padding: 15px 20px;
-        @if($useGradient)
-            background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
-        @else
-            background: {{ $primaryColor }};
-        @endif
+        background: {{ $primaryColor }};
         color: white;
         text-decoration: none;
         border-radius: 10px;

@@ -120,11 +120,7 @@
     }
     
     .schedule-date-header {
-        @if($settings?->use_gradient_header)
-            background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $settings?->secondary_color ?? '#0a58ca' }} 100%);
-        @else
-            background: {{ $primaryColor }};
-        @endif
+        background: {{ $primaryColor }};
         color: white;
         padding: 12px 16px;
         border-radius: 0;
@@ -140,7 +136,7 @@
     }
     
     .schedule-date-header.cancelled-header {
-        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        background: #dc3545;
     }
     
     .schedule-date-header .icon {

@@ -293,7 +293,7 @@
         }
 
         .tc-header {
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            background: #2563eb;
             padding: 25px;
             text-align: center;
             color: white;
@@ -397,7 +397,7 @@
         }
 
         .tc-copy-btn {
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            background: #2563eb;
             color: white;
             border: none;
             padding: 8px 16px;
@@ -409,15 +409,15 @@
         }
 
         .tc-copy-btn-success {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: #10b981;
         }
 
         .tc-copy-btn-copied {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: #10b981;
         }
 
         .tc-info-box {
-            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            background: #eff6ff;
             padding: 15px;
             border-radius: 10px;
             margin-bottom: 20px;
@@ -440,7 +440,7 @@
         .tc-close-btn {
             width: 100%;
             padding: 14px;
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            background: #2563eb;
             color: white;
             border: none;
             border-radius: 10px;
@@ -579,7 +579,7 @@
     <div id="testCredentialsModal" style="display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(5px); padding: 12px;">
         <div style="background: white; border-radius: 20px; max-width: 500px; width: 100%; max-height: 92vh; display: flex; flex-direction: column; box-shadow: 0 25px 50px rgba(0,0,0,0.5); overflow: hidden; animation: slideIn 0.3s ease;">
             <!-- Header -->
-            <div style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); padding: 25px; text-align: center; color: white; position: relative;">
+            <div style="background: #2563eb; padding: 25px; text-align: center; color: white; position: relative;">
                 <button type="button" onclick="closeModal()" aria-label="Close test credentials modal" style="position: absolute; top: 12px; right: 12px; border: none; background: rgba(255,255,255,0.2); color: white; width: 34px; height: 34px; border-radius: 999px; cursor: pointer; font-size: 1.25rem; line-height: 1;">&times;</button>
                 <div style="font-size: 48px; margin-bottom: 10px;"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 48px; height: 48px;">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />

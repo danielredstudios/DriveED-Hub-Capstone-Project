@@ -118,6 +118,23 @@ class Payment extends Model
     }
 
     /**
+     * Get the proof of payment URL.
+     */
+    public function getProofUrlAttribute(): ?string
+    {
+        $path = $this->proof_of_payment_path;
+        if (empty($path) && $this->relationLoaded('enrollmentRequest') && $this->enrollmentRequest) {
+            $path = $this->enrollmentRequest->payment_proof_path;
+        }
+
+        if (empty($path)) {
+            return null;
+        }
+
+        return app(\App\Services\ReceiptStorageService::class)->getUrl($path, $this->school ?? $this->school_id);
+    }
+
+    /**
      * Get the status logs for the payment.
      */
     public function statusLogs()

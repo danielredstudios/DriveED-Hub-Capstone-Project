@@ -45,7 +45,7 @@
         .icon-wrapper {
             width: 80px;
             height: 80px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background: var(--primary);
             border-radius: 20px;
             display: flex;
             align-items: center;
@@ -83,7 +83,7 @@
 
         .btn {
             display: inline-block;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background: var(--primary);
             color: white;
             padding: 14px 28px;
             border-radius: 12px;

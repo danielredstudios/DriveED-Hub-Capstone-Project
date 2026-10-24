@@ -937,11 +937,17 @@ class ExportController extends Controller
         try {
             $instructor = $this->getInstructor($school);
 
-            $sessions = SessionCompletion::where('school_id', $school->id)
+            $sessionId = request('session_id');
+
+            $query = SessionCompletion::where('school_id', $school->id)
                 ->where('instructor_id', $instructor->id)
-                ->with(['enrollment.student', 'enrollment.course'])
-                ->orderBy('session_date', 'desc')
-                ->cursor();
+                ->with(['enrollment.student', 'enrollment.course']);
+
+            if ($sessionId) {
+                $query->where('id', $sessionId);
+            }
+
+            $sessions = $query->orderBy('session_date', 'desc')->get();
 
             $totalHours = $sessions->sum('hours_completed');
             $theoreticalCount = $sessions->where('session_type', 'theoretical')->count();
@@ -957,7 +963,11 @@ class ExportController extends Controller
                 'generatedAt' => now(),
             ]);
 
-            return $pdf->download('session-logs-' . date('Y-m-d') . '.pdf');
+            $filename = $sessionId
+                ? 'session-log-' . $sessionId . '-' . date('Y-m-d') . '.pdf'
+                : 'session-logs-' . date('Y-m-d') . '.pdf';
+
+            return $pdf->download($filename);
         } catch (\Exception $e) {
             \App\Models\SystemLog::logError('Instructor PDF Export Error (instructorSessionsPdf): ' . $e->getMessage(), 'database', $e, ['school_id' => $school->id, 'instructor_id' => $instructor->id], $school->id, 'instructor_export_sessions_pdf');
             return back()->with('error', 'Failed to generate PDF report.');
@@ -972,17 +982,23 @@ class ExportController extends Controller
         try {
             $instructor = $this->getInstructor($school);
 
-            $sessions = SessionCompletion::where('school_id', $school->id)
+            $sessionId = request('session_id');
+
+            $query = SessionCompletion::where('school_id', $school->id)
                 ->where('instructor_id', $instructor->id)
-                ->with(['enrollment.student', 'enrollment.course'])
-                ->orderBy('session_date', 'desc')
-                ->cursor();
+                ->with(['enrollment.student', 'enrollment.course']);
+
+            if ($sessionId) {
+                $query->where('id', $sessionId);
+            }
+
+            $sessions = $query->orderBy('session_date', 'desc')->get();
 
             $rows = [];
             foreach ($sessions as $session) {
                 $rows[] = [
                     $session->session_date ? $session->session_date->format('M d, Y') : 'N/A',
-                    $session->session_time ?Carbon::parse($session->session_time)->format('h:i A') : 'N/A',
+                    $session->session_time ? Carbon::parse($session->session_time)->format('h:i A') : 'N/A',
                     $session->enrollment->student->name ?? $session->enrollment->learner->name ?? 'N/A',
                     $session->enrollment->course->title ?? 'N/A',
                     ucfirst($session->session_type),
@@ -994,12 +1010,16 @@ class ExportController extends Controller
 
             $html = $this->buildExcelHtml(
                 $school->name . ' - Session Logs',
-            ['Date', 'Time', 'Student', 'Course', 'Type', 'Hours', 'Status', 'Notes'],
+                ['Date', 'Time', 'Student', 'Course', 'Type', 'Hours', 'Status', 'Notes'],
                 $rows,
-                'Instructor: ' . $instructor->name
+                'Instructor: ' . $instructor->name . ($sessionId ? ' (Session #' . $sessionId . ')' : '')
             );
 
-            return $this->excelResponse($html, 'session-logs-' . date('Y-m-d') . '.xls');
+            $filename = $sessionId
+                ? 'session-log-' . $sessionId . '-' . date('Y-m-d') . '.xls'
+                : 'session-logs-' . date('Y-m-d') . '.xls';
+
+            return $this->excelResponse($html, $filename);
         } catch (\Exception $e) {
             \App\Models\SystemLog::logError('Instructor Excel Export Error (instructorSessionsExcel): ' . $e->getMessage(), 'database', $e, ['school_id' => $school->id, 'instructor_id' => $instructor->id], $school->id, 'instructor_export_sessions_excel');
             return back()->with('error', 'Failed to generate Excel file.');

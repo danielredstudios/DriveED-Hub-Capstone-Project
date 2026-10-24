@@ -31,11 +31,7 @@
 }
 
 .total-spent {
-    @if($settings->use_gradient_header ?? true)
-        background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
-    @else
-        background: {{ $primaryColor }};
-    @endif
+    background: {{ $primaryColor }};
     color: white;
     border-radius: 12px;
     padding: 30px;

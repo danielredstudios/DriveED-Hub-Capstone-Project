@@ -9,7 +9,7 @@
     $primaryColor = $settings?->primary_color ?? '#2563eb';
     $secondaryColor = $settings?->secondary_color ?? '#1d4ed8';
     $accentColor = $settings?->accent_color ?? '#1e40af';
-    $useGradient = $settings?->use_gradient_header ?? true;
+    $useGradient = false;
     $headerTextColor = $settings?->header_text_color ?? '#ffffff';
     ?>
 
@@ -96,20 +96,8 @@
 
         .section-header {
             padding: 12px 18px;
-            <?php if ($useGradient): ?>
-            background: linear-gradient(135deg,
-                    <?php    echo $primaryColor; ?>
-                    0%,
-                    <?php    echo $secondaryColor; ?>
-                    100%);
-            <?php else: ?>
-            background:
-                <?php    echo $primaryColor; ?>
-            ;
-            <?php endif; ?>
-            color:
-                <?php echo $headerTextColor; ?>
-            ;
+            background: <?php echo $primaryColor; ?>;
+            color: <?php echo $headerTextColor; ?>;
             cursor: pointer;
             display: flex;
             justify-content: space-between;
@@ -316,17 +304,7 @@
         .bar-fill {
             height: 100%;
             border-radius: 6px;
-            <?php if ($useGradient): ?>
-            background: linear-gradient(90deg,
-                    <?php    echo $primaryColor; ?>
-                    0%,
-                    <?php    echo $secondaryColor; ?>
-                    100%);
-            <?php else: ?>
-            background:
-                <?php    echo $primaryColor; ?>
-            ;
-            <?php endif; ?>
+            background: <?php echo $primaryColor; ?>;
             transition: width 0.6s ease;
             display: flex;
             align-items: center;
@@ -505,12 +483,12 @@
             align-items: center;
             gap: 12px;
             padding: 15px 20px;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+            background: #f8fafc;
             border-radius: 8px;
             text-decoration: none;
             color: #333;
             transition: all 0.3s ease;
-            border: 2px solid transparent;
+            border: 1px solid #e5e7eb;
         }
 
         .report-link:hover {
@@ -555,17 +533,7 @@
             align-items: center;
             gap: 8px;
             padding: 10px 18px;
-            <?php if ($useGradient): ?>
-            background: linear-gradient(135deg,
-                    <?php    echo $primaryColor; ?>
-                    0%,
-                    <?php    echo $secondaryColor; ?>
-                    100%);
-            <?php else: ?>
-            background:
-                <?php    echo $primaryColor; ?>
-            ;
-            <?php endif; ?>
+            background: <?php echo $primaryColor; ?>;
             color: white;
             border: none;
             border-radius: 8px;

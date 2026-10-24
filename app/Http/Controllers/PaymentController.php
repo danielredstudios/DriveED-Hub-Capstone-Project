@@ -63,10 +63,11 @@ class PaymentController extends Controller
 
         $payments = $query->latest('paid_on')->paginate(10);
 
-        // Append temporary URLs for GCash receipts
-        $payments->getCollection()->transform(function ($payment) use ($storageService) {
-            if ($payment->method === 'gcash' && $payment->proof_of_payment_path) {
-                $payment->proof_url = $storageService->getUrl($payment->proof_of_payment_path);
+        // Append secure URLs for receipts and payment proofs
+        $payments->getCollection()->transform(function ($payment) use ($storageService, $school) {
+            $proofPath = $payment->proof_of_payment_path ?: $payment->enrollmentRequest?->payment_proof_path;
+            if ($proofPath) {
+                $payment->proof_url = $storageService->getUrl($proofPath, $school);
             }
             return $payment;
         });

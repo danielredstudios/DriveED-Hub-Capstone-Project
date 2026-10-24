@@ -76,7 +76,7 @@
 
     .progress-bar-fill {
         height: 100%;
-        background: linear-gradient(90deg, {{ $primaryColor }}, #10b981);
+        background: {{ $primaryColor }};
         border-radius: 8px;
         display: flex;
         align-items: center;

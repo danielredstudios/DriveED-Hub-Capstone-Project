@@ -117,7 +117,7 @@
     
     .course-banner {
         height: 160px;
-        background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
+        background: {{ $primaryColor }};
         display: flex;
         align-items: center;
         justify-content: center;
@@ -139,7 +139,7 @@
         position: absolute;
         top: 10px;
         left: 10px;
-        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        background: #f59e0b;
         color: white;
         padding: 5px 12px;
         border-radius: 20px;

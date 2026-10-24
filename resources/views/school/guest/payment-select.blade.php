@@ -208,7 +208,7 @@
     }
     
     .btn-payment-submit {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        background: var(--primary-color);
         border: none;
     }
     

@@ -8,7 +8,7 @@
     $settings = $school?->schoolSetting;
     $primaryColor = $settings?->primary_color ?? '#2563eb';
     $secondaryColor = $settings?->secondary_color ?? '#1d4ed8';
-    $useGradient = $settings?->use_gradient_header ?? true;
+    $useGradient = false;
 @endphp
 
 @include('school.admin.partials.admin-styles')
@@ -77,7 +77,7 @@
 
     /* Student Info Box */
     .student-info-box {
-        background: linear-gradient(135deg, {{ $primaryColor }}08 0%, {{ $primaryColor }}12 100%);
+        background: #f8fafc;
         border: 1px solid {{ $primaryColor }}30;
         border-radius: 10px;
         padding: 16px 20px;
@@ -91,11 +91,7 @@
         width: 48px;
         height: 48px;
         border-radius: 50%;
-        @if($useGradient)
-            background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
-        @else
-            background: {{ $primaryColor }};
-        @endif
+        background: {{ $primaryColor }};
         color: white;
         display: flex;
         align-items: center;
@@ -223,11 +219,7 @@
 
     .btn-submit {
         padding: 10px 24px;
-        @if($useGradient)
-            background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
-        @else
-            background: {{ $primaryColor }};
-        @endif
+        background: {{ $primaryColor }};
         color: white;
         border: none;
         border-radius: 8px;

@@ -8,7 +8,7 @@
     $settings = $school?->schoolSetting;
     $primaryColor = $settings?->primary_color ?? '#2563eb';
     $secondaryColor = $settings?->secondary_color ?? '#1d4ed8';
-    $useGradient = $settings?->use_gradient_header ?? true;
+    $useGradient = false;
     // ...existing code...
 @endphp
 
@@ -21,11 +21,7 @@
         align-items: center;
         gap: 8px;
         padding: 10px 20px;
-        @if($useGradient)
-        background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
-        @else
         background: {{ $primaryColor }};
-        @endif
         color: white;
         border: none;
         border-radius: 10px;
@@ -246,6 +242,10 @@
     .btn-view:hover { background: #bfdbfe; color: #1e40af; }
     .btn-edit { background: #fef3c7; color: #92400e; }
     .btn-edit:hover { background: #fde68a; color: #92400e; }
+    .btn-pdf { background: #fee2e2; color: #b91c1c; }
+    .btn-pdf:hover { background: #fecaca; color: #991b1b; }
+    .btn-excel { background: #dcfce7; color: #15803d; }
+    .btn-excel:hover { background: #bbf7d0; color: #166534; }
 
     /* ── Empty State ── */
     .empty-state { text-align: center; padding: 48px 20px; }
@@ -393,13 +393,13 @@
                     Export
                 </button>
                 <div class="export-menu" id="exportMenu">
-                    <a href="{{ school_route('instructor.exports.sessions.pdf') }}">
+                    <a href="{{ school_route('instructor.session-report', ['format' => 'pdf']) }}" download>
                         <svg class="icon-18" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#ef4444"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                        Download PDF
+                        Export Whole Sessions (PDF)
                     </a>
-                    <a href="{{ school_route('instructor.exports.sessions.excel') }}">
+                    <a href="{{ school_route('instructor.session-report', ['format' => 'xlsx']) }}" download>
                         <svg class="icon-18" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#10b981"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        Download Excel
+                        Export Whole Sessions (Excel)
                     </a>
                 </div>
             </div>
@@ -549,6 +549,18 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                     </svg>
                                 </a>
+                                <a href="{{ school_route('instructor.session-report', ['format' => 'pdf', 'session_id' => $session->id]) }}" 
+                                   class="btn-action btn-pdf" title="Export Session Log (PDF)" download>
+                                    <svg class="icon-16" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                    </svg>
+                                </a>
+                                <a href="{{ school_route('instructor.session-report', ['format' => 'xlsx', 'session_id' => $session->id]) }}" 
+                                   class="btn-action btn-excel" title="Export Session Log (Excel)" download>
+                                    <svg class="icon-16" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                </a>
                             </div>
                         </td>
                     </tr>
@@ -583,6 +595,8 @@
                 <div class="card-actions">
                     <a href="{{ school_route('instructor.sessions.show', ['sessionCompletion' => $session->id]) }}" class="btn-view-card">View</a>
                     <a href="{{ school_route('instructor.sessions.edit', ['sessionCompletion' => $session->id]) }}" class="btn-edit-card">Edit</a>
+                    <a href="{{ school_route('instructor.session-report', ['format' => 'pdf', 'session_id' => $session->id]) }}" class="btn-view-card" style="background: #fee2e2; color: #b91c1c;" title="Export Session (PDF)" download>PDF</a>
+                    <a href="{{ school_route('instructor.session-report', ['format' => 'xlsx', 'session_id' => $session->id]) }}" class="btn-view-card" style="background: #dcfce7; color: #15803d;" title="Export Session (Excel)" download>XLSX</a>
                 </div>
             </div>
             @endforeach

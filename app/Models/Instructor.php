@@ -36,6 +36,7 @@ class Instructor extends Authenticatable
         'license_status',
         'restriction_codes',
         'license_rejection_reason',
+        'license_expiration_date',
     ];
 
     protected $hidden = [
@@ -52,6 +53,7 @@ class Instructor extends Authenticatable
             'last_login_at' => 'datetime',
             'last_logout_at' => 'datetime',
             'restriction_codes' => 'array',
+            'license_expiration_date' => 'date',
         ];
     }
 
@@ -116,5 +118,97 @@ class Instructor extends Authenticatable
         if ($required === 'D') return count(array_intersect(['D', 'DE'], $codes)) > 0;
 
         return false;
+    }
+
+    /**
+     * Check if the instructor has a recorded license expiration date.
+     */
+    public function hasLicenseExpiration(): bool
+    {
+        return !empty($this->license_expiration_date);
+    }
+
+    /**
+     * Check if the instructor's license is already expired.
+     */
+    public function isLicenseExpired(): bool
+    {
+        return $this->license_expiration_date && $this->license_expiration_date->isPast();
+    }
+
+    /**
+     * Check if the instructor's license is expiring within the specified days.
+     */
+    public function isLicenseExpiringSoon(int $days = 60): bool
+    {
+        if (!$this->license_expiration_date) {
+            return false;
+        }
+
+        $now = now()->startOfDay();
+        $expiry = $this->license_expiration_date->copy()->startOfDay();
+
+        return $expiry->greaterThanOrEqualTo($now) && $now->diffInDays($expiry, false) <= $days;
+    }
+
+    /**
+     * Get remaining days until license expiration.
+     */
+    public function getLicenseDaysRemaining(): ?int
+    {
+        if (!$this->license_expiration_date) {
+            return null;
+        }
+
+        $now = now()->startOfDay();
+        $expiry = $this->license_expiration_date->copy()->startOfDay();
+
+        return (int) $now->diffInDays($expiry, false);
+    }
+
+    /**
+     * Get status badge array for UI presentation.
+     */
+    public function getLicenseStatusBadge(): ?array
+    {
+        if (!$this->license_expiration_date) {
+            return null;
+        }
+
+        $days = $this->getLicenseDaysRemaining();
+
+        if ($days < 0) {
+            return [
+                'state' => 'expired',
+                'label' => 'Expired ' . abs($days) . ' ' . (abs($days) === 1 ? 'day' : 'days') . ' ago',
+                'badge_class' => 'badge-danger',
+                'color' => '#ef4444',
+                'bg' => '#fee2e2',
+                'text_color' => '#991b1b',
+                'days' => $days,
+            ];
+        }
+
+        if ($days <= 60) {
+            return [
+                'state' => 'expiring_soon',
+                'label' => 'Expiring in ' . $days . ' ' . ($days === 1 ? 'day' : 'days'),
+                'badge_class' => 'badge-warning',
+                'color' => '#f59e0b',
+                'bg' => '#fef3c7',
+                'text_color' => '#92400e',
+                'days' => $days,
+            ];
+        }
+
+        return [
+            'state' => 'active',
+            'label' => 'Valid (' . $days . ' days left)',
+            'badge_class' => 'badge-success',
+            'color' => '#10b981',
+            'bg' => '#d1fae5',
+            'text_color' => '#065f46',
+            'days' => $days,
+        ];
     }
 }

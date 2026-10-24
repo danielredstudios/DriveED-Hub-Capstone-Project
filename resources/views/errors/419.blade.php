@@ -29,9 +29,7 @@
         .code {
             font-size: 72px;
             font-weight: 800;
-            background: linear-gradient(135deg, #38bdf8, #818cf8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #38bdf8;
             line-height: 1;
             margin-bottom: 12px;
         }

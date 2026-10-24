@@ -128,14 +128,11 @@ class SchoolSetting extends Model
     }
 
     /**
-     * Get the gradient CSS for the header
+     * Get the header background color (solid primary color)
      */
     public function getHeaderGradient(): string
     {
-        if ($this->use_gradient_header) {
-            return "linear-gradient(135deg, {$this->primary_color} 0%, {$this->secondary_color} 100%)";
-        }
-        return $this->primary_color;
+        return $this->primary_color ?? '#2563eb';
     }
 
     /**
@@ -159,16 +156,13 @@ class SchoolSetting extends Model
      */
     public function getLoginHeaderBackground(): string
     {
-        $bgType = $this->login_header_bg_type ?? 'gradient';
+        $bgType = $this->login_header_bg_type ?? 'solid';
         
-        if ($bgType === 'solid' && $this->login_header_bg_color) {
-            return $this->login_header_bg_color;
-        } elseif ($bgType === 'image' && $this->login_header_bg_image) {
+        if ($bgType === 'image' && $this->login_header_bg_image) {
             return "url('" . asset('storage/' . $this->login_header_bg_image) . "')";
-        } else {
-            // Default gradient
-            return "linear-gradient(135deg, {$this->primary_color} 0%, {$this->secondary_color} 100%)";
         }
+
+        return $this->login_header_bg_color ?? $this->primary_color ?? '#2563eb';
     }
 
     /**

@@ -23,7 +23,7 @@
         }
 
         .test-header {
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            background: #2563eb;
             color: white;
             padding: 20px;
             border-radius: 12px;
@@ -76,7 +76,7 @@
         .section-icon {
             width: 28px;
             height: 28px;
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            background: #2563eb;
             border-radius: 8px;
             display: flex;
             align-items: center;
@@ -256,7 +256,7 @@
         }
 
         .total-hours {
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            background: #2563eb;
             color: white;
             padding: 20px;
             border-radius: 12px;
@@ -295,7 +295,7 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            background: #2563eb;
             color: white;
             flex: 1;
         }

@@ -66,7 +66,7 @@
     table { width: 100%; border-collapse: collapse; }
 
     thead {
-        background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
+        background: {{ $primaryColor }};
         color: white;
     }
 
@@ -96,7 +96,7 @@
 
     .user-avatar {
         width: 36px; height: 36px; border-radius: 50%;
-        background: linear-gradient(135deg, {{ $primaryColor }}, {{ $secondaryColor }});
+        background: {{ $primaryColor }};
         color: white; display: flex; align-items: center; justify-content: center;
         font-weight: 700; font-size: 0.95rem; flex-shrink: 0;
     }
@@ -121,9 +121,9 @@
     }
 
     .progress-bar-fill { height: 100%; border-radius: 10px; }
-    .progress-bar-fill.high { background: linear-gradient(90deg,#10b981,#059669); }
-    .progress-bar-fill.mid  { background: linear-gradient(90deg,#f59e0b,#eab308); }
-    .progress-bar-fill.low  { background: linear-gradient(90deg,#ef4444,#f97316); }
+    .progress-bar-fill.high { background: #10b981; }
+    .progress-bar-fill.mid  { background: #f59e0b; }
+    .progress-bar-fill.low  { background: #ef4444; }
 
     .icon-13 { width: 13px; height: 13px; }
     .icon-15 { width: 15px; height: 15px; }
@@ -164,7 +164,7 @@
     }
 
     .btn-mark-passed {
-        background: linear-gradient(135deg,#10b981,#059669); color: white;
+        background: #10b981; color: white;
     }
     .btn-mark-passed:hover {
         transform: translateY(-1px);
@@ -185,7 +185,7 @@
     }
 
     .section-header.ready-bg {
-        background: linear-gradient(135deg,#f0fdf4,#dcfce7);
+        background: #f0fdf4;
         border-bottom-color:#a7f3d0;
     }
 
@@ -213,7 +213,7 @@
         display: flex; align-items: center; justify-content: center;
     }
 
-    .empty-state-icon.green  { background: linear-gradient(135deg,#d1fae5,#a7f3d0); color:#065f46; }
+    .empty-state-icon.green  { background: #d1fae5; color:#065f46; }
     .empty-state-icon.muted  { background:#f3f4f6; color:#9ca3af; }
 
     .empty-state-text { font-size:0.95rem; color:#6b7280; line-height:1.5; }
@@ -251,7 +251,7 @@
 
     .modal-icon {
         width:56px; height:56px; margin:0 auto 16px;
-        background:linear-gradient(135deg,#d1fae5,#a7f3d0); border-radius:50%;
+        background:#d1fae5; border-radius:50%;
         display:flex; align-items:center; justify-content:center; color:#065f46;
     }
 
@@ -269,7 +269,7 @@
     .modal-btn-cancel { background:#f3f4f6; color:#6b7280; }
     .modal-btn-cancel:hover { background:#e5e7eb; }
 
-    .modal-btn-confirm { background:linear-gradient(135deg,#10b981,#059669); color:white; }
+    .modal-btn-confirm { background:#10b981; color:white; }
     .modal-btn-confirm:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(16,185,129,0.35); }
 
     @media (max-width: 768px) {

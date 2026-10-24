@@ -96,12 +96,12 @@
     }
 
     .stat-icon-box.success {
-        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        background: #d1fae5;
         color: #065f46;
     }
 
     .stat-icon-box.primary {
-        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        background: #dbeafe;
         color: #1e40af;
     }
 
@@ -184,7 +184,7 @@
     }
 
     thead {
-        background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
+        background: {{ $primaryColor }};
         color: white;
     }
 
@@ -228,7 +228,7 @@
         width: 38px;
         height: 38px;
         border-radius: 50%;
-        background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
+        background: {{ $primaryColor }};
         color: white;
         display: flex;
         align-items: center;

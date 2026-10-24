@@ -129,7 +129,19 @@
             <h1 class="title">Instructor Session Details</h1>
             <div class="subtitle">Session completion information you submitted</div>
         </div>
-        <a class="back-link" href="{{ school_route('instructor.sessions.index') }}">&larr; Back to Session Logs</a>
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <a href="{{ school_route('instructor.session-report', ['format' => 'pdf', 'session_id' => $sessionCompletion->id]) }}" 
+               style="background: #dc2626; color: white; padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);" download>
+                <svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Export Session (PDF)
+            </a>
+            <a href="{{ school_route('instructor.session-report', ['format' => 'xlsx', 'session_id' => $sessionCompletion->id]) }}" 
+               style="background: #16a34a; color: white; padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);" download>
+                <svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Export Session (Excel)
+            </a>
+            <a class="back-link" href="{{ school_route('instructor.sessions.index') }}">&larr; Back to Session Logs</a>
+        </div>
     </div>
 
     @if(isset($sessionCompletion))

@@ -91,13 +91,41 @@ class StorageController extends Controller
     public function streamReceipt(Request $request, School $school)
     {
         $path = $request->query('path');
-        abort_unless((bool)$path, 404);
+        abort_unless((bool)$path, 404, 'Receipt path not specified.');
+
+        // Normalize path (handle Windows separators, leading slashes, storage/ prefixes)
+        $path = str_replace('\\', '/', $path);
+        $path = ltrim($path, '/');
+        if (str_starts_with($path, 'storage/')) {
+            $path = substr($path, 8);
+        }
+
+        // Prevent path traversal
+        abort_if(str_contains($path, '..'), 403, 'Invalid receipt path traversal.');
 
         // Authorization: Must be logged in (student or admin)
-        abort_unless(Auth::guard('student')->check() || Auth::guard('admin')->check(), 403);
+        $admin = Auth::guard('admin')->user();
+        $student = Auth::guard('student')->user();
+        abort_unless($admin || $student, 403, 'Unauthorized access.');
 
-        // Security check: Only allow known storage directories
-        $allowedPrefixes = ['receipts/', 'screenshots/payments/', 'proof_of_payment/'];
+        // School boundary check
+        if ($admin && !(method_exists($admin, 'isSystemAdmin') && $admin->isSystemAdmin())) {
+            abort_if((int)$admin->school_id !== (int)$school->id, 403, 'School mismatch.');
+        }
+        if ($student) {
+            abort_if((int)$student->school_id !== (int)$school->id, 403, 'School mismatch.');
+        }
+
+        // Security check: Only allow known receipt / payment proof directories
+        $allowedPrefixes = [
+            'receipts/',
+            'screenshots/',
+            'proof_of_payment/',
+            'proof_of_payments/',
+            'proofs/',
+            'guest-data/',
+            'payments/',
+        ];
         $isAllowed = false;
         foreach ($allowedPrefixes as $prefix) {
             if (str_starts_with($path, $prefix)) {
@@ -105,13 +133,32 @@ class StorageController extends Controller
                 break;
             }
         }
-        abort_unless($isAllowed, 403, 'Invalid receipt path.');
+        abort_unless($isAllowed, 403, 'Invalid receipt directory.');
 
         // Try both local and public disks for deployment robustness
-        foreach (['local', 'public'] as $diskName) {
-            if (Storage::disk($diskName)->exists($path)) {
-                return $this->fileResponseFromDisk($diskName, $path);
+        $disks = ['local', 'public'];
+        foreach ($disks as $diskName) {
+            $disk = Storage::disk($diskName);
+            if ($disk->exists($path)) {
+                $fullPath = $disk->path($path);
+                $mimeType = $disk->mimeType($path) ?? 'image/jpeg';
+                $filename = basename($path);
+                return response()->file($fullPath, [
+                    'Content-Type' => $mimeType,
+                    'Content-Disposition' => 'inline; filename="' . $filename . '"',
+                ]);
             }
+        }
+
+        // Fallback: check directly in public_path (e.g. public/guest-data/...)
+        $publicFilePath = public_path($path);
+        if (file_exists($publicFilePath) && is_file($publicFilePath)) {
+            $mimeType = mime_content_type($publicFilePath) ?: 'image/jpeg';
+            $filename = basename($path);
+            return response()->file($publicFilePath, [
+                'Content-Type' => $mimeType,
+                'Content-Disposition' => 'inline; filename="' . $filename . '"',
+            ]);
         }
 
         abort(404, 'Receipt file not found.');

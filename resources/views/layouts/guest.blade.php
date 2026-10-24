@@ -35,7 +35,7 @@
         }
         
         .guest-header {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            background: var(--primary-color);
             padding: 1.25rem 0;
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
             color: white;

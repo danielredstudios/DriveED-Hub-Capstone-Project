@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            background: #1e3a8a;
             min-height: 100vh;
             padding: 20px;
             display: flex;
@@ -116,19 +116,19 @@
         }
 
         .account-card.admin .account-icon {
-            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            background: #fee2e2;
         }
 
         .account-card.instructor .account-icon {
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            background: #dbeafe;
         }
 
         .account-card.student .account-icon {
-            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            background: #d1fae5;
         }
 
         .account-card.guest .account-icon {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            background: #fef3c7;
         }
 
         .account-title {
@@ -200,7 +200,7 @@
         }
 
         .copy-btn {
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            background: #2563eb;
             color: white;
             border: none;
             padding: 6px 12px;
@@ -220,14 +220,14 @@
         }
 
         .copy-btn.copied {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: #10b981;
         }
 
         .login-btn {
             display: block;
             width: 100%;
             padding: 12px;
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            background: #2563eb;
             color: white;
             text-decoration: none;
             text-align: center;

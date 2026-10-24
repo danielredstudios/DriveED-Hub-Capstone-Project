@@ -39,8 +39,14 @@ if (! function_exists('current_school')) {
 }
 
 if (! function_exists('school_route')) {
-    function school_route(string $name, array $parameters = [], ?School $school = null): string
+    function school_route(string $name, array|School|null $parameters = [], ?School $school = null): string
     {
+        if ($parameters instanceof School) {
+            $school = $parameters;
+            $parameters = [];
+        }
+
+        $parameters = is_array($parameters) ? $parameters : [];
         $school ??= current_school();
 
         if (! $school instanceof School) {

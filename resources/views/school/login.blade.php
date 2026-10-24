@@ -69,7 +69,7 @@
             transform: translateX(-50%);
             width: 50px;
             height: 3px;
-            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--secondary-color)dd 100%);
+            background: var(--secondary-color);
             border-radius: 2px;
         }
 
@@ -225,9 +225,6 @@
             width: 100%;
             padding: 10px;
             background: var(--primary-color);
-            @if($settings?->use_gradient_header ?? false)
-                background: linear-gradient(135deg, {{ $settings?->primary_color ?? '#3b82f6' }} 0%, {{ $settings?->secondary_color ?? '#2563eb' }} 100%);
-            @endif
             color: white;
             border: none;
             border-radius: 8px;

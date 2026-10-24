@@ -80,7 +80,7 @@
     }
     
     .requests-table thead {
-        background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
+        background: {{ $primaryColor }};
         color: #ffffff;
     }
 
@@ -622,7 +622,7 @@
 
     .export-btn {
         padding: 6px 14px;
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        background: #ef4444;
         display: flex;
         align-items: center;
         gap: 8px;

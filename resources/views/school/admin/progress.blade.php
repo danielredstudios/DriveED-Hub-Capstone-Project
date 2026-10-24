@@ -58,7 +58,7 @@
 }
 
 .progress-table thead {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    background: #2563eb;
     color: white;
 }
 
@@ -227,7 +227,7 @@
 
 .progress-bar-fill {
     height: 100%;
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    background: #2563eb;
     border-radius: 20px;
     transition: width 0.5s ease;
     display: flex;

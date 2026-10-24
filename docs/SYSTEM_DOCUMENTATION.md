@@ -7,6 +7,7 @@
 ## Table of Contents
 
 1. [System Overview](#1-system-overview)
+   - [Scope and System Limitations](#11-scope-and-system-limitations)
 2. [Technology Stack](#2-technology-stack)
 3. [User Roles](#3-user-roles)
 4. [Database Schema](#4-database-schema)
@@ -25,6 +26,19 @@
 - **Multi-tenant:** One system, multiple schools. Each school has a unique URL slug (e.g., `/smart-driving`, `/lyspeed-driving`)
 - **School isolation:** Data is separated by `school_id` - students from School A cannot see School B's data
 - **Role-based access:** Four user types with different permissions
+
+### 1.1 Scope and System Limitations
+
+#### System Scope:
+- Multi-tenant driving school operations (Admin, Instructor, Student, Guest, System Admin).
+- Theoretical Driving Course (TDC) digital curriculum, modular progress, assessments, and readiness tracking.
+- Practical Driving Course (PDC) session scheduling, vehicle allocation, instructor evaluations, and completed hours verification.
+- Student enrollment workflows, payment logging (GCash/Cash), and completion reports.
+
+#### System Limitations & Legal Authority:
+- **Driver's License Issuance & Authority:** The actual issuance and renewal of driver's licenses are handled exclusively by the Land Transportation Office (LTO), not by the application or driving school. The application only provides lessons, structured training, and guidance to help users prepare for obtaining a license.
+- **Driver's License Renewal:** License renewal must be processed directly through the LTO, not through the driving school or the application. Any refresher modules or assessments provided within the system are for educational and preparatory purposes only.
+- **Physical Examinations & Biometrics:** Medical examinations and official biometric capturing must be executed at accredited LTO clinics and LTO physical offices in accordance with statutory regulations.
 
 ---
 

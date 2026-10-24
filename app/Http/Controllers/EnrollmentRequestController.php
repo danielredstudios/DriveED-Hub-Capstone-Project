@@ -1810,6 +1810,13 @@ class EnrollmentRequestController extends Controller
         if (empty($path))
             abort(404, 'No payment proof path found for this enrollment.');
 
+        // Normalize path
+        $path = str_replace('\\', '/', $path);
+        $path = ltrim($path, '/');
+        if (str_starts_with($path, 'storage/')) {
+            $path = substr($path, 8);
+        }
+
         // Try both public and local disks for robustness
         foreach (['public', 'local'] as $diskName) {
             if (Storage::disk($diskName)->exists($path)) {
@@ -1823,6 +1830,17 @@ class EnrollmentRequestController extends Controller
                     'Content-Disposition' => 'inline; filename="' . $filename . '"',
                 ]);
             }
+        }
+
+        // Fallback: check directly in public_path
+        $publicFilePath = public_path($path);
+        if (file_exists($publicFilePath) && is_file($publicFilePath)) {
+            $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+            $filename = "payment-receipt-{$enrollmentRequest->id}.{$extension}";
+
+            return response()->file($publicFilePath, [
+                'Content-Disposition' => 'inline; filename="' . $filename . '"',
+            ]);
         }
 
         Log::warning('Payment proof file not found during admin view', [

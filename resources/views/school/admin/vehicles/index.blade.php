@@ -12,7 +12,7 @@
     
     $primaryColor = $settings?->primary_color ?? '#6366f1'; 
     $secondaryColor = $settings?->secondary_color ?? '#4338ca';
-    $useGradient = $settings?->use_gradient_header;
+    $useGradient = false;
 
     $totalVehicles = $vehicles->count();
     $activeCount = $vehicles->where('status', 'active')->count();
@@ -66,8 +66,7 @@
     .modal-content { background: white; border-radius: 16px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4); overflow: hidden; display: flex; flex-direction: column; animation: modalEnter 0.3s ease-out; }
     @keyframes modalEnter { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     .modal-header {
-        @if($useGradient) background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
-        @else background: {{ $primaryColor }}; @endif
+        background: {{ $primaryColor }};
         color: white; padding: 24px 32px; position: relative;
     }
     .modal-header h5 { font-size: 1.25rem; font-weight: 600; margin: 0; display: flex; align-items: center; gap: 12px; }
@@ -79,8 +78,7 @@
     .vehicle-table-card { background: white; border-radius: 16px; box-shadow: 0 2px 12px {{ $primaryColor }}10; overflow: hidden; border: 1px solid {{ $primaryColor }}08; }
     .vehicle-table { width: 100%; border-collapse: collapse; }
     .vehicle-table thead {
-        @if($useGradient) background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
-        @else background: {{ $primaryColor }}; @endif
+        background: {{ $primaryColor }};
         color: white;
     }
     .vehicle-table thead th { padding: 16px 20px; text-align: left; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: white; letter-spacing: 0.05em; }
@@ -121,8 +119,7 @@
     .btn-activate { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; height: 34px; padding: 0 12px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: all 0.2s; }
     .btn-activate:hover { transform: translateY(-1px); filter: brightness(0.95); }
     .btn-primary { 
-        @if($useGradient) background: linear-gradient(135deg, {{ $primaryColor }} 0%, {{ $secondaryColor }} 100%);
-        @else background: {{ $primaryColor }}; @endif
+        background: {{ $primaryColor }};
         color: white; box-shadow: 0 4px 12px {{ $primaryColor }}30;
     }
     .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px {{ $primaryColor }}40; opacity: 0.95; }
