@@ -47,11 +47,7 @@ Thumbs.db
 /routes_list.txt
 /routes_utf8.json
 /tmp
-/docs/screenshots/_audit_integrity.php
-/tmp
-/docs/screenshots/_check_db.php
-/tmp
-/docs/screenshots/_verify_student_parity.php
+
 
 # Deployment & Config
 /phpunit.xml
@@ -61,4 +57,4 @@ Thumbs.db
 !.env.example
 !.env.docker.example
 /tmp
-/docs/screenshots/
+

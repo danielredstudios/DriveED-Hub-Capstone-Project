@@ -15,11 +15,27 @@ The following changes address feedback from capstone advisory consultations and 
 - Added a `proof_url` accessor on the `Payment` model that automatically checks both the payment record and linked enrollment request.
 - Updated `StorageController` to normalize path separators, whitelist legacy directories (`guest-data/`, `receipts/`, `screenshots/`), and search both `local` and `public` disks.
 
+![Admin Payments Table](docs/screenshots/01_admin_payments_table.png)
+*Admin Payments & Transactions table with working "View Receipt" action.*
+
+![Payment Receipt Modal Stream](docs/screenshots/02_payment_receipt_image_stream.png)
+*Inline receipt proof modal streaming verified image directly from secure storage.*
+
+---
+
 ### Instructor Session Log Exports (Whole & Per-Session)
 - Updated `SessionReportController` to accept `session_id` or `booking_id` for exporting individual session logs in addition to date-range exports.
 - Added a whole-session export dropdown in the instructor session completions view (`instructor/sessions/index.blade.php`) supporting PDF and Excel (.xlsx).
 - Added 1-click PDF and Excel download buttons on each row of the instructor sessions table and mobile cards.
 - Added "Export Session (PDF)" and "Export Session (Excel)" action buttons to the single session detail view (`instructor/sessions/show.blade.php`).
+
+![Instructor Sessions Export Controls](docs/screenshots/08_instructor_sessions_list_exports.png)
+*Instructor session completions view with whole-history export dropdown and per-row PDF/Excel actions.*
+
+![Single Session Detail Export](docs/screenshots/09_instructor_session_detail_export.png)
+*Individual session log detail page with direct PDF and Excel export buttons.*
+
+---
 
 ### Driver's License Expiration Reminder
 - Added a database migration adding `license_expiration_date` and `license_number` to students and instructors.
@@ -28,14 +44,32 @@ The following changes address feedback from capstone advisory consultations and 
 - Added an alert banner on the student dashboard that displays remaining days, a link to update license info, and an advisory note that renewals are processed exclusively through the LTO LTMS portal.
 - Hardened the `school_route()` helper in `helpers.php` to handle optional argument order differences cleanly.
 
-### UI Styling Standards (No Gradients)
-- Removed CSS gradients across student, instructor, admin, guest, and email templates in favor of flat brand colors (`#2563eb`, `#1d4ed8`, `#10b981`, `#1e293b`).
-- Ensured consistent contrast and button styling across all screens.
+![Student Dashboard Alerts](docs/screenshots/05_student_dashboard_alerts.png)
+*Student dashboard displaying license expiration notice and certificate claim reminder.*
+
+---
 
 ### Phase Progression & Certificate Claim Notices
 - Removed the standalone Phase Progression page. Progression from TDC to PDC is now handled directly through the student dashboard modal and reviewed under Admin Enrollment Requests.
 - Added a "Send pickup notice" button in Admin Student Training list so admins can notify students when their certificate of completion is ready.
 - Added persistent claim stub notices to the student dashboard.
+
+![Admin Training Claim Notice](docs/screenshots/04_admin_student_training_claim_notice.png)
+*Admin Student Training management view with "Send Claim Notice" action.*
+
+---
+
+### Schedules & Session Management
+- Added session export capabilities for administrators and students across scheduled slots and attendance records.
+- Standardized UI contrast, removed gradient artifacts, and ensured responsive layout across desktop and mobile browsers.
+
+![Admin Schedules Export](docs/screenshots/03_admin_schedules_session_exports.png)
+*Admin schedules session view with PDF/Excel reporting controls.*
+
+![Student Schedule Export](docs/screenshots/06_student_schedule_export.png)
+*Student schedule portal with session history and export functionality.*
+
+---
 
 ### Defense Preparation Documents
 - Added `docs/CAPSTONE_DEFENSE_MASTER_GUIDE.md`: Presenter guide and 2-laptop walkthrough script (Laptop 1: Student/Guest, Laptop 2: Admin/Instructor).
@@ -89,3 +123,6 @@ docker compose exec app php tests/verify-bundle-transitions.php
 node tests/verify-module-toasts.cjs
 node tests/verify-schedule-submission.cjs
 ```
+
+![Automated Test Verification](docs/screenshots/07_automated_test_suites_passing.png)
+*Terminal output showing 100% pass rate across all automated test suites.*
