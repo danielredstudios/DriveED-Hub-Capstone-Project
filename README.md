@@ -71,6 +71,20 @@ The following changes address feedback from capstone advisory consultations and 
 
 ---
 
+### In-Place Pop-up Modals for Enrollment License & Receipt Re-upload
+- Converted license and payment receipt re-uploads from multi-page redirects into streamlined in-place pop-up modals.
+- Re-uploading a rejected driver's license can now be completed directly from the Guest Enrollment Requests table, Student Course Details, Student Dashboard, or Student Profile without navigating to separate pages.
+- Submitting or re-uploading a payment receipt can be performed directly on the Guest Enrollment Requests page, Guest Dashboard, Student Course Details, or Courses Catalog via modal dialogs with instant GCash number copying, QR code scanning, and 13-digit reference number validation.
+- Initial enrollment submission seamlessly keeps the user on their active dashboard with the receipt upload modal automatically popped open, completing the full enrollment workflow on a single page.
+
+![Payment Receipt Pop-up Modal](docs/screenshots/10_reupload_receipt_popup_modal.png)
+*In-place payment receipt submission pop-up modal with GCash QR preview, account copy tool, and live validation.*
+
+![License Re-upload Pop-up Modal](docs/screenshots/11_reupload_license_popup_modal.png)
+*In-place driver's license re-upload pop-up modal with LTO regulatory notice and direct file dropzone.*
+
+---
+
 ### Defense Preparation Documents
 - Added `docs/CAPSTONE_DEFENSE_MASTER_GUIDE.md`: Presenter guide and 2-laptop walkthrough script (Laptop 1: Student/Guest, Laptop 2: Admin/Instructor).
 - Added `docs/SYSTEM_PROCESS_FLOWS_PRESENTATION.md`: Scenario walkthroughs including smooth enrollment, exception handling, and expired license workflows.
@@ -118,6 +132,9 @@ docker compose exec app php tests/verify-license-expiration-reminders.php
 
 # Verify bundle transitions
 docker compose exec app php tests/verify-bundle-transitions.php
+
+# Verify in-place enrollment re-upload modals
+docker compose exec app php tests/verify-enrollment-reupload-modals.php
 
 # Verify toast deduplication & schedule validation
 node tests/verify-module-toasts.cjs
