@@ -241,6 +241,10 @@ Route::prefix('{school:slug}')
                         Route::delete('/invitations/{invitation}/cancel', [AdminController::class, 'cancelInvitation'])->name('cancel');
                     });
 
+                    // License expiration reminder management
+                    Route::post('/license-expirations/check-all', [AdminController::class, 'checkLicenseExpirations'])->name('licenseExpirations.checkAll');
+                    Route::post('/license-expirations/{role}/{id}/remind', [AdminController::class, 'remindLicenseExpiration'])->name('licenseExpirations.remind');
+
                     // Branch management
                     Route::get('/branches', [BranchController::class , 'index'])->name('branches.index');
                     Route::post('/branches', [BranchController::class , 'store'])->name('branches.store');

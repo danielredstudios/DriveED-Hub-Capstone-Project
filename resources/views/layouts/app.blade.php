@@ -1844,7 +1844,7 @@
             <div class="notification-icon" onclick="toggleNotificationDropdown(event)" role="button"
                 aria-label="Notifications" aria-expanded="false" aria-haspopup="true" tabindex="0"
                 onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleNotificationDropdown(event)}">
-                <span class="notification-icon-emoji">🔔</span>
+                <i class="bi bi-bell" style="font-size: 1.25rem;"></i>
                 <span class="notification-badge" id="notificationBadge"></span>
 
                 <div class="notification-dropdown" id="notificationDropdown">

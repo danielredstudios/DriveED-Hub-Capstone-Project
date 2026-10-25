@@ -70,10 +70,10 @@
                             </p>
                             <p class="lms-item-meta">
                                 @if($lesson->video_url)
-                                    <span style="color: #dc2626;">🎬 Video</span> •
+                                    <span style="color: #dc2626;"><i class="bi bi-play-circle-fill me-1"></i> Video</span> •
                                 @endif
                                 @if(!empty($lesson->attachments) && count($lesson->attachments) > 0)
-                                    <span style="color: #16a34a;">📎 {{ count($lesson->attachments) }} file(s)</span> •
+                                    <span style="color: #16a34a;"><i class="bi bi-paperclip me-1"></i> {{ count($lesson->attachments) }} file(s)</span> •
                                 @endif
                                 Lesson {{ $lesson->sort_order ?? $index + 1 }}
                             </p>

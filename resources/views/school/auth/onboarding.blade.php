@@ -176,7 +176,7 @@
                 
                 <div class="form-group">
                     <label class="label">Full Name</label>
-                    <input type="text" name="name" value="{{ old('name') }}" placeholder="John Doe" required>
+                    <input type="text" name="name" value="{{ old('name') }}" placeholder="Your Full Name" required>
                     @error('name') <p class="error-text">{{ $message }}</p> @enderror
                 </div>
 

@@ -37,15 +37,26 @@ The following changes address feedback from capstone advisory consultations and 
 
 ---
 
-### Driver's License Expiration Reminder
-- Added a database migration adding `license_expiration_date` and `license_number` to students and instructors.
-- Created `LicenseExpirationReminderService` to check for licenses expiring within 30 days and dispatch notifications with a 7-day cooldown to prevent spam.
-- Added an Artisan command (`php artisan license:check-expirations`) scheduled in `routes/console.php`.
-- Added an alert banner on the student dashboard that displays remaining days, a link to update license info, and an advisory note that renewals are processed exclusively through the LTO LTMS portal.
-- Hardened the `school_route()` helper in `helpers.php` to handle optional argument order differences cleanly.
+### Driver's License Expiration Notification & Advisory Hub (Competitive Advantage)
+Unlike traditional driving schools that lose touch with learners after course graduation, DriveED Hub features a comprehensive **Driver's License Expiration Notification & Advisory System** that gives the driving school a continuous competitive edge ("+"):
+- **Proactive Multi-Channel Alerts:** Automated daily scans (08:00 AM) detect driver's licenses expiring within 60, 30, and 7 days, as well as expired credentials, automatically dispatching in-app notification badges and responsive advisory emails (`LicenseExpirationReminderMail`).
+- **Official LTO LTMS 4-Step Renewal Checklist:** Seamlessly integrated into student and instructor dashboards with direct links to `portal.lto.gov.ph`, online CDE (Comprehensive Driver's Education) exam requirements, and accredited clinic guidelines.
+- **Driving School Retention & Refresher Perks:** Recommends refresher driving sessions and vehicle/motorcycle DL code upgrades (A/A1, B/B1/B2) for students renewing licenses.
+- **Instructor Legal Compliance:** Real-time instructor dashboard alerts preventing instructors from teaching behind the wheel with expired credentials.
+- **Admin License Tracker & 1-Click Reminders:** Dedicated monitoring widget on the Admin Dashboard with expiring/expired counters, quick filtering in User Management, and 1-click on-demand reminder dispatching with cooldown overrides.
+- **Strict Anti-Slop UI Standards:** Modern UI designed with vector icons, contextual Philippine placeholders, consistent elevation tokens, and zero AI filler slop.
 
-![Student Dashboard Alerts](docs/screenshots/05_student_dashboard_alerts.png)
-*Student dashboard displaying license expiration notice and certificate claim reminder.*
+![Student License Expiration Alert & Renewal Guide](docs/screenshots/12_student_license_expiration_alert.png)
+*Student Dashboard showing remaining days alert, official LTO notice, and expanded 4-step renewal checklist.*
+
+![Admin License Expiration Monitoring Widget](docs/screenshots/13_admin_license_expiration_monitoring_widget.png)
+*Admin Dashboard featuring the Driver's License Expiration Monitoring widget and on-demand reminder scan action.*
+
+![Admin User Management License Filter](docs/screenshots/14_admin_user_management_license_filter.png)
+*User Management filtered by expiring licenses with instant "Remind" action buttons.*
+
+![Instructor License Expiration Alert](docs/screenshots/15_instructor_license_expiration_alert.png)
+*Instructor Dashboard with legal compliance notice for expiring professional credentials.*
 
 ---
 

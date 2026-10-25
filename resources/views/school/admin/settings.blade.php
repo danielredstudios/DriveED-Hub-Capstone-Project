@@ -1477,7 +1477,7 @@
 
                     <div class="form-group">
                         <label class="form-label">GCash Account Name</label>
-                        <input type="text" class="form-control" name="gcash_account_name" value="{{ old('gcash_account_name', $gcashSetting->account_name ?? '') }}" placeholder="e.g. John Doe">
+                        <input type="text" class="form-control" name="gcash_account_name" value="{{ old('gcash_account_name', $gcashSetting->account_name ?? '') }}" placeholder="e.g. Juan Dela Cruz">
                     </div>
 
                     <div class="form-group">

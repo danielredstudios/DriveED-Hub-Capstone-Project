@@ -361,6 +361,71 @@
         </div>
     </div>
 
+    <!-- License Expiration Monitoring Widget -->
+    <div class="content-card content-card-spaced">
+        <div class="content-card-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <i class="bi bi-card-heading text-primary" style="font-size: 1.25rem;"></i>
+                <span style="font-weight: 700;">Driver's License Expiration Monitoring</span>
+            </div>
+            <button type="button" class="btn btn-sm" id="btnScanLicenses" onclick="triggerLicenseCheck(this)" style="
+                background: #2563eb;
+                color: white;
+                font-weight: 600;
+                font-size: 0.82rem;
+                padding: 6px 14px;
+                border-radius: 6px;
+                border: none;
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+            ">
+                <i class="bi bi-arrow-repeat"></i> Scan &amp; Dispatch Reminders Now
+            </button>
+        </div>
+        <div class="content-card-body">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 16px;">
+                <a href="{{ school_route('admin.userManagement', ['license_filter' => 'expiring', 'filtered' => 1]) }}" onclick="loadContent(this.href); return false;" style="text-decoration: none;">
+                    <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                        <div>
+                            <div style="font-size: 0.82rem; font-weight: 600; color: #92400e; text-transform: uppercase;">Expiring Soon (&le; 60 days)</div>
+                            <div style="font-size: 1.6rem; font-weight: 800; color: #b45309; line-height: 1.2; margin-top: 2px;">
+                                {{ $licenseStats['total_expiring'] ?? 0 }}
+                            </div>
+                            <div style="font-size: 0.75rem; color: #78350f; margin-top: 4px;">
+                                {{ $licenseStats['students_expiring'] ?? 0 }} Students &middot; {{ $licenseStats['instructors_expiring'] ?? 0 }} Instructors
+                            </div>
+                        </div>
+                        <div style="width: 40px; height: 40px; border-radius: 50%; background: #fef3c7; color: #d97706; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="{{ school_route('admin.userManagement', ['license_filter' => 'expired', 'filtered' => 1]) }}" onclick="loadContent(this.href); return false;" style="text-decoration: none;">
+                    <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                        <div>
+                            <div style="font-size: 0.82rem; font-weight: 600; color: #991b1b; text-transform: uppercase;">Licenses Expired</div>
+                            <div style="font-size: 1.6rem; font-weight: 800; color: #dc2626; line-height: 1.2; margin-top: 2px;">
+                                {{ $licenseStats['total_expired'] ?? 0 }}
+                            </div>
+                            <div style="font-size: 0.75rem; color: #7f1d1d; margin-top: 4px;">
+                                {{ $licenseStats['students_expired'] ?? 0 }} Students &middot; {{ $licenseStats['instructors_expired'] ?? 0 }} Instructors
+                            </div>
+                        </div>
+                        <div style="width: 40px; height: 40px; border-radius: 50%; background: #fee2e2; color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                            <i class="bi bi-exclamation-octagon-fill"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <p style="margin: 0; font-size: 0.84rem; color: #6b7280; line-height: 1.45;">
+                <i class="bi bi-shield-check text-success"></i> <strong>Proactive Student &amp; Instructor Care:</strong> Automated daily checks run at 08:00 AM, dispatching in-app reminders and advisory emails with 4-step LTO LTMS renewal guidance and driving school refresher course perks.
+            </p>
+        </div>
+    </div>
+
     <!-- Two Column Layout for Recent Activity -->
     <div class="two-column-grid">
         <!-- Recent Students -->
@@ -515,6 +580,36 @@
             }
         });
     }
+
+    window.triggerLicenseCheck = function (btn) {
+        if (!confirm('Scan all student and instructor licenses and dispatch renewal notifications/emails now?')) {
+            return;
+        }
+        const originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Scanning...';
+
+        fetch('{{ school_route("admin.licenseExpirations.checkAll") }}', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message || 'Scan completed successfully!');
+            window.location.reload();
+        })
+        .catch(err => {
+            alert('Failed to trigger scan: ' + err.message);
+        })
+        .finally(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+        });
+    };
 </script>
 
 @endsection

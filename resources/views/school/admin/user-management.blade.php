@@ -1817,6 +1817,27 @@
                     </div>
                 </div>
             </div>
+
+            <div class="stat-card license-expiring {{ (($activeLicenseFilter ?? 'all') !== 'all') ? 'filter-selected' : '' }}"
+                onclick="applyQuickFilter('license_expiring')" style="cursor: pointer;">
+                <div class="stat-content">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-label">Licenses Expiring</div>
+                            <div class="stat-value" style="color: #d97706;">{{ $licenseStats['total_alerts'] ?? 0 }}</div>
+                        </div>
+                        <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: #d97706;">
+                            <svg class="icon-24" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="stat-detail">
+                        <strong>{{ $licenseStats['total_expiring'] ?? 0 }}</strong> Expiring &middot;
+                        <strong>{{ $licenseStats['total_expired'] ?? 0 }}</strong> Expired
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Toast Notifications handled at the bottom of the file -->
@@ -1830,6 +1851,14 @@
                         placeholder="Search users by name, email, or role...">
                 </div>
                 <div class="action-controls">
+                    <label for="licenseFilter" class="control-label">License Filter</label>
+                    <select id="licenseFilter" onchange="applyLicenseFilter(this.value)"
+                        style="padding: 10px 14px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.9rem; background: white; cursor: pointer;">
+                        <option value="all" {{ ($activeLicenseFilter ?? 'all') === 'all' ? 'selected' : '' }}>All Licenses</option>
+                        <option value="expiring" {{ ($activeLicenseFilter ?? 'all') === 'expiring' ? 'selected' : '' }}>Expiring Soon (&le; 60 days)</option>
+                        <option value="expired" {{ ($activeLicenseFilter ?? 'all') === 'expired' ? 'selected' : '' }}>Expired Only</option>
+                    </select>
+
                     @if(isset($branches) && $branches->count() > 0)
                         <label for="branchFilter" class="control-label">Branch Filter</label>
                         <select id="branchFilter" onchange="applyBranchFilter()"
@@ -2158,6 +2187,19 @@
                                                 </button>
 
                                                 {{-- Verify button moved to License column --}}
+                                            @endif
+
+                                            {{-- License Expiration Reminder Button --}}
+                                            @if(!empty($user->license_status_badge) && in_array($user->license_status_badge['state'] ?? '', ['expiring_soon', 'expired']))
+                                                <button type="button" class="btn-action btn-warning js-remind-license"
+                                                    data-id="{{ $user->id }}"
+                                                    data-role="{{ $user->role }}"
+                                                    data-name="{{ $user->name }}"
+                                                    style="background: #f59e0b; color: white; border: none;"
+                                                    title="Send License Renewal Advisory & Email">
+                                                    <i class="bi bi-bell-fill"></i>
+                                                    <span>Remind</span>
+                                                </button>
                                             @endif
 
                                             {{-- Global Status Toggle --}}
@@ -2634,7 +2676,8 @@
             search: @json($activeSearch ?? ''),
             status: @json($activeStatusFilter ?? 'all'),
             role: @json($activeRoleFilter ?? 'all'),
-            branch: @json((string) ($activeBranchFilter ?? 'all'))
+            branch: @json((string) ($activeBranchFilter ?? 'all')),
+            license_filter: @json($activeLicenseFilter ?? 'all')
         };
 
         function hardenUserManagementActionForms() {
@@ -2703,7 +2746,8 @@
                 search: (liveSearch !== null ? liveSearch : (params.get('search') || initialUserFilterState.search || '')),
                 status: params.get('status') || initialUserFilterState.status || 'all',
                 role: params.get('role') || initialUserFilterState.role || 'all',
-                branch: params.get('branch') || initialUserFilterState.branch || 'all'
+                branch: params.get('branch') || initialUserFilterState.branch || 'all',
+                license_filter: params.get('license_filter') || initialUserFilterState.license_filter || 'all'
             };
         }
 
@@ -2726,6 +2770,10 @@
 
             if (merged.branch && merged.branch !== 'all') {
                 url.searchParams.set('branch', merged.branch);
+            }
+
+            if (merged.license_filter && merged.license_filter !== 'all') {
+                url.searchParams.set('license_filter', merged.license_filter);
             }
 
             if (!resetPage) {
@@ -2756,6 +2804,7 @@
         function applyQuickFilter(type) {
             let role = 'all';
             let status = 'all';
+            let license_filter = 'all';
 
             if (type === 'students') {
                 role = 'student';
@@ -2765,7 +2814,16 @@
                 status = 'active';
             } else if (type === 'inactive') {
                 status = 'inactive';
+            } else if (type === 'license_expiring') {
+                license_filter = 'expiring';
             }
+
+            navigateWithUserFilters({ role, status, license_filter }, true);
+        }
+
+        function applyLicenseFilter(filterVal) {
+            navigateWithUserFilters({ license_filter: filterVal || 'all' }, true);
+        }
 
             navigateWithUserFilters({ role, status }, true);
         }
@@ -3486,6 +3544,44 @@
                     lastLogout: verifyBtn.dataset.lastLogout
                 });
                 toggleLicenseVerificationMode(true);
+                return;
+            }
+
+            // License Expiration Reminder Delegation
+            const remindBtn = e.target.closest('.js-remind-license');
+            if (remindBtn) {
+                e.preventDefault();
+                const id = remindBtn.getAttribute('data-id');
+                const role = remindBtn.getAttribute('data-role');
+                const name = remindBtn.getAttribute('data-name');
+
+                if (!confirm(`Send license renewal reminder & email advisory to ${name}?`)) {
+                    return;
+                }
+
+                remindBtn.disabled = true;
+                const origHtml = remindBtn.innerHTML;
+                remindBtn.innerHTML = '<i class="bi bi-hourglass-split"></i>';
+
+                fetch(`/${window.schoolSlug}/admin/license-expirations/${role}/${id}/remind`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    alert(data.message || 'Reminder dispatched successfully!');
+                })
+                .catch(err => {
+                    alert('Error: ' + err.message);
+                })
+                .finally(() => {
+                    remindBtn.disabled = false;
+                    remindBtn.innerHTML = origHtml;
+                });
                 return;
             }
         });

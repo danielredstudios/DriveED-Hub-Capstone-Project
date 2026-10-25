@@ -595,6 +595,22 @@
                         <div class="profile-field-value">{{ $instructor->license_number ?? 'N/A' }}</div>
                     </div>
                     <div class="profile-field">
+                        <div class="profile-field-label">License Expiration:</div>
+                        <div class="profile-field-value">
+                            @if($instructor->license_expiration_date)
+                                {{ $instructor->license_expiration_date->format('M d, Y') }}
+                                @php $instBadge = $instructor->getLicenseStatusBadge(); @endphp
+                                @if($instBadge)
+                                    <span class="badge ms-2" style="background: {{ $instBadge['bg'] }}; color: {{ $instBadge['text_color'] }}; font-size: 0.75rem; padding: 3px 8px; border-radius: 9999px;">
+                                        {{ $instBadge['label'] }}
+                                    </span>
+                                @endif
+                            @else
+                                <span class="text-muted">Not recorded</span>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="profile-field">
                         <div class="profile-field-label">Branch:</div>
                         <div class="profile-field-value">{{ $instructor->branch->name ?? 'Not Assigned' }}</div>
                     </div>
@@ -646,6 +662,14 @@
                         <label for="license_number">License Number <span class="required-indicator">*</span></label>
                         <input type="text" id="license_number" name="license_number"
                             value="{{ old('license_number', $instructor->license_number) }}" required>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="license_expiration_date">Driver's License Expiration Date</label>
+                        <input type="date" id="license_expiration_date" name="license_expiration_date"
+                            value="{{ old('license_expiration_date', $instructor->license_expiration_date?->format('Y-m-d')) }}"
+                            style="width: 100%; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 0.88rem; outline: none; background: white;">
+                        <p class="field-help" style="margin-top: 6px; font-size: 0.8rem; color: #6b7280;">Keep this updated according to your physical driver's license card to receive proactive renewal reminders.</p>
                     </div>
 
                     <div class="form-field">

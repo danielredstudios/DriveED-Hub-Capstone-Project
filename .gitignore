@@ -47,6 +47,8 @@ Thumbs.db
 /routes_list.txt
 /routes_utf8.json
 /tmp
+/.agents
+
 
 
 # Deployment & Config
@@ -57,4 +59,6 @@ Thumbs.db
 !.env.example
 !.env.docker.example
 /tmp
+/.agents
+
 

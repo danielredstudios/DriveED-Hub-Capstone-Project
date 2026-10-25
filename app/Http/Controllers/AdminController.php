@@ -172,6 +172,9 @@ class AdminController extends Controller
                 ->where('status', 'approved')
                 ->count();
 
+            // License expiration stats for proactive reminder monitoring (Value-add feature)
+            $licenseStats = app(\App\Services\LicenseExpirationReminderService::class)->getExpiringUsersCount($school->id, 60);
+
             return view($school->resolveView('admin.dashboard'), [
                 'isAjax' => $request->ajax(),
                 'school' => $school,
@@ -192,6 +195,7 @@ class AdminController extends Controller
                 'pendingEnrollments' => $pendingEnrollments,
                 'monthlyRevenue' => $monthlyRevenue,
                 'activeEnrollments' => $activeEnrollments,
+                'licenseStats' => $licenseStats,
                 'alertThreshold' => $alertThreshold = ($school->schoolSetting?->alert_threshold_pending ?? 50),
                 'isAlertCritical' => $pendingEnrollments > $alertThreshold,
             ]);
@@ -239,9 +243,13 @@ class AdminController extends Controller
             $activeInstructors = (clone $instructorQuery)->where('status', 'active')->count();
             $inactiveInstructors = $totalInstructors - $activeInstructors;
 
+            // License expiration overview stats
+            $licenseStats = app(\App\Services\LicenseExpirationReminderService::class)->getExpiringUsersCount($school->id, 60);
+
             $activeSearch = trim((string) $request->query('search', ''));
             $activeStatusFilter = strtolower(trim((string) $request->query('status', 'all')));
             $activeRoleFilter = strtolower(trim((string) $request->query('role', 'all')));
+            $activeLicenseFilter = strtolower(trim((string) $request->query('license_filter', 'all')));
             $branchFilterRaw = trim((string) $request->query('branch', 'all'));
 
             if (!in_array($activeStatusFilter, ['all', 'active', 'inactive'], true)) {
@@ -250,6 +258,10 @@ class AdminController extends Controller
 
             if (!in_array($activeRoleFilter, ['all', 'student', 'instructor'], true)) {
                 $activeRoleFilter = 'all';
+            }
+
+            if (!in_array($activeLicenseFilter, ['all', 'expiring', 'expired'], true)) {
+                $activeLicenseFilter = 'all';
             }
 
             $activeBranchFilter = 'all';
@@ -266,9 +278,10 @@ class AdminController extends Controller
                 || $activeSearch !== ''
                 || $activeStatusFilter !== 'all'
                 || $activeRoleFilter !== 'all'
+                || $activeLicenseFilter !== 'all'
                 || $activeBranchFilter !== 'all';
 
-            $applySharedFilters = function ($query) use ($activeSearch, $activeStatusFilter, $activeBranchFilter): void {
+            $applySharedFilters = function ($query) use ($activeSearch, $activeStatusFilter, $activeBranchFilter, $activeLicenseFilter): void {
                 if ($activeSearch !== '') {
                     $query->where(function ($q) use ($activeSearch): void {
                         $q->where('name', 'like', '%' . $activeSearch . '%')
@@ -279,6 +292,15 @@ class AdminController extends Controller
 
                 if ($activeStatusFilter !== 'all') {
                     $query->where('status', '=', $activeStatusFilter);
+                }
+
+                if ($activeLicenseFilter === 'expiring') {
+                    $query->whereNotNull('license_expiration_date')
+                        ->whereDate('license_expiration_date', '>=', now()->startOfDay())
+                        ->whereDate('license_expiration_date', '<=', now()->addDays(60)->endOfDay());
+                } elseif ($activeLicenseFilter === 'expired') {
+                    $query->whereNotNull('license_expiration_date')
+                        ->whereDate('license_expiration_date', '<', now()->startOfDay());
                 }
 
                 if ($activeBranchFilter === 'unassigned') {
@@ -415,6 +437,8 @@ class AdminController extends Controller
                 'activeStatusFilter' => $activeStatusFilter,
                 'activeRoleFilter' => $activeRoleFilter,
                 'activeBranchFilter' => $activeBranchFilter,
+                'activeLicenseFilter' => $activeLicenseFilter,
+                'licenseStats' => $licenseStats,
                 'filtersApplied' => $filtersApplied,
             ]);
         } catch (\Exception $e) {
@@ -2840,6 +2864,83 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Invitation resend failed: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Failed to resend setup email.');
+        }
+    }
+
+    /**
+     * Trigger an on-demand scan of driver's license expirations and send notifications & emails.
+     */
+    public function checkLicenseExpirations(Request $request, School $school)
+    {
+        try {
+            $admin = Auth::guard('admin')->user();
+            if (!$admin) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+            }
+
+            $service = app(\App\Services\LicenseExpirationReminderService::class);
+            $stats = $service->checkAllUsers($school->id, true);
+
+            return response()->json([
+                'success' => true,
+                'message' => "License check complete! Dispatched {$stats['notifications_sent']} renewal notifications ({$stats['expiring_soon']} expiring soon, {$stats['already_expired']} expired).",
+                'stats' => $stats,
+            ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Check license expirations failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to process license check: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Manually dispatch a license expiration reminder for a specific student or instructor.
+     */
+    public function remindLicenseExpiration(Request $request, School $school, string $role, int $id)
+    {
+        try {
+            $admin = Auth::guard('admin')->user();
+            if (!$admin) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+            }
+
+            $user = null;
+            if ($role === 'student') {
+                $user = Student::where('school_id', $school->id)->where('id', $id)->first();
+            } elseif ($role === 'instructor') {
+                $user = Instructor::where('school_id', $school->id)->where('id', $id)->first();
+            }
+
+            if (!$user) {
+                return response()->json(['success' => false, 'message' => 'User not found.'], 404);
+            }
+
+            if (!$user->license_expiration_date) {
+                return response()->json(['success' => false, 'message' => 'User has no license expiration date recorded.'], 422);
+            }
+
+            $service = app(\App\Services\LicenseExpirationReminderService::class);
+            $notification = $service->checkUser($user, true, true);
+
+            if ($notification) {
+                return response()->json([
+                    'success' => true,
+                    'message' => "License renewal reminder and advisory email sent to {$user->name}!",
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => "License is active and valid ({$user->getLicenseDaysRemaining()} days remaining).",
+            ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Manual license reminder failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to dispatch reminder: ' . $e->getMessage(),
+            ], 500);
         }
     }
 }

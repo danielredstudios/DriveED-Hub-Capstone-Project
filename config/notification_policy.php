@@ -53,5 +53,9 @@ return [
                 'in_app' => false,
             ],
         ],
+        'license_expiration' => [
+            'email' => true,
+            'in_app' => true,
+        ],
     ],
 ];

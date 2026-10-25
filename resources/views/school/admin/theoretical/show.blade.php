@@ -433,14 +433,6 @@
         </div>
     </div>
 
-    <style>
-        @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(1.05); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-    </style>
-
     <div class="content-grid">
         <!-- Left Column -->
         <div>
@@ -523,7 +515,7 @@
                 @if($enrollment->status === 'completed')
                     <div style="text-align: center; padding: 20px 0;">
                         <div style="background: #ecfdf5; color: #065f46; padding: 15px; border-radius: 10px; border: 1px solid #10b981;">
-                            <h4 style="margin: 0; font-size: 1.2rem; font-weight: 700;">🎓 GRADUATED</h4>
+                            <h4 style="margin: 0; font-size: 1.2rem; font-weight: 700;"><i class="bi bi-mortarboard-fill me-2"></i> GRADUATED</h4>
                             <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Course completed on {{ $enrollment->completed_at?->format('M d, Y') }}</p>
                         </div>
                     </div>
@@ -537,7 +529,7 @@
                                     <div style="font-size: 0.85rem; color: #6b7280;">Requirement: {{ $tdcLimit }} Hours</div>
                                 </div>
                                 @if($enrollment->student->has_passed_theoretical)
-                                    <span class="badge-custom badge-success" style="padding: 6px 12px; font-weight: 700;">COMPLETED ✓</span>
+                                    <span class="badge-custom badge-success" style="padding: 6px 12px; font-weight: 700;">COMPLETED</span>
                                 @else
                                     <span class="badge-custom {{ $tdcProgress >= 100 ? 'badge-info' : 'badge-secondary' }}" style="padding: 6px 12px;">{{ $tdcProgress }}% Done</span>
                                 @endif
@@ -642,7 +634,7 @@
                                 </form>
                             @else
                                 <div style="text-align: center; font-size: 0.85rem; color: #9ca3af; padding: 10px; border: 1px dashed #d1d5db; border-radius: 6px;">
-                                    🔒 Locked until TDC is passed
+                                    <i class="bi bi-lock me-1"></i> Locked until TDC is passed
                                 </div>
                             @endif
                         </div>

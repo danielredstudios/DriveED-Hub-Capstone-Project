@@ -226,6 +226,9 @@
         </div>
     </div>
 
+    {{-- License Expiration Notification Banner --}}
+    @include('school.instructor.partials.license-expiration-alert', ['instructor' => $instructor, 'school' => $school])
+
     @if($instructor->license_status !== 'verified')
         <div class="alert alert-{{ $instructor->license_status === 'rejected' ? 'danger' : 'warning' }} mb-4 border-0 shadow-sm d-flex align-items-center" style="border-radius: 12px; padding: 16px 20px;">
             <div class="alert-icon-wrapper me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: rgba(255,255,255,0.3); border-radius: 10px;">

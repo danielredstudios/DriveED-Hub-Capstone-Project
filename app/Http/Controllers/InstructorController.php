@@ -637,6 +637,7 @@ class InstructorController extends Controller
             // rule separators (which the pipe-delimited string form does).
             'contact' => ['nullable', 'string', 'max:13', 'regex:/^(09\d{9}|\+639\d{9}|9\d{9})$/'],
             'license_number' => 'nullable|string|max:50',
+            'license_expiration_date' => 'nullable|date',
             'availability' => 'required|in:available,unavailable',
             'current_password' => 'nullable|required_with:new_password',
             'new_password' => ['nullable', 'string', 'confirmed', new StrongPassword()],
@@ -659,6 +660,10 @@ class InstructorController extends Controller
             'license_number' => $request->license_number,
         ];
 
+        if ($request->has('license_expiration_date')) {
+            $data['license_expiration_date'] = !empty($request->license_expiration_date) ? $request->license_expiration_date : null;
+        }
+
         if ($request->filled('new_password')) {
             if (!Hash::check($request->current_password, $instructor->password)) {
                 return back()->withErrors(['current_password' => 'Current password is incorrect.']);
@@ -667,6 +672,17 @@ class InstructorController extends Controller
         }
 
         $instructor->update($data);
+
+        if (!empty($data['license_expiration_date'])) {
+            try {
+                $refreshed = $instructor->fresh();
+                if ($refreshed) {
+                    app(\App\Services\LicenseExpirationReminderService::class)->checkUser($refreshed);
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning("Instructor license check failed: " . $e->getMessage());
+            }
+        }
 
         return back()->with('success', 'Profile updated successfully!');
     }

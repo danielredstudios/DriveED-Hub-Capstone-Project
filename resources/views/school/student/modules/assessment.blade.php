@@ -131,7 +131,7 @@
                 </div>
             @empty
                 <div style="padding: 4rem 2rem; text-align: center;">
-                    <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;">📋</div>
+                    <div style="font-size: 3rem; margin-bottom: 1rem; color: #94a3b8;"><i class="bi bi-journal-text"></i></div>
                     <h2 style="font-size: 1.25rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem;">Ready to be set</h2>
                     <p style="color: #94a3b8;">Questions are currently being prepared for this assessment.</p>
                 </div>
