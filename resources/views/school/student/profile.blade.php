@@ -754,7 +754,7 @@
         
         <div class="profile-header">
             <div class="profile-avatar avatar-container-rel" id="avatarContainer">
-                @if($student->profile_picture && file_exists(public_path('storage/' . $student->profile_picture)))
+                @if($student->profile_picture && (file_exists(public_path('storage/' . $student->profile_picture)) || \Illuminate\Support\Facades\Storage::disk('public')->exists($student->profile_picture)))
                     <img src="{{ asset('storage/' . $student->profile_picture) }}" alt="{{ $student->name }}" id="avatarImage">
                 @else
                     <span class="avatar-icon" id="avatarLetter">{{ strtoupper(substr($student->name ?? 'S', 0, 1)) }}</span>

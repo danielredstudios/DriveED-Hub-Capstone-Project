@@ -73,8 +73,9 @@ class BookingController extends Controller
             $query->where('bookings.status', $activeFilter);
         }
 
-        // Fetch instructors and branches for filters
+        // Fetch instructors, students, and branches for filters
         $instructors = Instructor::where('school_id', $school->id)->orderBy('name')->get();
+        $students = Student::where('school_id', $school->id)->orderBy('name')->get();
         $branches = Branch::where('school_id', $school->id)->orderBy('name')->get();
 
         // Additional date and branch filters
@@ -297,7 +298,7 @@ class BookingController extends Controller
 
         // Only admin has bookings list view
         $view = 'admin.verify-session-completion';
-        return view($school->resolveView($view), array_merge(compact('school', 'bookings', 'stats', 'allSessionsCount', 'pendingRequestsCount', 'awaitingVerificationCount', 'verifiedSessionsCount', 'flaggedIssuesCount', 'activeFilter', 'activeSort', 'activeTab', 'instructors', 'branches'), ['isAjax' => $request->ajax()]));
+        return view($school->resolveView($view), array_merge(compact('school', 'bookings', 'stats', 'allSessionsCount', 'pendingRequestsCount', 'awaitingVerificationCount', 'verifiedSessionsCount', 'flaggedIssuesCount', 'activeFilter', 'activeSort', 'activeTab', 'instructors', 'students', 'branches'), ['isAjax' => $request->ajax()]));
     }
 
     /**

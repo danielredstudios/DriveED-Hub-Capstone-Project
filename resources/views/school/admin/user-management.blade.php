@@ -2382,7 +2382,7 @@
                 <h3><i class="bi bi-pencil-square me-2"></i>Edit Student</h3>
                 <button type="button" class="btn-close-modal" onclick="closeEditStudentModal()">×</button>
             </div>
-            <form id="editStudentForm" method="POST" action="">
+            <form id="editStudentForm" method="POST" action="" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 <div class="modal-body">
@@ -2426,6 +2426,18 @@
                         <label>License Expiration Date</label>
                         <input type="date" id="edit_student_license_expiration" name="license_expiration_date">
                         <p class="field-help">Automated reminder alerts will notify the student before this date.</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Profile Picture</label>
+                        <div id="edit_student_pic_preview_container" style="display: none; margin-bottom: 10px; align-items: center; gap: 12px;">
+                            <img id="edit_student_pic_preview" src="" alt="Profile Picture" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid #e2e8f0;">
+                            <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #ef4444; cursor: pointer;">
+                                <input type="checkbox" name="remove_profile_picture" id="edit_student_remove_pic" value="1">
+                                Remove picture
+                            </label>
+                        </div>
+                        <input type="file" name="profile_picture" id="edit_student_profile_picture" accept="image/*" class="form-control" style="font-size: 0.875rem;">
+                        <p class="field-help">Upload JPG, PNG, GIF or WebP (max 2MB).</p>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -2656,6 +2668,18 @@
                             </select>
                         </div>
                     @endif
+                    <div class="form-group">
+                        <label>Profile Picture</label>
+                        <div id="edit_instructor_pic_preview_container" style="display: none; margin-bottom: 10px; align-items: center; gap: 12px;">
+                            <img id="edit_instructor_pic_preview" src="" alt="Profile Picture" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid #e2e8f0;">
+                            <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #ef4444; cursor: pointer;">
+                                <input type="checkbox" name="remove_profile_picture" id="edit_instructor_remove_pic" value="1">
+                                Remove picture
+                            </label>
+                        </div>
+                        <input type="file" name="profile_picture" id="edit_instructor_profile_picture" accept="image/*" class="form-control" style="font-size: 0.875rem;">
+                        <p class="field-help">Upload JPG, PNG, GIF or WebP (max 2MB).</p>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" onclick="closeEditInstructorModal()">Cancel</button>
@@ -2953,7 +2977,7 @@
             setInviteFormLoadingState(document.getElementById('createStudentInviteForm'), false);
         }
 
-        function editStudent(id, name, email, contact, address, branchId, license, licenseExpiration) {
+        function editStudent(id, name, email, contact, address, branchId, license, licenseExpiration, profilePicture) {
             const form = document.getElementById('editStudentForm');
             form.action = `${window.studentBaseUrl}/${id}`;
             document.getElementById('edit_student_name').value = name || '';
@@ -2974,6 +2998,19 @@
             if (licenseField) licenseField.value = license || '';
             const expiryField = document.getElementById('edit_student_license_expiration');
             if (expiryField) expiryField.value = licenseExpiration || '';
+
+            const previewContainer = document.getElementById('edit_student_pic_preview_container');
+            const previewImg = document.getElementById('edit_student_pic_preview');
+            const removeCheckbox = document.getElementById('edit_student_remove_pic');
+            const picInput = document.getElementById('edit_student_profile_picture');
+            if (picInput) picInput.value = '';
+            if (removeCheckbox) removeCheckbox.checked = false;
+            if (profilePicture && previewContainer && previewImg) {
+                previewImg.src = profilePicture;
+                previewContainer.style.display = 'flex';
+            } else if (previewContainer) {
+                previewContainer.style.display = 'none';
+            }
 
             document.getElementById('editStudentModal').style.display = 'flex';
         }
@@ -3001,7 +3038,8 @@
                         btn.dataset.address,
                         btn.dataset.branch,
                         btn.dataset.license,
-                        btn.dataset.licenseExpiration
+                        btn.dataset.licenseExpiration,
+                        btn.dataset.profilePicture
                     );
                 } else if (role === 'instructor') {
                     editInstructor(
@@ -3014,7 +3052,8 @@
                         btn.dataset.branch,
                         btn.dataset.specializations,
                         btn.dataset.availability,
-                        btn.dataset.licenseExpiration
+                        btn.dataset.licenseExpiration,
+                        btn.dataset.profilePicture
                     );
                 }
             }
@@ -3118,7 +3157,7 @@
             setInviteFormLoadingState(document.getElementById('createInstructorInviteForm'), false);
         }
 
-        function editInstructor(id, name, email, contact, license, address, branchId, specializations, availability, licenseExpiration) {
+        function editInstructor(id, name, email, contact, license, address, branchId, specializations, availability, licenseExpiration, profilePicture) {
             const form = document.getElementById('editInstructorForm');
             form.action = `${window.instructorBaseUrl}/${id}`;
             document.getElementById('edit_instructor_name').value = name || '';
@@ -3159,6 +3198,19 @@
                 checkboxes.forEach(cb => {
                     cb.checked = specArray.includes(parseInt(cb.value)) || specArray.includes(cb.value);
                 });
+            }
+
+            const previewContainer = document.getElementById('edit_instructor_pic_preview_container');
+            const previewImg = document.getElementById('edit_instructor_pic_preview');
+            const removeCheckbox = document.getElementById('edit_instructor_remove_pic');
+            const picInput = document.getElementById('edit_instructor_profile_picture');
+            if (picInput) picInput.value = '';
+            if (removeCheckbox) removeCheckbox.checked = false;
+            if (profilePicture && previewContainer && previewImg) {
+                previewImg.src = profilePicture;
+                previewContainer.style.display = 'flex';
+            } else if (previewContainer) {
+                previewContainer.style.display = 'none';
             }
 
             document.getElementById('editInstructorModal').style.display = 'flex';
@@ -3465,35 +3517,6 @@
         });
 
         document.addEventListener('click', function (e) {
-            // Edit User Delegation
-            const editBtn = e.target.closest('.js-edit-user');
-            if (editBtn) {
-                const role = editBtn.dataset.role;
-                if (role === 'student') {
-                    editStudent(
-                        editBtn.dataset.id,
-                        editBtn.dataset.name,
-                        editBtn.dataset.email,
-                        editBtn.dataset.contact,
-                        editBtn.dataset.address,
-                        editBtn.dataset.branch
-                    );
-                } else if (role === 'instructor') {
-                    editInstructor(
-                        editBtn.dataset.id,
-                        editBtn.dataset.name,
-                        editBtn.dataset.email,
-                        editBtn.dataset.contact,
-                        editBtn.dataset.license,
-                        editBtn.dataset.address,
-                        editBtn.dataset.branch,
-                        editBtn.dataset.specializations,
-                        editBtn.dataset.availability
-                    );
-                }
-                return;
-            }
-
             // View User Delegation
             const viewBtn = e.target.closest('.js-view-user');
             if (viewBtn) {

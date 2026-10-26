@@ -241,27 +241,20 @@ class EnrollmentRequestController extends Controller
                 ->with('error', 'Cannot approve an enrollment request that has a pending withdrawal request. Please resolve the withdrawal first.');
         }
 
-        // Security Check 4: Verify the student still exists and is a guest
+        // Security Check 4: Verify the student still exists
         if (!$enrollmentRequest->student) {
             return redirect()
                 ->back()
                 ->with('error', 'Student not found.');
         }
 
-        if ($enrollmentRequest->student->role !== 'guest') {
+        if (!in_array($enrollmentRequest->student->role, ['guest', 'student'], true)) {
             return redirect()
                 ->back()
-                ->with('error', 'This user is already a student.');
+                ->with('error', 'Invalid learner account.');
         }
 
         // Security Check 5: Verify student is not locked to another active course
-        if ($enrollmentRequest->student->is_course_locked) {
-            return redirect()
-                ->back()
-                ->with('error', 'This student is already enrolled in an active course. They must complete or cancel their current enrollment first.');
-        }
-
-        // Idempotent school-scoped single-active guard.
         $hasOtherActiveEnrollment = EnrollmentRequest::where('school_id', $school->id)
             ->where('learner_id', $enrollmentRequest->learner_id)
             ->where('status', 'approved')
@@ -272,6 +265,11 @@ class EnrollmentRequestController extends Controller
             return redirect()
                 ->back()
                 ->with('error', 'This student already has an active enrollment in this school.');
+        }
+
+        // Auto-heal orphaned course lock if no other active enrollment exists
+        if ($enrollmentRequest->student->is_course_locked && !$hasOtherActiveEnrollment) {
+            $enrollmentRequest->student->unlockFromCourse();
         }
 
         if ($enrollmentRequest->payment_status !== 'paid') {
@@ -522,7 +520,11 @@ class EnrollmentRequestController extends Controller
 
             // Unlock student from course so they can enroll in a new one
             if ($enrollmentRequest->student) {
-                $enrollmentRequest->student->update(['is_course_locked' => false]);
+                $enrollmentRequest->student->unlockFromCourse();
+
+                if ($enrollmentRequest->course && $enrollmentRequest->course->course_type === 'theoretical') {
+                    $enrollmentRequest->student->markTheoreticalPassed();
+                }
 
                 // Notify student about enrollment completion
                 try {
@@ -551,6 +553,8 @@ class EnrollmentRequestController extends Controller
                     Log::warning('Failed to send enrollment completion notification: ' . $e->getMessage());
                 }
             }
+
+            DB::commit();
 
             if ($request->ajax()) {
                 return response()->json([
@@ -1029,14 +1033,23 @@ class EnrollmentRequestController extends Controller
                     continue;
                 }
 
-                // Skip if student is already active
-                if ($student->role !== 'guest') {
+                // Ensure valid learner role (guest or returning student)
+                if (!in_array($student->role, ['guest', 'student'], true)) {
                     continue;
                 }
 
-                // Skip if student is locked to another course
-                if ($student->is_course_locked) {
+                // Skip if student already has another active approved enrollment
+                $hasOtherActive = EnrollmentRequest::where('school_id', $school->id)
+                    ->where('learner_id', $enrollment->learner_id)
+                    ->where('status', 'approved')
+                    ->where('id', '!=', $enrollment->id)
+                    ->exists();
+                if ($hasOtherActive) {
                     continue;
+                }
+
+                if ($student->is_course_locked && !$hasOtherActive) {
+                    $student->unlockFromCourse();
                 }
 
                 // Strict two-step gate: only verified/paid enrollments can be approved.
@@ -1292,7 +1305,10 @@ class EnrollmentRequestController extends Controller
             if ($student->role === 'guest') {
                 $student->promoteToStudent();
             }
-            $studentUpdate = ['is_course_locked' => true];
+            $studentUpdate = [
+                'is_course_locked' => true,
+                'active_enrollment_id' => $enrollmentRequest->id,
+            ];
             if (!empty($enrollmentRequest->requested_dl_code)) {
                 $studentUpdate['dl_code'] = $enrollmentRequest->requested_dl_code;
             }

@@ -330,7 +330,7 @@
             </div>
         </div>
 
-
+        @include('partials.session-report-export')
 
         <!-- Main Tabs -->
         <div class="main-tabs" style="display: flex; gap: 5px; margin-bottom: 25px; background: #f3f4f6; padding: 5px; border-radius: 14px; width: fit-content;">

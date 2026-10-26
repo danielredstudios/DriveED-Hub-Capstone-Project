@@ -430,6 +430,11 @@
                         </button>
                     @endif
                 @else
+                    @if($enrollmentStatus === 'completed')
+                        <div class="status-alert status-approved" style="margin-bottom: 15px;">
+                            ✓ Course Previously Completed
+                        </div>
+                    @endif
                     <div class="price-tag">
                         @if($course->packages?->count())
                             <small>Packages from</small>
@@ -483,7 +488,7 @@
                         </button>
                     @else
                         <button type="button" class="btn-enroll-action" onclick="openEnrollModal()">
-                            Enroll Now
+                            {{ $enrollmentStatus === 'completed' ? 'Enroll Again' : 'Enroll Now' }}
                         </button>
                     @endif
                 @endif

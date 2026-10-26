@@ -279,11 +279,18 @@ class CourseController extends Controller
             'is_featured' => 'nullable',
         ]);
 
-        // Handle banner image upload
+        // Handle banner image upload / removal
         if ($request->hasFile('banner_image')) {
+            if ($course->banner_image && \Illuminate\Support\Facades\Storage::disk('public')->exists($course->banner_image)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($course->banner_image);
+            }
             $validated['banner_image'] = $request->file('banner_image')->store('courses/banners', 'public');
-        }
-        else {
+        } elseif ($request->boolean('remove_banner_image')) {
+            if ($course->banner_image && \Illuminate\Support\Facades\Storage::disk('public')->exists($course->banner_image)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($course->banner_image);
+            }
+            $validated['banner_image'] = null;
+        } else {
             unset($validated['banner_image']);
         }
 
@@ -305,7 +312,7 @@ class CourseController extends Controller
             ]);
         }
 
-        return redirect()->route('courses.show', [$school->slug, $course->id])
+        return redirect()->route('schools.admin.courses', ['school' => $school->slug])
             ->with('success', 'Course updated successfully');
     }
 

@@ -405,7 +405,7 @@
         <div id="profileView">
             <div class="profile-card-header">
                 <div class="profile-avatar-circle" id="avatarContainer">
-                    @if($admin->profile_picture && file_exists(public_path('storage/' . $admin->profile_picture)))
+                    @if($admin->profile_picture && (file_exists(public_path('storage/' . $admin->profile_picture)) || \Illuminate\Support\Facades\Storage::disk('public')->exists($admin->profile_picture)))
                         <img src="{{ asset('storage/' . $admin->profile_picture) }}" alt="{{ $admin->name }}" id="avatarImage">
                     @else
                         <span class="profile-avatar-letter" id="avatarLetter">{{ strtoupper(substr($admin->name ?? 'A', 0, 1)) }}</span>

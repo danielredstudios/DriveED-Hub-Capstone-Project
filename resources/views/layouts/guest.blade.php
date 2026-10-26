@@ -68,6 +68,8 @@
             <div class="d-flex align-items-center">
                 @if($school->schoolSetting && $school->schoolSetting->login_logo_image)
                     <img src="{{ asset('storage/' . $school->schoolSetting->login_logo_image) }}" alt="{{ $school->name }}" class="header-logo">
+                @else
+                    <img src="{{ asset('images/logo-smart-transparent.png') }}" alt="{{ $school->name }}" class="header-logo">
                 @endif
                 <span class="school-name">{{ $school->name }}</span>
             </div>

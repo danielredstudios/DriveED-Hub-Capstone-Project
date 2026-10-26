@@ -698,6 +698,8 @@ class AdminController extends Controller
                 'license_number' => 'nullable|string|max:50',
                 'license_expiration_date' => 'nullable|date',
                 'password' => ['nullable', 'string', new StrongPassword()],
+                'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+                'remove_profile_picture' => 'nullable|boolean',
                 'branch_id' => [
                     'nullable',
                     Rule::exists('branches', 'id')->where('school_id', $school->id),
@@ -743,6 +745,19 @@ class AdminController extends Controller
 
             if ($request->filled('password')) {
                 $data['password'] = Hash::make($request->password);
+            }
+
+            // Handle Profile Picture
+            if ($request->hasFile('profile_picture')) {
+                if ($student->profile_picture && Storage::disk('public')->exists($student->profile_picture)) {
+                    Storage::disk('public')->delete($student->profile_picture);
+                }
+                $data['profile_picture'] = $request->file('profile_picture')->store('profile_pictures', 'public');
+            } elseif ($request->boolean('remove_profile_picture')) {
+                if ($student->profile_picture && Storage::disk('public')->exists($student->profile_picture)) {
+                    Storage::disk('public')->delete($student->profile_picture);
+                }
+                $data['profile_picture'] = null;
             }
 
             $student->update($data);
@@ -838,6 +853,8 @@ class AdminController extends Controller
                 'address' => 'required|string|max:255',
                 'availability' => 'required|in:available,unavailable',
                 'password' => ['nullable', 'string', new StrongPassword()],
+                'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+                'remove_profile_picture' => 'nullable|boolean',
                 'branch_id' => [
                     'nullable',
                     Rule::exists('branches', 'id')->where('school_id', $school->id),
@@ -886,6 +903,19 @@ class AdminController extends Controller
 
             if ($request->filled('password')) {
                 $data['password'] = Hash::make($request->password);
+            }
+
+            // Handle Profile Picture
+            if ($request->hasFile('profile_picture')) {
+                if ($student->profile_picture && Storage::disk('public')->exists($student->profile_picture)) {
+                    Storage::disk('public')->delete($student->profile_picture);
+                }
+                $data['profile_picture'] = $request->file('profile_picture')->store('profile_pictures', 'public');
+            } elseif ($request->boolean('remove_profile_picture')) {
+                if ($student->profile_picture && Storage::disk('public')->exists($student->profile_picture)) {
+                    Storage::disk('public')->delete($student->profile_picture);
+                }
+                $data['profile_picture'] = null;
             }
 
             // Handle License Image
@@ -1540,7 +1570,10 @@ class AdminController extends Controller
                 'login_welcome_size' => 'nullable|integer|min:12|max:32',
                 'login_header_bg_type' => 'nullable|in:gradient,solid,image',
                 'login_header_bg_color' => 'nullable|regex:/^#[0-9A-Fa-f]{6}$/',
-                'login_header_bg_image' => 'nullable|string|max:255',
+                'login_header_bg_image' => 'nullable|file|mimes:jpeg,png,jpg,webp|max:' . (($school->schoolSetting->max_file_size_mb ?? 5) * 1024),
+                'remove_login_header_bg' => 'nullable|boolean',
+                'remove_background_image' => 'nullable|boolean',
+                'remove_login_page_bg_image' => 'nullable|boolean',
                 'login_header_height' => 'nullable|integer|min:50|max:200',
                 'login_header_text_color' => 'nullable|regex:/^#[0-9A-Fa-f]{6}$/',
                 'login_header_shadow' => 'nullable|boolean',
@@ -1599,6 +1632,9 @@ class AdminController extends Controller
                 }
 
                 $backgroundImagePath = $request->file('background_image')->store('backgrounds/' . $school->slug, 'public');
+            } elseif ($request->boolean('remove_background_image') && $backgroundImagePath) {
+                Storage::disk('public')->delete($backgroundImagePath);
+                $backgroundImagePath = null;
             }
 
             // Handle login page background image upload
@@ -1610,6 +1646,22 @@ class AdminController extends Controller
                 }
 
                 $loginBgImagePath = $request->file('login_page_bg_image')->store('backgrounds/' . $school->slug . '/login', 'public');
+            } elseif ($request->boolean('remove_login_page_bg_image') && $loginBgImagePath) {
+                Storage::disk('public')->delete($loginBgImagePath);
+                $loginBgImagePath = null;
+            }
+
+            // Handle login header background / banner image upload
+            $loginHeaderBgPath = $schoolSetting->login_header_bg_image;
+            if ($request->hasFile('login_header_bg_image')) {
+                if ($loginHeaderBgPath) {
+                    Storage::disk('public')->delete($loginHeaderBgPath);
+                }
+
+                $loginHeaderBgPath = $request->file('login_header_bg_image')->store('backgrounds/' . $school->slug . '/header', 'public');
+            } elseif ($request->boolean('remove_login_header_bg') && $loginHeaderBgPath) {
+                Storage::disk('public')->delete($loginHeaderBgPath);
+                $loginHeaderBgPath = null;
             }
 
             // Handle login header logo upload. Admins upload the file here
@@ -1698,7 +1750,7 @@ class AdminController extends Controller
                 'login_welcome_size' => $request->login_welcome_size ?? 16,
                 'login_header_bg_type' => $request->login_header_bg_type ?? 'gradient',
                 'login_header_bg_color' => $request->login_header_bg_color ?? '#2563eb',
-                'login_header_bg_image' => $request->login_header_bg_image,
+                'login_header_bg_image' => $loginHeaderBgPath,
                 'login_header_height' => $request->login_header_height ?? 60,
                 'login_header_text_color' => $request->login_header_text_color ?? '#ffffff',
                 'login_header_shadow' => $request->has('login_header_shadow'),

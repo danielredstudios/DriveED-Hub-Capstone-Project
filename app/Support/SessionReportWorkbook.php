@@ -48,7 +48,10 @@ class SessionReportWorkbook
         };
         $write([$data['school']->name.' | Training Session History'], 1);
         $write(['Prepared for: '.$data['preparedFor']], 0);
-        $write(['Period: '.$data['period'].' | Generated: '.$data['generatedAt']->timezone($data['school']->timezone ?? 'Asia/Manila')->format('Y-m-d H:i T')], 0);
+        $write(['Period: '.$data['period'].' | Generated: '.$data['generatedAt']->timezone(!empty($data['school']->timezone) ? $data['school']->timezone : 'Asia/Manila')->format('Y-m-d H:i T')], 0);
+        if (!empty($data['filterSubtitle'])) {
+            $write(['Active Filters: '.$data['filterSubtitle']], 0);
+        }
         $summary = [];
         foreach ($data['summary'] as $label => $value) { $summary[] = $label.': '.$value; }
         $write([implode('   |   ', $summary)], 0);

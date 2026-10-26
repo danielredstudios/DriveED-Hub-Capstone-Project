@@ -259,16 +259,27 @@
     </style>
 </head>
 <body>
+    @php
+        $primarySchool = $schools->first(fn($s) => !empty($s->schoolSetting?->login_logo_image)) ?? $schools->first();
+        $platformLogoUrl = !empty($primarySchool?->schoolSetting?->login_logo_image)
+            ? asset('storage/' . $primarySchool->schoolSetting->login_logo_image)
+            : asset('images/logo-smart-transparent.png');
+        $platformBannerUrl = !empty($primarySchool?->schoolSetting?->background_image)
+            ? asset('storage/' . $primarySchool->schoolSetting->background_image)
+            : (!empty($primarySchool?->schoolSetting?->login_page_bg_image)
+                ? asset('storage/' . $primarySchool->schoolSetting->login_page_bg_image)
+                : asset('images/DrivingGuyImage.png'));
+    @endphp
     <div class="main-container">
         <!-- Left Section -->
         <div class="left-section">
             <!-- Upper: Logo image -->
             <div class="logo-section">
-                <img class="beneficiary-logo" src="{{ asset('images/logo-smart-transparent.png') }}" alt="SMART Driving School logo">
+                <img class="beneficiary-logo" src="{{ $platformLogoUrl }}" alt="{{ $primarySchool?->name ?? 'Driving School' }} logo">
             </div>
 
             <!-- Lower: Driving image -->
-            <div class="hero-section"></div>
+            <div class="hero-section" style="background-image: url('{{ $platformBannerUrl }}');"></div>
         </div>
 
         <!-- Right Section - Schools List -->

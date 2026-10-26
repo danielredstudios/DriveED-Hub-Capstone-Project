@@ -1582,7 +1582,6 @@
     </style>
 
     <div class="timeslots-container">
-        @include('partials.session-report-export')
         <div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 3px solid var(--primary-color);">
             <div>
                 <h1 class="page-title">Manage Schedule</h1>

@@ -42,6 +42,8 @@ class Student extends Authenticatable
         'last_logout_at',
         'status',
         'is_active',
+        'is_course_locked',
+        'active_enrollment_id',
         'must_reset_password',
         'dl_code',
         'license_number',
@@ -109,15 +111,16 @@ class Student extends Authenticatable
      */
     public function isEnrolledInCourse(): bool
     {
-        return $this->is_course_locked && $this->active_enrollment_id !== null;
+        return $this->activeEnrollments()->exists();
     }
 
     /**
      * Check if student can enroll in a new course
+     * Completed courses do not block new enrollments.
      */
     public function canEnrollInNewCourse(): bool
     {
-        return !$this->is_course_locked;
+        return !$this->activeEnrollments()->exists();
     }
 
     /**
@@ -212,7 +215,16 @@ class Student extends Authenticatable
      */
     public function hasPassedTheoretical(): bool
     {
-        return $this->has_passed_theoretical === true;
+        if ($this->has_passed_theoretical === true) {
+            return true;
+        }
+
+        return $this->enrollmentRequests()
+            ->where('status', 'completed')
+            ->whereHas('course', function ($query) {
+                $query->where('course_type', 'theoretical');
+            })
+            ->exists();
     }
 
     /**

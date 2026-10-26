@@ -476,7 +476,7 @@
 
             <div class="profile-card-header">
                 <div class="profile-avatar-circle" id="avatarContainer">
-                    @if($instructor->profile_picture && file_exists(public_path('storage/' . $instructor->profile_picture)))
+                    @if($instructor->profile_picture && (file_exists(public_path('storage/' . $instructor->profile_picture)) || \Illuminate\Support\Facades\Storage::disk('public')->exists($instructor->profile_picture)))
                         <img src="{{ asset('storage/' . $instructor->profile_picture) }}" alt="{{ $instructor->name }}"
                             id="avatarImage">
                     @else

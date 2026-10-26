@@ -159,6 +159,7 @@ Route::prefix('{school:slug}')
                     // Guest payment routes
                     Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
                     Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');
+                    Route::post('/profile/picture', [GuestController::class, 'updateProfilePicture'])->name('profile.picture');
                 }
                 );
 

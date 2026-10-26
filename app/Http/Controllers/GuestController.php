@@ -213,10 +213,10 @@ class GuestController extends Controller
             abort(403, 'This course does not belong to this school.');
         }
 
-        // Ensure user is logged in and is a guest
-        if (!$guest || !$guest->isGuest()) {
-            Log::warning('User is not a guest', ['user' => $guest?->id, 'role' => $guest?->role]);
-            return redirect()->back()->with('error', 'Only guests can submit enrollment requests.');
+        // Ensure user is logged in
+        if (!$guest || !in_array($guest->role, ['guest', 'student'], true)) {
+            Log::warning('User is not authorized for enrollment', ['user' => $guest?->id, 'role' => $guest?->role]);
+            return redirect()->back()->with('error', 'You must be logged in to submit an enrollment request.');
         }
 
         // PDC (Practical Driving Course) requires a verified Student Driver's License
@@ -287,7 +287,7 @@ class GuestController extends Controller
             $enrollmentRequest = \Illuminate\Support\Facades\DB::transaction(function () use ($data, $school, $guest, $course) {
                 $exists = EnrollmentRequest::where('learner_id', $guest->id)
                     ->where('course_id', $course->id)
-                    ->whereNotIn('status', ['rejected', 'cancelled'])
+                    ->whereIn('status', ['pending', 'approved'])
                     ->lockForUpdate()
                     ->exists();
                 if ($exists) {
@@ -1005,5 +1005,35 @@ class GuestController extends Controller
         }
 
         return back()->with('success', 'Verification code sent! Check your email.');
+    }
+
+    /**
+     * Update guest profile picture
+     */
+    public function updateProfilePicture(Request $request, School $school)
+    {
+        /** @var \App\Models\Student|null $guest */
+        $guest = Auth::guard('student')->user();
+        if (!$guest) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        }
+
+        $maxSize = ($school->schoolSetting->max_file_size_mb ?? 5) * 1024;
+        $request->validate([
+            'profile_picture' => "required|image|mimes:png,jpg,jpeg,webp|max:{$maxSize}|dimensions:max_width=2000,max_height=2000",
+        ]);
+
+        if ($guest->profile_picture && Storage::disk('public')->exists($guest->profile_picture)) {
+            Storage::disk('public')->delete($guest->profile_picture);
+        }
+
+        $path = $request->file('profile_picture')->store('profile_pictures', 'public');
+        $guest->update(['profile_picture' => $path]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profile picture updated successfully!',
+            'path' => $path,
+        ]);
     }
 }

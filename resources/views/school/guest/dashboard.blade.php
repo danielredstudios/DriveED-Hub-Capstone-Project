@@ -678,9 +678,22 @@
 
 <div class="guest-dashboard">
     <!-- Welcome Banner -->
-    <div class="welcome-banner">
-        <h1>Welcome, {{ $guest->name }}!</h1>
-        <p>Discover driving courses and start your journey with {{ $school->name }}</p>
+    <div class="welcome-banner" style="display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="position: relative; width: 64px; height: 64px; border-radius: 50%; overflow: hidden; background: rgba(255,255,255,0.2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; cursor: pointer;" onclick="document.getElementById('guestAvatarInput').click()" title="Click to change profile picture">
+                @if($guest->profile_picture)
+                    <img src="{{ asset('storage/' . $guest->profile_picture) }}" alt="{{ $guest->name }}" id="guestAvatarImg" style="width: 100%; height: 100%; object-fit: cover;">
+                @else
+                    <span id="guestAvatarLetter" style="font-size: 1.5rem; font-weight: 700; color: white;">{{ strtoupper(substr($guest->name, 0, 1)) }}</span>
+                @endif
+                <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.55); color: white; font-size: 9px; text-align: center; padding: 2px 0;">Photo</div>
+            </div>
+            <input type="file" id="guestAvatarInput" style="display: none;" accept="image/png,image/jpeg,image/webp" onchange="uploadGuestAvatar(this)">
+            <div>
+                <h1 style="margin: 0; font-size: 1.5rem;">Welcome, {{ $guest->name }}!</h1>
+                <p style="margin: 4px 0 0 0; opacity: 0.9;">Discover driving courses and start your journey with {{ $school->name }}</p>
+            </div>
+        </div>
     </div>
     
     <!-- Getting Started Checklist -->
@@ -1338,6 +1351,34 @@
     });
 </script>
 @endif
+
+<script>
+function uploadGuestAvatar(input) {
+    if (!input.files || !input.files[0]) return;
+    const formData = new FormData();
+    formData.append('profile_picture', input.files[0]);
+    formData.append('_token', '{{ csrf_token() }}');
+    fetch('{{ route("schools.guest.profile.picture", $school) }}', {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            let img = document.getElementById('guestAvatarImg');
+            if (img) {
+                img.src = '/storage/' + data.path + '?t=' + Date.now();
+            } else {
+                location.reload();
+            }
+        } else {
+            alert(data.message || 'Failed to upload photo');
+        }
+    })
+    .catch(() => alert('Failed to upload photo'));
+}
+</script>
 
 @include('school.partials.enrollment-payment-modal')
 @include('school.partials.enrollment-license-modal')

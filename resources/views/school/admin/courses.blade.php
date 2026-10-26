@@ -1973,6 +1973,12 @@
                                 class="form-control @error('banner_image') is-invalid @enderror"
                                 accept=".jpg,.jpeg,.png,.webp" onchange="previewImage(this)">
                             <img id="imagePreview" class="image-preview">
+                            <div id="removeBannerWrapper" style="display: none; margin-top: 6px;">
+                                <label style="font-size: 0.85rem; color: #64748b; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                                    <input type="checkbox" name="remove_banner_image" id="removeCourseBanner" value="1">
+                                    Remove current banner
+                                </label>
+                            </div>
                             <small class="banner-help-text">Recommended size: 1200x400px for best results</small>
                             @error('banner_image')
                                 <div class="field-error">{{ $message }}</div>
@@ -2419,6 +2425,10 @@
                 document.getElementById('courseId').value = '';
                 document.getElementById('courseForm').reset();
                 document.getElementById('imagePreview').style.display = 'none';
+                const removeBannerWrapper = document.getElementById('removeBannerWrapper');
+                const removeCourseBanner = document.getElementById('removeCourseBanner');
+                if (removeBannerWrapper) removeBannerWrapper.style.display = 'none';
+                if (removeCourseBanner) removeCourseBanner.checked = false;
                 document.querySelectorAll('.combo-course-checkbox').forEach(cb => cb.checked = false);
                 toggleComboCoursesContainer();
                 updateDlCodePreview();
@@ -2466,11 +2476,18 @@
                     addFeature();
                 }
 
-                // Show banner preview if exists
+                // Show banner preview and remove toggle if exists
+                const removeBannerWrap = document.getElementById('removeBannerWrapper');
+                const removeCourseBn = document.getElementById('removeCourseBanner');
+                if (removeCourseBn) removeCourseBn.checked = false;
                 if (course.banner_image_url) {
                     const preview = document.getElementById('imagePreview');
                     preview.src = course.banner_image_url;
                     preview.style.display = 'block';
+                    if (removeBannerWrap) removeBannerWrap.style.display = 'block';
+                } else {
+                    document.getElementById('imagePreview').style.display = 'none';
+                    if (removeBannerWrap) removeBannerWrap.style.display = 'none';
                 }
 
                 updateDlCodePreview();

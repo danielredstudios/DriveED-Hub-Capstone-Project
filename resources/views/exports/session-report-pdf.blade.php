@@ -30,8 +30,12 @@
     <div class="school">{{ $school->name }}</div>
     <div class="meta">
         <strong>Prepared for:</strong> {{ $preparedFor }} &nbsp; | &nbsp;
-        <strong>Period:</strong> {{ $period }}<br>
-        <span class="muted">Generated on {{ $generatedAt->timezone($school->timezone ?? 'Asia/Manila')->format('M d, Y \a\t g:i A T') }}. Shows booked driving lessons and completed training sessions. Hours are shown separately for each record.</span>
+        <strong>Period:</strong> {{ $period }}
+        @if(!empty($filterSubtitle))
+            <br><strong>Filters:</strong> {{ $filterSubtitle }}
+        @endif
+        <br>
+        <span class="muted">Generated on {{ $generatedAt->timezone(!empty($school->timezone) ? $school->timezone : 'Asia/Manila')->format('M d, Y \a\t g:i A T') }}. Shows booked driving lessons and completed training sessions. Hours are shown separately for each record.</span>
     </div>
     <table class="summary"><tr>
         @foreach($summary as $label => $value)
@@ -53,7 +57,7 @@
                 <tr class="record">
                     <td style="white-space:pre-line;">{{ $row['date'] ?: 'Not recorded' }}</td><td>{{ $row['student'] }}</td>
                     <td>{{ $row['course'] }}<br><span class="muted">{{ $row['type'] }}</span></td>
-                    <td>{{ $row['instructor'] }}</td><td>{{ number_format($row['hours'], 1) }}</td>
+                    <td>{{ $row['instructor'] }}</td><td>{{ number_format((float) ($row['hours'] ?? 0), 1) }}</td>
                     <td>{{ $row['status'] }}</td><td>{{ $row['attendance'] ?: 'Not recorded' }}</td>
                     <td>{{ $row['grade'] === '' ? 'Not graded' : $row['grade'] }}</td>
                 </tr>

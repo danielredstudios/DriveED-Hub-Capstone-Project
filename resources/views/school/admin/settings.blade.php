@@ -1659,6 +1659,10 @@
                         <div class="current-bg-wrap">
                             <img src="{{ asset('storage/' . $settings->background_image) }}" class="current-bg-image">
                             <p class="current-bg-caption">Current background image</p>
+                            <label class="current-logo-actions">
+                                <input type="checkbox" name="remove_background_image" value="1" class="checkbox-inline">
+                                Remove this background
+                            </label>
                         </div>
                     @endif
                 </div>
@@ -2277,9 +2281,22 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Background Image Path (if selected above)</label>
-                        <input type="text" class="form-control" name="login_header_bg_image" value="{{ old('login_header_bg_image', $settings->login_header_bg_image ?? '') }}" placeholder="e.g., backgrounds/login-header.jpg">
-                        <small class="text-muted">Upload image to storage/app/public/ folder first</small>
+                        <label class="form-label">Header Banner Image (if image selected above)</label>
+                        <input type="file" class="form-control" name="login_header_bg_image" accept="image/png,image/jpeg,image/webp">
+                        @error('login_header_bg_image')
+                            <small class="text-danger help-text-block">{{ $message }}</small>
+                        @enderror
+                        <small class="text-muted">PNG, JPG, or WebP up to {{ $settings->max_file_size_mb ?? 5 }}MB.</small>
+                        @if($settings && $settings->login_header_bg_image)
+                            <div class="current-bg-wrap">
+                                <img src="{{ asset('storage/' . $settings->login_header_bg_image) }}" alt="Current header banner" class="current-logo-image">
+                                <p class="current-bg-caption">Current banner image</p>
+                                <label class="current-logo-actions">
+                                    <input type="checkbox" name="remove_login_header_bg" value="1" class="checkbox-inline">
+                                    Remove this banner
+                                </label>
+                            </div>
+                        @endif
                     </div>
 
                     <div class="form-row form-row-two">
@@ -2341,6 +2358,10 @@
                                     <div class="current-bg-wrap">
                                         <img src="{{ asset('storage/' . $settings->login_page_bg_image) }}" class="current-bg-image">
                                         <p class="current-bg-caption">Current background image</p>
+                                        <label class="current-logo-actions">
+                                            <input type="checkbox" name="remove_login_page_bg_image" value="1" class="checkbox-inline">
+                                            Remove this background
+                                        </label>
                                     </div>
                                 @endif
                             </div>

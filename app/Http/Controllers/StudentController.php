@@ -73,16 +73,14 @@ class StudentController extends Controller
             return redirect()->back()->with('error', $msg);
         }
 
-        // Check if already enrolled for this course (excluding previous rejections/cancellations)
+        // Check if already enrolled for this course (excluding previous rejections/cancellations/completions)
         $existingRequest = EnrollmentRequest::where('learner_id', $student->id)
             ->where('course_id', $course->id)
-            ->whereNotIn('status', ['rejected', 'cancelled'])
+            ->whereIn('status', ['pending', 'approved'])
             ->first();
 
         if ($existingRequest) {
-            if (in_array($existingRequest->status, ['pending', 'approved'])) {
-                return redirect()->back()->with('warning', 'You already have an active enrollment request for this course.');
-            }
+            return redirect()->back()->with('warning', 'You already have an active enrollment request for this course.');
         }
 
         // Prevent race-condition double submit with row-level lock and unique pending/approved guard
@@ -126,7 +124,7 @@ class StudentController extends Controller
                 // Re-check inside transaction with lock to avoid race
                 $exists = EnrollmentRequest::where('learner_id', $student->id)
                     ->where('course_id', $course->id)
-                    ->whereNotIn('status', ['rejected', 'cancelled'])
+                    ->whereIn('status', ['pending', 'approved'])
                     ->lockForUpdate()
                     ->exists();
                 if ($exists) {

@@ -1834,8 +1834,12 @@
     <nav class="topbar" role="banner">
         <div class="topbar-left">
             <div class="topbar-logo" role="heading" aria-level="1" style="display: flex; align-items: center; gap: 8px;">
-                <img src="{{ asset('images/logo-smart-transparent.png') }}" alt="SMART Driving School Logo" style="height: 40px; width: auto;">
-                <span>{{ config('app.name', 'SMART Driving School') }}</span>
+                @if(!empty($settings?->login_logo_image))
+                    <img src="{{ asset('storage/' . $settings->login_logo_image) }}" alt="{{ $schoolName ?? 'Driving School' }} Logo" style="height: 40px; width: auto; object-fit: contain;">
+                @else
+                    <img src="{{ asset('images/logo-smart-transparent.png') }}" alt="{{ $schoolName ?? 'Driving School' }} Logo" style="height: 40px; width: auto; object-fit: contain;">
+                @endif
+                <span>{{ $schoolName ?? config('app.name', 'SMART Driving School') }}</span>
             </div>
         </div>
 
