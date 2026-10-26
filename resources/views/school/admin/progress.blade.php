@@ -425,7 +425,7 @@
                         <td>
                             @if($progress->nextBooking)
                                 <span class="schedule-badge">
-                                    {{ $progress->nextBooking->scheduled_at->format('M d, Y h:i A') }}
+                                    {{ $progress->nextBooking->scheduled_at?->format('M d, Y h:i A') ?? 'Scheduled' }}
                                 </span>
                             @else
                                 <span class="text-muted-italic">No upcoming schedule</span>
@@ -502,7 +502,7 @@
                                         <div class="detail-item">
                                             <span class="detail-label">Last Session</span>
                                             <span class="detail-value">
-                                                {{ $progress->currentBooking ? $progress->currentBooking->scheduled_at->format('M d, Y') : 'N/A' }}
+                                                {{ $progress->currentBooking && $progress->currentBooking->scheduled_at ? $progress->currentBooking->scheduled_at->format('M d, Y') : 'N/A' }}
                                             </span>
                                         </div>
                                     </div>
@@ -583,7 +583,7 @@
                                         <tbody>
                                             @foreach($progress->bookingsList->take(5) as $booking)
                                             <tr class="recent-row">
-                                                <td class="recent-td">{{ $booking->scheduled_at->format('M d, Y h:i A') }}</td>
+                                                <td class="recent-td">{{ $booking->scheduled_at?->format('M d, Y h:i A') ?? 'N/A' }}</td>
                                                 <td class="recent-td">{{ $booking->instructor->name ?? 'N/A' }}</td>
                                                 <td class="recent-td">
                                                     <span class="badge badge-{{ strtolower($booking->status) }}">{{ ucfirst($booking->status) }}</span>

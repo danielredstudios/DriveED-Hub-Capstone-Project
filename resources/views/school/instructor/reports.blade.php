@@ -439,7 +439,7 @@
                     @foreach($upcomingLessons as $lesson)
                         <div class="upcoming-lesson">
                             <div class="lesson-time">
-                                {{ $lesson->scheduled_at->format('M d, Y - g:i A') }}
+                                {{ $lesson->scheduled_at?->format('M d, Y - g:i A') ?? 'N/A' }}
                             </div>
                             <div class="lesson-student">
                                 {{ $lesson->student->name ?? 'Unknown' }} 
