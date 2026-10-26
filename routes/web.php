@@ -108,6 +108,7 @@ Route::prefix('{school:slug}')
         Route::controller(AuthController::class)->group(function (): void {
             Route::get('/', 'showLogin')->name('login');
             Route::get('/login', 'showLogin');
+            Route::get('/admin/login', 'showLogin')->name('admin.login');
             Route::post('/login', 'login')->name('login.submit')->middleware(app()->environment('production') ? 'throttle:5,1' : 'throttle:60,1');
             Route::post('/logout', 'logout')->name('logout');
 

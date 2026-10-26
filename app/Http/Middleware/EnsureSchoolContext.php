@@ -67,14 +67,20 @@ class EnsureSchoolContext
         foreach (['admin', 'instructor', 'student'] as $guard) {
             $user = Auth::guard($guard)->user();
 
-            if ($user && (int)$user->school_id !== (int)$school->id) {
-                Auth::guard($guard)->logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
+            if ($user) {
+                if ($guard === 'admin' && method_exists($user, 'isSystemAdmin') && $user->isSystemAdmin()) {
+                    continue;
+                }
 
-                return redirect()
-                    ->route('schools.login', $school)
-                    ->withErrors(['email' => 'Please login using the correct school portal.']);
+                if ((int)$user->school_id !== (int)$school->id) {
+                    Auth::guard($guard)->logout();
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
+
+                    return redirect()
+                        ->route('schools.login', $school)
+                        ->withErrors(['email' => 'Please login using the correct school portal.']);
+                }
             }
         }
 

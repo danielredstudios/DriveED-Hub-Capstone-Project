@@ -96,6 +96,17 @@ Unlike traditional driving schools that lose touch with learners after course gr
 
 ---
 
+### School Admin Authentication & Resilient Dashboard Access
+- Resolved false-positive session loop terminations caused by unhandled redirections to undefined routes during admin authentication.
+- Added explicit route aliasing (`schools.admin.login` mapped to `schools.login`) ensuring multi-tenant consistency.
+- Fortified the School Admin dashboard (`AdminController@dashboard`) with isolated defensive query fallbacks for student/instructor counts, growth indicators, trends, revenues, and license stats so non-critical metric failures never block administrators from accessing their dashboard.
+- Prevented unintended session invalidation for administrative guards across school context middleware.
+
+![School Admin Dashboard Verified](docs/screenshots/16_school_admin_dashboard_login_verified.png)
+*School Admin dashboard rendering successfully with zero errors following authentication.*
+
+---
+
 ### Defense Preparation Documents
 - Added `docs/CAPSTONE_DEFENSE_MASTER_GUIDE.md`: Presenter guide and 2-laptop walkthrough script (Laptop 1: Student/Guest, Laptop 2: Admin/Instructor).
 - Added `docs/SYSTEM_PROCESS_FLOWS_PRESENTATION.md`: Scenario walkthroughs including smooth enrollment, exception handling, and expired license workflows.
