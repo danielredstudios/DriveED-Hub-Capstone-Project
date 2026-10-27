@@ -33,6 +33,26 @@
         color: #6b7280;
     }
     
+    /* QR Code Styles */
+    .qr-code-wrapper {
+        aspect-ratio: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .qr-code-image {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+    
+    .or-number {
+        color: #2563eb;
+        text-decoration: underline;
+        font-weight: 500;
+    }
+    
     /* Export Buttons */
     .export-buttons {
         display: flex;
@@ -96,27 +116,27 @@
         transform: translateY(-1px);
         box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
     }
-
+    
     .icon-24 {
         width: 24px;
         height: 24px;
     }
-
+    
     .icon-16 {
         width: 16px;
         height: 16px;
         margin-right: 4px;
     }
-
+    
     .table-scroll {
         overflow-x: auto;
     }
-
+    
     .admin-table thead {
         background: {{ $primaryColor }};
         color: #ffffff;
     }
-
+    
     .admin-table th {
         background: transparent;
         color: inherit;
@@ -125,32 +145,32 @@
         letter-spacing: 0;
         font-size: 0.95rem;
     }
-
+    
     .payment-status-paid {
         color: #059669;
         font-size: 0.85rem;
     }
-
+    
     .payment-status-none {
         color: #6b7280;
         font-size: 0.85rem;
     }
-
+    
     .mobile-card-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-bottom: 8px;
     }
-
+    
     .mobile-amount {
         color: #10b981;
     }
-
+    
     .mobile-action-wrap {
         margin-top: 10px;
     }
-
+    
     .btn-mark-paid-full {
         width: 100%;
         padding: 10px;
@@ -415,7 +435,19 @@
                             </div>
                         </td>
                         <td class="reference-cell">
-                            {{ $payment->reference ?? $payment->or_number ?? '-' }}
+                            @if($payment->snap_qr_path)
+                                <!-- QR Code Image - click to view full size -->
+                                <div class="qr-code-wrapper cursor-pointer select-none" onclick="openQrModal('{{ $payment->snap_qr_path }}')">
+                                    <img src="{{ $payment->snap_qr_path }}" alt="OR QR Code" class="qr-code-image max-w-full h-auto rounded-md transition-transform duration-300">
+                                </div>
+                            @elseif($payment->or_number)
+                                <!-- OR Number - click to view full size -->
+                                <span class="or-number cursor-pointer select-none" onclick="openQrModal('/storage/or-illustration.png')">
+                                    {{ $payment->or_number }}
+                                </span>
+                            @else
+                                -
+                            @endif
                             @if($payment->normalized_reference || $payment->normalized_or_number)
                                 <div class="text-xs text-gray-400">Norm: {{ $payment->normalized_reference ?? $payment->normalized_or_number }}</div>
                             @endif
@@ -489,6 +521,23 @@
     </div>
 </div>
 
+<!-- QR Code Modal -->
+<div id="qrModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 transition-opacity" role="dialog" aria-modal="true">
+    <div class="relative w-full max-w-2xl max-h-96 bg-white rounded-lg shadow-2xl outline-none">
+        <button type="button" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2" aria-label="Close modal" onclick="closeQrModal()">
+            <i class="bi bi-x-lg"></i>
+        </button>
+        <div class="relative flex flex-col overflow-hidden min-h-[300px]">
+            <img id="qrModalImage" src="" alt="QR Code" class="w-full h-auto object-contain transition-opacity">
+            <div class="p-2 flex justify-end">
+                <button class="text-gray-400 hover:text-gray-600" onclick="event.stopPropagation();" aria-label="Zoom out">−</button>
+                <span class="mx-2">|</span>
+                <button class="text-gray-400 hover:text-gray-600" onclick="event.stopPropagation();" aria-label="Zoom in">+</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 function filterPayments(status, btn) {
     const rows = document.querySelectorAll('#paymentsTable tbody tr[data-status]');
@@ -498,13 +547,32 @@ function filterPayments(status, btn) {
     btn.classList.add('active');
     
     rows.forEach(row => {
-        const rowStatus = row.dataset.status;
+        const rowStatus = rowDataset.status;
         if (status === 'all' || rowStatus === status) {
             row.style.display = 'table-row';
         } else {
             row.style.display = 'none';
         }
-    });
+    }
+}
+
+// QR Code Modal functions
+function openQrModal(imageUrl) {
+    const modal = document.getElementById('qrModal');
+    const qrImage = document.getElementById('qrModalImage');
+    
+    if (modal && qrImage) {
+        qrImage.src = imageUrl;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+}
+
+function closeQrModal() {
+    const modal = document.getElementById('qrModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
 }
 </script>
-@endsection
