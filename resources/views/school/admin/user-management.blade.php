@@ -148,17 +148,98 @@
         .action-bar {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 16px;
             margin-bottom: 20px;
             padding: 15px;
             background: #f8f9fa;
             border-radius: 8px;
         }
 
+        .filters-form {
+            display: flex;
+            flex: 1 1 640px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            gap: 12px;
+            min-width: 0;
+        }
+
         .search-box {
             position: relative;
-            flex: 1;
+            flex: 1 1 260px;
             max-width: 400px;
+            min-width: 220px;
+        }
+
+        .search-input-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .search-input-row input {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .filter-field {
+            display: flex;
+            flex-direction: column;
+            min-width: 150px;
+        }
+
+        .filter-field select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            background: #fff;
+            color: #1f2937;
+            cursor: pointer;
+        }
+
+        .filter-field select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .btn-filter-search,
+        .btn-filter-clear {
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .btn-filter-search {
+            border: 2px solid var(--primary-color);
+            background: var(--primary-color);
+            color: var(--btn-primary-text, #fff);
+        }
+
+        .btn-filter-search:hover {
+            filter: brightness(1.08);
+        }
+
+        .btn-filter-clear {
+            border: 2px solid #d1d5db;
+            background: #fff;
+            color: #4b5563;
+        }
+
+        .btn-filter-clear:hover {
+            border-color: #9ca3af;
+            background: #f3f4f6;
+        }
+
+        .filter-actions {
+            justify-content: flex-end;
+            min-width: auto;
         }
 
         .control-label {
@@ -201,7 +282,7 @@
 
         .search-box input {
             width: 100%;
-            padding: 10px 40px 10px 15px;
+            padding: 10px 15px;
             border: 2px solid #e1e5e9;
             border-radius: 8px;
             font-size: 0.95rem;
@@ -211,14 +292,6 @@
         .search-box input:focus {
             outline: none;
             border-color: var(--primary-color);
-        }
-
-        .search-box::after {
-            content: "";
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
         }
 
         .btn-create {
@@ -1845,33 +1918,50 @@
         <!-- Students Section -->
         <div id="usersSection" class="user-section">
             <div class="action-bar">
-                <div class="search-box">
-                    <label for="userSearch" class="control-label">Search Users</label>
-                    <input type="text" id="userSearch" value="{{ $activeSearch ?? '' }}"
-                        placeholder="Search users by name, email, or role...">
-                </div>
-                <div class="action-controls">
-                    <label for="licenseFilter" class="control-label">License Filter</label>
-                    <select id="licenseFilter" onchange="applyLicenseFilter(this.value)"
-                        style="padding: 10px 14px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.9rem; background: white; cursor: pointer;">
-                        <option value="all" {{ ($activeLicenseFilter ?? 'all') === 'all' ? 'selected' : '' }}>All Licenses</option>
-                        <option value="expiring" {{ ($activeLicenseFilter ?? 'all') === 'expiring' ? 'selected' : '' }}>Expiring Soon (&le; 60 days)</option>
-                        <option value="expired" {{ ($activeLicenseFilter ?? 'all') === 'expired' ? 'selected' : '' }}>Expired Only</option>
-                    </select>
+                <form id="userFiltersForm" class="filters-form" method="GET" action="{{ url()->current() }}">
+                    {{-- The controller only renders the roster once a filter is applied. --}}
+                    <input type="hidden" name="filtered" value="1">
+                    {{-- Quick-filter cards keep their selection when the form is submitted. --}}
+                    <input type="hidden" name="role" id="userRoleFilter" value="{{ $activeRoleFilter ?? 'all' }}">
+                    <input type="hidden" name="status" id="userStatusFilter" value="{{ $activeStatusFilter ?? 'all' }}">
+
+                    <div class="search-box">
+                        <label for="userSearch" class="control-label">Search Users</label>
+                        <div class="search-input-row">
+                            <input type="search" id="userSearch" name="search" value="{{ $activeSearch ?? '' }}"
+                                placeholder="Name, email, phone" autocomplete="off">
+                            <button type="submit" class="btn-filter-search">Search</button>
+                        </div>
+                    </div>
+
+                    <div class="filter-field">
+                        <label for="licenseFilter" class="control-label">License Filter</label>
+                        <select id="licenseFilter" name="license_filter">
+                            <option value="all" {{ ($activeLicenseFilter ?? 'all') === 'all' ? 'selected' : '' }}>All Licenses</option>
+                            <option value="expiring" {{ ($activeLicenseFilter ?? 'all') === 'expiring' ? 'selected' : '' }}>Expiring Soon (&le; 60 days)</option>
+                            <option value="expired" {{ ($activeLicenseFilter ?? 'all') === 'expired' ? 'selected' : '' }}>Expired Only</option>
+                        </select>
+                    </div>
 
                     @if(isset($branches) && $branches->count() > 0)
-                        <label for="branchFilter" class="control-label">Branch Filter</label>
-                        <select id="branchFilter" onchange="applyBranchFilter()"
-                            style="padding: 10px 14px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.9rem; background: white; cursor: pointer;">
-                            <option value="all" {{ ($activeBranchFilter ?? 'all') === 'all' ? 'selected' : '' }}>All Branches
-                            </option>
-                            <option value="unassigned" {{ ($activeBranchFilter ?? 'all') === 'unassigned' ? 'selected' : '' }}>
-                                Unassigned</option>
-                            @foreach($branches as $branch)
-                                <option value="{{ $branch->id }}" {{ (string) ($activeBranchFilter ?? 'all') === (string) $branch->id ? 'selected' : '' }}>{{ $branch->name }}</option>
-                            @endforeach
-                        </select>
+                        <div class="filter-field">
+                            <label for="branchFilter" class="control-label">Branch Filter</label>
+                            <select id="branchFilter" name="branch">
+                                <option value="all" {{ ($activeBranchFilter ?? 'all') === 'all' ? 'selected' : '' }}>All Branches</option>
+                                <option value="unassigned" {{ ($activeBranchFilter ?? 'all') === 'unassigned' ? 'selected' : '' }}>Unassigned</option>
+                                @foreach($branches as $branch)
+                                    <option value="{{ $branch->id }}" {{ (string) ($activeBranchFilter ?? 'all') === (string) $branch->id ? 'selected' : '' }}>{{ $branch->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     @endif
+
+                    <div class="filter-field filter-actions">
+                        <button type="button" class="btn-filter-clear" onclick="clearUserFilters(event)">Clear</button>
+                    </div>
+                </form>
+
+                <div class="action-controls">
                     <div class="export-dropdown" id="exportDropdown">
                         <button class="btn-export-trigger" onclick="toggleExportDropdown()">
                             <svg class="icon-18" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -1927,8 +2017,8 @@
                     <div class="empty-state empty-state-prompt">
                         <div class="empty-state-icon"><i class="bi bi-funnel"></i></div>
                         <div class="empty-state-title">Choose a filter to view users</div>
-                        <p class="empty-state-text">Click a card above, pick a branch from the dropdown, or search and press Enter —
-                            the list loads once a filter is applied.</p>
+                        <p class="empty-state-text">Click a card above, choose a branch or license filter, or search by
+                            name, email, or contact to load the list.</p>
                     </div>
                 @elseif($users->count() > 0)
                     <table id="usersTable">
@@ -2244,6 +2334,8 @@
                     <div class="empty-state">
                         <div class="empty-state-icon"></div>
                         <div class="empty-state-text">No users match the current filters.</div>
+                        <button type="button" class="btn-filter-clear" onclick="clearUserFilters(event)"
+                            style="margin-top: 12px;">Clear filters</button>
                     </div>
                 @endif
             </div>
@@ -2736,12 +2828,11 @@
             console.log('User Management: Initializing...');
             try {
                 hardenUserManagementActionForms();
-                
-                // Prioritize search binding
-                bindUserSearchEvents();
-                
+
+                bindUserManagementFilters();
+
                 const searchInput = document.getElementById('userSearch');
-                if (searchInput && searchInput.value) {
+                if (searchInput && searchInput.value.trim() !== '') {
                     applyLocalUserTableSearch(searchInput.value);
                 }
 
@@ -2765,40 +2856,45 @@
             const params = new URLSearchParams(window.location.search);
             const initialUserFilterState = window.__userMgmtInitialFilterState || {};
             const searchInput = document.getElementById('userSearch');
-            const liveSearch = searchInput ? searchInput.value : null;
+            const licenseSelect = document.getElementById('licenseFilter');
+            const branchSelect = document.getElementById('branchFilter');
+            const roleInput = document.getElementById('userRoleFilter');
+            const statusInput = document.getElementById('userStatusFilter');
+
             return {
-                search: (liveSearch !== null ? liveSearch : (params.get('search') || initialUserFilterState.search || '')),
-                status: params.get('status') || initialUserFilterState.status || 'all',
-                role: params.get('role') || initialUserFilterState.role || 'all',
-                branch: params.get('branch') || initialUserFilterState.branch || 'all',
-                license_filter: params.get('license_filter') || initialUserFilterState.license_filter || 'all'
+                search: searchInput
+                    ? searchInput.value
+                    : (params.get('search') ?? initialUserFilterState.search ?? ''),
+                status: statusInput
+                    ? (statusInput.value || 'all')
+                    : (params.get('status') || initialUserFilterState.status || 'all'),
+                role: roleInput
+                    ? (roleInput.value || 'all')
+                    : (params.get('role') || initialUserFilterState.role || 'all'),
+                branch: branchSelect
+                    ? (branchSelect.value || 'all')
+                    : (params.get('branch') || initialUserFilterState.branch || 'all'),
+                license_filter: licenseSelect
+                    ? (licenseSelect.value || 'all')
+                    : (params.get('license_filter') || initialUserFilterState.license_filter || 'all')
             };
         }
 
-        function buildUserManagementUrl(filters, resetPage = true) {
+        function buildUserManagementUrl(filters = {}, resetPage = true) {
             const merged = Object.assign({}, getUserFilterState(), filters || {});
             const url = new URL(window.location.pathname, window.location.origin);
 
-            const search = (merged.search || '').trim();
-            if (search) {
+            const search = String(merged.search || '').trim();
+            if (search !== '') {
                 url.searchParams.set('search', search);
             }
 
-            if (merged.status && merged.status !== 'all') {
-                url.searchParams.set('status', merged.status);
-            }
-
-            if (merged.role && merged.role !== 'all') {
-                url.searchParams.set('role', merged.role);
-            }
-
-            if (merged.branch && merged.branch !== 'all') {
-                url.searchParams.set('branch', merged.branch);
-            }
-
-            if (merged.license_filter && merged.license_filter !== 'all') {
-                url.searchParams.set('license_filter', merged.license_filter);
-            }
+            ['status', 'role', 'branch', 'license_filter'].forEach(function (key) {
+                const value = merged[key];
+                if (value && value !== 'all') {
+                    url.searchParams.set(key, value);
+                }
+            });
 
             if (!resetPage) {
                 const currentPage = new URLSearchParams(window.location.search).get('page');
@@ -2814,15 +2910,29 @@
             return url;
         }
 
-        function navigateWithUserFilters(nextFilters, resetPage = true) {
+        function navigateWithUserFilters(nextFilters = {}, resetPage = true) {
             const targetUrl = buildUserManagementUrl(nextFilters, resetPage);
             const target = targetUrl.pathname + targetUrl.search;
+
+            if (target === window.location.pathname + window.location.search) {
+                return;
+            }
+
             if (typeof loadContent === 'function') {
                 loadContent(target);
                 return;
             }
 
             window.location.href = target;
+        }
+
+        function submitUserFilters(event) {
+            if (event) {
+                event.preventDefault();
+            }
+
+            navigateWithUserFilters({}, true);
+            return false;
         }
 
         function applyQuickFilter(type) {
@@ -2849,9 +2959,6 @@
             navigateWithUserFilters({ license_filter: filterVal || 'all' }, true);
         }
 
-            navigateWithUserFilters({ role, status }, true);
-        }
-
         function applyBranchFilter() {
             const select = document.getElementById('branchFilter');
             if (!select) {
@@ -2861,29 +2968,76 @@
             navigateWithUserFilters({ branch: select.value || 'all' }, true);
         }
 
-        function bindUserSearchEvents() {
-            // Use event delegation on the document to ensure search works even if injected via AJAX
-            if (window._userSearchBound) return;
-            window._userSearchBound = true;
+        function clearUserFilters(event) {
+            if (event) {
+                event.preventDefault();
+            }
 
-            document.addEventListener('keydown', function(event) {
-                if (event.target && event.target.id === 'userSearch') {
+            const form = document.getElementById('userFiltersForm');
+            if (form) {
+                form.reset();
+            }
+
+            const searchInput = document.getElementById('userSearch');
+            if (searchInput) {
+                searchInput.value = '';
+            }
+
+            ['userRoleFilter', 'userStatusFilter'].forEach(function (id) {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.value = 'all';
+                }
+            });
+
+            navigateWithUserFilters({
+                search: '',
+                role: 'all',
+                status: 'all',
+                branch: 'all',
+                license_filter: 'all'
+            }, true);
+        }
+
+        function bindUserManagementFilters() {
+            const form = document.getElementById('userFiltersForm');
+            const searchInput = document.getElementById('userSearch');
+            const licenseSelect = document.getElementById('licenseFilter');
+            const branchSelect = document.getElementById('branchFilter');
+
+            // Bind per element so AJAX-rendered pages get fresh handlers instead of
+            // duplicate document-level listeners.
+            if (form && form.dataset.filtersBound !== '1') {
+                form.dataset.filtersBound = '1';
+                form.addEventListener('submit', submitUserFilters);
+                form.addEventListener('change', function (event) {
+                    if (event.target === licenseSelect || event.target === branchSelect) {
+                        submitUserFilters();
+                    }
+                });
+            }
+
+            if (searchInput && searchInput.dataset.searchBound !== '1') {
+                searchInput.dataset.searchBound = '1';
+                let debounceTimer = null;
+
+                searchInput.addEventListener('input', function () {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(function () {
+                        applyLocalUserTableSearch(searchInput.value || '');
+                    }, 120);
+                });
+
+                searchInput.addEventListener('keydown', function (event) {
                     if (event.key === 'Enter') {
                         event.preventDefault();
-                        const val = event.target.value.trim();
-                        // Trigger server-side search on Enter
-                        navigateWithUserFilters({ search: val });
+                        submitUserFilters();
+                    } else if (event.key === 'Escape') {
+                        searchInput.value = '';
+                        applyLocalUserTableSearch('');
                     }
-                }
-            });
-
-            document.addEventListener('input', function(event) {
-                if (event.target && event.target.id === 'userSearch') {
-                    applyLocalUserTableSearch(event.target.value || '');
-                }
-            });
-            
-            console.log('User search events bound (Delegated)');
+                });
+            }
         }
 
         function applyLocalUserTableSearch(rawValue) {
@@ -2897,30 +3051,27 @@
             const rows = Array.from(tbody.querySelectorAll('tr')).filter(function (row) {
                 return row.id !== 'userSearchNoResultRow';
             });
-            const columnCount = table.querySelectorAll('thead th').length || 7;
+            const columnCount = table.querySelectorAll('thead th').length || 9;
 
             let visibleCount = 0;
             rows.forEach(function (row) {
                 const cells = row.querySelectorAll('td');
                 if (cells.length < 4) return;
 
-                // For Name, search the text content
                 const name = (cells[0].textContent || '').toLowerCase();
-                
-                // For Email and Contact, check for masked-pii spans first to get the full value
+
+                // Masked PII keeps the real value in data-full, so search that
+                // while the table continues to display the masked version.
                 const emailSpan = cells[1].querySelector('.masked-pii');
                 const email = (emailSpan ? emailSpan.dataset.full : cells[1].textContent || '').toLowerCase();
-                
+
                 const contactSpan = cells[2].querySelector('.masked-pii');
                 const contact = (contactSpan ? contactSpan.dataset.full : cells[2].textContent || '').toLowerCase();
-                
-                const role = (cells[3].textContent || '').toLowerCase();
 
                 const visible = query === '' ||
                     name.indexOf(query) !== -1 ||
                     email.indexOf(query) !== -1 ||
-                    contact.indexOf(query) !== -1 ||
-                    role.indexOf(query) !== -1;
+                    contact.indexOf(query) !== -1;
 
                 row.style.display = visible ? '' : 'none';
                 if (visible) {
@@ -2929,13 +3080,22 @@
             });
 
             let noResultRow = document.getElementById('userSearchNoResultRow');
-            if (visibleCount === 0 && rows.length > 0) {
+            if (visibleCount === 0 && rows.length > 0 && query !== '') {
                 if (!noResultRow) {
                     noResultRow = document.createElement('tr');
                     noResultRow.id = 'userSearchNoResultRow';
-                    noResultRow.innerHTML = '<td colspan="' + columnCount + '" style="text-align:center;padding:18px;color:#6b7280;">No users match your search on this page.</td>';
+
+                    const cell = document.createElement('td');
+                    cell.colSpan = columnCount;
+                    cell.style.textAlign = 'center';
+                    cell.style.padding = '18px';
+                    cell.style.color = '#6b7280';
+                    noResultRow.appendChild(cell);
                     tbody.appendChild(noResultRow);
                 }
+
+                noResultRow.firstElementChild.textContent =
+                    'No users on this page match "' + rawValue.trim() + '". Press Enter or click Search to search all users.';
             } else if (noResultRow) {
                 noResultRow.remove();
             }

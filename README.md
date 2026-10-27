@@ -9,6 +9,26 @@ DriveED Hub is a multi-tenant web application built for driving schools to manag
 
 The following changes address feedback from capstone advisory consultations and defense preparations:
 
+---
+
+### Admin User Management Search & Filters — October 27, 2026
+- Removed an orphaned JavaScript fragment that caused `SyntaxError: Unexpected token '}'` and prevented the entire User Management script from running, leaving search and every filter unresponsive.
+- Rebuilt the filter bar as a native `GET` form with explicit `Search` and `Clear` actions, preserving `role`, `status`, and `filtered` state in hidden fields and keeping a no-JS fallback.
+- Server-side search now matches **name, email, and contact** on Enter or Search, while typing filters the current page instantly and points to the full search when there are no page-level matches.
+- License, branch, and quick-stat-card filters (Total, Active, Inactive, Students, Instructors, Licenses Expiring) now compose correctly across AJAX navigation.
+- Added a `Clear filters` action to the zero-results state so users are never stranded on an empty result.
+
+![Admin User Management search and filters](docs/screenshots/22_admin_user_management_search_and_filters.png)
+*User Management with working search, license and branch filters, Clear action, and quick-stat-card filtering.*
+
+![License filter results](docs/screenshots/23_admin_user_management_license_filter_results.png)
+*License filter returning only credentials expiring within 60 days, with the expiring card highlighted and reminder actions intact.*
+
+![Zero results with Clear filters](docs/screenshots/24_admin_user_management_empty_state_clear_filters.png)
+*Searching for a non-existent user shows a helpful empty state with a one-click Clear filters recovery.*
+
+---
+
 ### Payment Receipt Viewing (404 Fix) — October 24, 2026
 - Fixed an issue where clicking "View Receipt" under Admin Payments & Transactions produced an HTTP 404 error.
 - Corrected the route parameter resolution in `ReceiptStorageService` so school slugs resolve from active models and authenticated contexts rather than falling back to an unmapped default route.
