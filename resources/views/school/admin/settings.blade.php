@@ -1497,10 +1497,19 @@
                     </div>
 
                     @if(!empty($gcashSetting?->qr_path))
+                    @php
+                        $settingQrUrl = route('schools.guest.storage.gcash-qr', ['school' => $school, 'gcashSetting' => $gcashSetting]);
+                    @endphp
                     <div class="form-group">
                         <label class="form-label">Current GCash Payment Image</label>
-                        <div class="current-bg-wrap">
-                            <img class="current-bg-image" src="{{ route('schools.guest.storage.gcash-qr', ['school' => $school, 'gcashSetting' => $gcashSetting]) }}" alt="Current GCash payment image">
+                        <div class="current-bg-wrap qr-zoom-interactive" style="cursor: zoom-in; display: inline-block; position: relative;" onclick="openImageLightbox('{{ $settingQrUrl }}', 'GCash Payment QR Code', { isQr: true })" title="Click to zoom & inspect QR code">
+                            <img class="current-bg-image" src="{{ $settingQrUrl }}" alt="Current GCash payment image">
+                            <span class="qr-zoom-hint-badge"><i class="fas fa-search-plus"></i> Zoom</span>
+                        </div>
+                        <div style="margin-top: 6px;">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="openImageLightbox('{{ $settingQrUrl }}', 'GCash Payment QR Code', { isQr: true })" style="font-size: 0.78rem; padding: 2px 10px; border-radius: 9999px;">
+                                <i class="fas fa-search-plus me-1"></i> Preview & Inspect QR Code
+                            </button>
                         </div>
                     </div>
                     @endif

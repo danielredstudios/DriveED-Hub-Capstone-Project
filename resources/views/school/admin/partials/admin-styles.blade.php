@@ -504,6 +504,52 @@
     }
 
     /* Tables */
+    .table-container,
+    .table-responsive,
+    .admin-table-card,
+    .branch-table-card,
+    .content-card .table-scroll {
+        overflow-x: auto !important;
+        overflow-y: visible !important;
+        -webkit-overflow-scrolling: touch !important;
+        position: relative;
+        max-width: 100%;
+    }
+
+    .table-container::-webkit-scrollbar,
+    .table-responsive::-webkit-scrollbar,
+    .admin-table-card::-webkit-scrollbar,
+    .branch-table-card::-webkit-scrollbar,
+    .content-card .table-scroll::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .table-container::-webkit-scrollbar-track,
+    .table-responsive::-webkit-scrollbar-track,
+    .admin-table-card::-webkit-scrollbar-track,
+    .branch-table-card::-webkit-scrollbar-track,
+    .content-card .table-scroll::-webkit-scrollbar-track {
+        background: #f8fafc;
+        border-radius: 4px;
+    }
+
+    .table-container::-webkit-scrollbar-thumb,
+    .table-responsive::-webkit-scrollbar-thumb,
+    .admin-table-card::-webkit-scrollbar-thumb,
+    .branch-table-card::-webkit-scrollbar-thumb,
+    .content-card .table-scroll::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+
+    .table-container::-webkit-scrollbar-thumb:hover,
+    .table-responsive::-webkit-scrollbar-thumb:hover,
+    .admin-table-card::-webkit-scrollbar-thumb:hover,
+    .branch-table-card::-webkit-scrollbar-thumb:hover,
+    .content-card .table-scroll::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+
     .admin-table {
         width: 100%;
         border-collapse: collapse;

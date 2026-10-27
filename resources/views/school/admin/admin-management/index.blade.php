@@ -504,12 +504,37 @@
         border-radius: 20px;
         box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
         border: 1px solid #f3f4f6;
-        overflow: hidden;
+        overflow-x: auto;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+        position: relative;
+        max-width: 100%;
+    }
+
+    .admin-table-card::-webkit-scrollbar,
+    .pending-table-wrapper::-webkit-scrollbar {
+        height: 8px;
+    }
+    .admin-table-card::-webkit-scrollbar-track,
+    .pending-table-wrapper::-webkit-scrollbar-track {
+        background: #f8fafc;
+        border-radius: 4px;
+    }
+    .admin-table-card::-webkit-scrollbar-thumb,
+    .pending-table-wrapper::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+    .admin-table-card::-webkit-scrollbar-thumb:hover,
+    .pending-table-wrapper::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
     }
 
     .admin-table {
         width: 100%;
-        border-collapse: collapse;
+        min-width: 1020px;
+        border-collapse: separate;
+        border-spacing: 0;
     }
 
     .admin-table thead {
@@ -518,7 +543,7 @@
     }
 
     .admin-table thead th {
-        background: transparent;
+        background: {{ $primaryColor }};
         color: inherit;
         padding: 15px;
         text-align: left;
@@ -526,6 +551,76 @@
         font-size: 0.95rem;
         text-transform: none;
         letter-spacing: 0;
+    }
+
+    /* Pinned / Sticky Actions Column for Small Screens & Narrow Windows */
+    .admin-table th.col-actions,
+    .admin-table td.col-actions,
+    .pending-table th.col-actions,
+    .pending-table td.col-actions {
+        position: sticky;
+        right: 0;
+        z-index: 4;
+        background: #ffffff;
+        box-shadow: -5px 0 12px -3px rgba(15, 23, 42, 0.08);
+        text-align: right;
+        min-width: 210px;
+    }
+
+    .admin-table thead th.col-actions {
+        background: {{ $primaryColor }};
+        color: #ffffff;
+        z-index: 10;
+    }
+
+    .pending-table thead th.col-actions {
+        background: #f9fafb;
+        color: #6b7280;
+        z-index: 10;
+    }
+
+    .admin-table tbody tr td {
+        border-bottom: 1px solid #f3f4f6;
+        background: #ffffff;
+    }
+
+    .admin-table tbody tr:hover td {
+        background: #f9fafb;
+    }
+
+    .admin-table tbody tr:hover td.col-actions,
+    .pending-table tbody tr:hover td.col-actions {
+        background: #f9fafb;
+    }
+
+    .action-buttons {
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 6px;
+        flex-wrap: nowrap;
+        white-space: nowrap;
+    }
+
+    .table-scroll-hint-bar {
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 8px 14px;
+        background: #f0f7ff;
+        border: 1px solid #dbeafe;
+        border-radius: 10px;
+        margin-bottom: 12px;
+        font-size: 0.8rem;
+        color: #1e40af;
+        font-weight: 500;
+    }
+
+    @media (max-width: 1280px) {
+        .table-scroll-hint-bar {
+            display: flex;
+        }
     }
 
     /* Badges & Actions - Color Theory */
@@ -931,7 +1026,9 @@
         }
 
         .action-buttons {
-            flex-direction: column;
+            display: inline-flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
         }
     }
     .btn-reveal-pii {
@@ -1087,6 +1184,10 @@
 
     {{-- Admin Table --}}
     @if($admins->count() > 0)
+    <div class="table-scroll-hint-bar">
+        <span><i class="bi bi-arrows-expand me-1"></i> Swipe or scroll horizontally to view full table details</span>
+        <span class="badge bg-primary text-white" style="font-size: 0.72rem;">Actions Pinned &rarr;</span>
+    </div>
     <div class="admin-table-card">
         <table class="admin-table">
             <thead>
@@ -1102,7 +1203,7 @@
                     <th>Branch</th>
                     <th>Status</th>
                     <th>Portal Activity</th>
-                    <th>Actions</th>
+                    <th class="col-actions">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -1168,7 +1269,7 @@
                             </div>
                         </div>
                     </td>
-                    <td>
+                    <td class="col-actions">
                         @if($adminRow->id === $admin->id)
                             <span class="you-badge">
                                 <i class="bi bi-person-fill"></i> You
@@ -1243,7 +1344,7 @@
                                     <th>Status</th>
                                     <th>Sent At</th>
                                     <th>Expires At</th>
-                                    <th>Actions</th>
+                                    <th class="col-actions">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1266,7 +1367,7 @@
                                         </td>
                                         <td>{{ $invitation->created_at?->format('M d, Y H:i') ?? 'N/A' }}</td>
                                         <td>{{ $invitation->expires_at?->format('M d, Y H:i') ?? 'No Expiry' }}</td>
-                                        <td>
+                                        <td class="col-actions">
                                             <div class="pending-invite-actions">
                                                 <form action="{{ route('schools.admin.invitations.resend', ['school' => $school, 'invitation' => $invitation]) }}" method="POST" class="inline-form native-form pending-invitation-form" data-no-ajax="1" data-no-submit-guard="1" data-protected="1">
                                                     @csrf

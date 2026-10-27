@@ -140,5 +140,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     @stack('scripts')
+    @include('partials.image-lightbox-modal')
 </body>
 </html>

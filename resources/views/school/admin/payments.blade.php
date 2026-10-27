@@ -428,21 +428,24 @@
                             <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-start;">
                                 <span class="method-badge" style="margin-bottom: 2px;">{{ ucfirst($payment->method ?? 'N/A') }}</span>
                                 @if($payment->proof_url)
-                                    <a href="{{ $payment->proof_url }}" target="_blank" class="text-xs text-blue-600 hover:underline" style="display: inline-flex; align-items: center; gap: 4px; font-weight: 500;">
+                                    <button type="button" class="btn-view-receipt text-xs text-blue-600 hover:underline" style="display: inline-flex; align-items: center; gap: 4px; font-weight: 500; background: none; border: none; padding: 0; cursor: pointer;" onclick="openImageLightbox('{{ $payment->proof_url }}', 'Payment Receipt - {{ addslashes($payment->payer->name ?? 'Guest') }} (₱{{ number_format($payment->amount, 2) }})')">
                                         <i class="bi bi-receipt"></i> View Receipt
-                                    </a>
+                                    </button>
                                 @endif
                             </div>
                         </td>
                         <td class="reference-cell">
-                            @if($payment->snap_qr_path)
+                            @php
+                                $qrImgSrc = $payment->snap_qr_path ? (str_starts_with($payment->snap_qr_path, 'http') || str_starts_with($payment->snap_qr_path, '/') ? $payment->snap_qr_path : asset('storage/' . $payment->snap_qr_path)) : null;
+                            @endphp
+                            @if($qrImgSrc)
                                 <!-- QR Code Image - click to view full size -->
-                                <div class="qr-code-wrapper cursor-pointer select-none" onclick="openQrModal('{{ $payment->snap_qr_path }}')">
-                                    <img src="{{ $payment->snap_qr_path }}" alt="OR QR Code" class="qr-code-image max-w-full h-auto rounded-md transition-transform duration-300">
+                                <div class="qr-code-wrapper qr-zoom-interactive cursor-pointer select-none" onclick="openImageLightbox('{{ $qrImgSrc }}', 'Payment QR Code / OR', { isQr: true })" title="Click to enlarge & zoom QR code">
+                                    <img src="{{ $qrImgSrc }}" alt="OR QR Code" class="qr-code-image max-w-full h-auto rounded-md transition-transform duration-300" style="max-height: 48px; object-fit: contain;">
                                 </div>
                             @elseif($payment->or_number)
                                 <!-- OR Number - click to view full size -->
-                                <span class="or-number cursor-pointer select-none" onclick="openQrModal('/storage/or-illustration.png')">
+                                <span class="or-number cursor-pointer select-none" onclick="openImageLightbox('/storage/or-illustration.png', 'Official Receipt (OR #{{ $payment->or_number }})', { isQr: false })" title="Click to inspect OR details">
                                     {{ $payment->or_number }}
                                 </span>
                             @else
@@ -521,23 +524,6 @@
     </div>
 </div>
 
-<!-- QR Code Modal -->
-<div id="qrModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 transition-opacity" role="dialog" aria-modal="true">
-    <div class="relative w-full max-w-2xl max-h-96 bg-white rounded-lg shadow-2xl outline-none">
-        <button type="button" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2" aria-label="Close modal" onclick="closeQrModal()">
-            <i class="bi bi-x-lg"></i>
-        </button>
-        <div class="relative flex flex-col overflow-hidden min-h-[300px]">
-            <img id="qrModalImage" src="" alt="QR Code" class="w-full h-auto object-contain transition-opacity">
-            <div class="p-2 flex justify-end">
-                <button class="text-gray-400 hover:text-gray-600" onclick="event.stopPropagation();" aria-label="Zoom out">−</button>
-                <span class="mx-2">|</span>
-                <button class="text-gray-400 hover:text-gray-600" onclick="event.stopPropagation();" aria-label="Zoom in">+</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
 function filterPayments(status, btn) {
     const rows = document.querySelectorAll('#paymentsTable tbody tr[data-status]');
@@ -547,32 +533,25 @@ function filterPayments(status, btn) {
     btn.classList.add('active');
     
     rows.forEach(row => {
-        const rowStatus = rowDataset.status;
+        const rowStatus = row.dataset.status;
         if (status === 'all' || rowStatus === status) {
             row.style.display = 'table-row';
         } else {
             row.style.display = 'none';
         }
-    }
+    });
 }
 
-// QR Code Modal functions
-function openQrModal(imageUrl) {
-    const modal = document.getElementById('qrModal');
-    const qrImage = document.getElementById('qrModalImage');
-    
-    if (modal && qrImage) {
-        qrImage.src = imageUrl;
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
+// QR Code Modal compatibility functions (delegates to universal lightbox with zoom/pan)
+function openQrModal(imageUrl, title) {
+    if (typeof openImageLightbox === 'function') {
+        openImageLightbox(imageUrl, title || 'Payment QR Code / OR', { isQr: true });
     }
 }
 
 function closeQrModal() {
-    const modal = document.getElementById('qrModal');
-    if (modal) {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
+    if (typeof closeImageLightbox === 'function') {
+        closeImageLightbox();
     }
 }
 </script>

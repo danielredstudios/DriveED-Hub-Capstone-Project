@@ -372,8 +372,47 @@
 
         table {
             width: 100%;
-            min-width: 900px;
-            border-collapse: collapse;
+            min-width: 960px;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .table-container::-webkit-scrollbar {
+            height: 8px;
+        }
+        .table-container::-webkit-scrollbar-track {
+            background: #f8fafc;
+            border-radius: 4px;
+        }
+        .table-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        #usersTable th:last-child,
+        #usersTable td:last-child,
+        #usersTable th.col-actions,
+        #usersTable td.col-actions {
+            position: sticky;
+            right: 0;
+            background: #ffffff;
+            z-index: 4;
+            box-shadow: -5px 0 12px -3px rgba(15, 23, 42, 0.08);
+            text-align: right;
+            min-width: 170px;
+        }
+
+        #usersTable thead th:last-child {
+            background: {{ $primaryColor }};
+            color: #ffffff;
+            z-index: 10;
+        }
+
+        #usersTable tbody tr:hover td:last-child {
+            background: #f9fafb;
         }
 
         .sr-only {

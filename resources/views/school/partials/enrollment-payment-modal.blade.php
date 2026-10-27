@@ -50,10 +50,23 @@
                 <div class="epm-instructions-card" id="epmGcashDetails">
                     <div class="epm-gcash-grid">
                         @if($epmGcash && $epmGcash->qr_path && $epmSchool)
+                        @php
+                            $epmQrUrl = route('schools.guest.storage.gcash-qr', ['school' => $epmSchool->slug, 'gcashSetting' => $epmGcash->id]);
+                        @endphp
                         <div class="epm-qr-column">
-                            <div class="epm-qr-box">
-                                <img src="{{ route('schools.guest.storage.gcash-qr', ['school' => $epmSchool->slug, 'gcashSetting' => $epmGcash->id]) }}" alt="GCash QR Code" class="epm-qr-img">
+                            <div class="epm-qr-box qr-zoom-interactive" 
+                                 onclick="openQrScanModal('{{ $epmQrUrl }}', { accountName: '{{ addslashes($epmGcash->account_name ?? 'School Official GCash') }}', accountNumber: '{{ addslashes($epmGcash->account_number ?? '') }}' })" 
+                                 title="Click to open QR popup to scan" 
+                                 style="cursor: zoom-in; position: relative;">
+                                <img src="{{ $epmQrUrl }}" alt="GCash QR Code" class="epm-qr-img">
+                                <span class="qr-zoom-hint-badge" style="font-size: 0.65rem; padding: 2px 6px;"><i class="fas fa-qrcode"></i> Scan</span>
                             </div>
+                            <button type="button" 
+                                    class="epm-qr-zoom-btn" 
+                                    onclick="openQrScanModal('{{ $epmQrUrl }}', { accountName: '{{ addslashes($epmGcash->account_name ?? 'School Official GCash') }}', accountNumber: '{{ addslashes($epmGcash->account_number ?? '') }}' })" 
+                                    title="Open QR in full-size scanner view">
+                                <i class="fas fa-search-plus"></i> Tap to Zoom / Scan
+                            </button>
                             <span class="epm-qr-caption">Scan with GCash</span>
                         </div>
                         @endif
@@ -129,10 +142,13 @@
                             </div>
                         </div>
                         <div class="epm-preview-box d-none" id="epmPreviewBox">
-                            <img src="" alt="Receipt Preview" id="epmPreviewImg" class="epm-preview-thumbnail">
+                            <img src="" alt="Receipt Preview" id="epmPreviewImg" class="epm-preview-thumbnail" style="cursor: zoom-in;" title="Click to inspect receipt full size" onclick="openImageLightbox(this.src, 'Uploaded Payment Receipt')">
                             <div class="epm-preview-meta">
                                 <span class="epm-preview-filename" id="epmPreviewName">receipt.png</span>
-                                <button type="button" class="epm-clear-file" id="epmClearFile" title="Remove file">&times; Remove</button>
+                                <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
+                                    <button type="button" class="epm-inspect-btn" onclick="openImageLightbox(document.getElementById('epmPreviewImg').src, 'Uploaded Payment Receipt')"><i class="fas fa-search-plus"></i> Zoom</button>
+                                    <button type="button" class="epm-clear-file" id="epmClearFile" title="Remove file">&times; Remove</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -338,11 +354,55 @@
     border: 1px solid #cbd5e1;
     border-radius: 8px;
     padding: 4px;
-    width: 100px;
-    height: 100px;
+    width: 108px;
+    height: 108px;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.enrollment-payment-modal .epm-qr-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+.enrollment-payment-modal .epm-qr-zoom-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1d4ed8;
+    border-radius: 9999px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    margin-top: 5px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.enrollment-payment-modal .epm-qr-zoom-btn:hover {
+    background: #dbeafe;
+    color: #1e40af;
+    transform: translateY(-1px);
+}
+
+.enrollment-payment-modal .epm-inspect-btn {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    color: #334155;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 2px 6px;
+    cursor: pointer;
+}
+
+.enrollment-payment-modal .epm-inspect-btn:hover {
+    background: #e2e8f0;
+    color: #0f172a;
 }
 
 .enrollment-payment-modal .epm-qr-img {

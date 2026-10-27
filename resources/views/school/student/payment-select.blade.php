@@ -49,16 +49,30 @@
                         <div class="row g-4 align-items-center" id="gcashInstructionBlock">
                             <!-- QR Section - Stacked on Mobile -->
                             <div class="col-md-5 text-center">
-                                <div class="qr-container p-2 bg-white border rounded-3 shadow-xs mx-auto" style="max-width: 165px;">
-                                    @if($gcashSetting && $gcashSetting->qr_path)
-                                        <img src="{{ route('schools.guest.storage.gcash-qr', ['school' => $school, 'gcashSetting' => $gcashSetting]) }}" class="img-fluid rounded-2" alt="GCash QR">
-                                    @else
+                                @if($gcashSetting && $gcashSetting->qr_path)
+                                    @php
+                                        $gcashQrUrl = route('schools.guest.storage.gcash-qr', ['school' => $school, 'gcashSetting' => $gcashSetting]);
+                                    @endphp
+                                    <div class="qr-container qr-zoom-interactive p-2 bg-white border rounded-3 shadow-xs mx-auto" 
+                                         style="max-width: 175px; cursor: zoom-in;" 
+                                         onclick="openQrScanModal('{{ $gcashQrUrl }}', { accountName: '{{ addslashes($gcashSetting->account_name ?? 'School GCash') }}', accountNumber: '{{ addslashes($gcashSetting->account_number ?? '') }}' })"
+                                         title="Click to open QR popup to scan">
+                                        <img src="{{ $gcashQrUrl }}" class="img-fluid rounded-2" alt="GCash QR">
+                                        <span class="qr-zoom-hint-badge"><i class="fas fa-qrcode"></i> Scan</span>
+                                    </div>
+                                    <button type="button" 
+                                            class="btn btn-sm btn-outline-primary rounded-pill mt-2 py-1 px-3 fw-semibold d-inline-flex align-items-center gap-1 shadow-2xs" 
+                                            onclick="openQrScanModal('{{ $gcashQrUrl }}', { accountName: '{{ addslashes($gcashSetting->account_name ?? 'School GCash') }}', accountNumber: '{{ addslashes($gcashSetting->account_number ?? '') }}' })">
+                                        <i class="fas fa-expand-arrows-alt"></i> Tap to Enlarge / Scan QR
+                                    </button>
+                                @else
+                                    <div class="qr-container p-2 bg-white border rounded-3 shadow-xs mx-auto" style="max-width: 175px;">
                                         <div class="bg-light d-flex align-items-center justify-content-center rounded-2" style="height: 140px;">
                                             <i class="fas fa-image text-muted opacity-50 fa-2x"></i>
                                         </div>
-                                    @endif
-                                </div>
-                                <p class="mt-2 mb-0 small text-muted fw-bold">Scan to Pay</p>
+                                    </div>
+                                    <p class="mt-2 mb-0 small text-muted fw-bold">Scan to Pay</p>
+                                @endif
                             </div>
                             
                             <!-- Account Details - Stacked on Mobile -->
@@ -155,8 +169,13 @@
                                 <label class="form-label small fw-bold text-dark mb-2" id="screenshotLabel">{{ $selectedMethod === 'on_site' ? 'Upload Official Receipt Photo' : 'Upload GCash Receipt (Screenshot)' }}</label>
                                 <div class="upload-area p-4 border-2 border-dashed rounded-4 text-center cursor-pointer position-relative" id="dropZone" style="border-color: #e2e8f0; transition: all 0.2s; background: #f8fafc;">
                                     <input type="file" name="screenshot" id="screenshotInput" class="position-absolute w-100 h-100 opacity-0 cursor-pointer" style="left:0; top:0; z-index:2;" accept="image/*" required @disabled(!$allowPaymentSubmission)>
-                                    <div class="upload-preview d-none mb-1">
-                                        <img src="" class="img-thumbnail" style="max-height: 120px;">
+                                    <div class="upload-preview d-none mb-1 position-relative" style="z-index: 3;">
+                                        <img src="" class="img-thumbnail" style="max-height: 140px; cursor: zoom-in;" title="Click to inspect receipt full-size" onclick="openImageLightbox(this.src, 'Uploaded Payment Receipt')">
+                                        <div class="mt-2">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-3 rounded-pill" onclick="event.stopPropagation(); openImageLightbox(document.querySelector('.upload-preview img').src, 'Uploaded Payment Receipt')">
+                                                <i class="fas fa-search-plus me-1"></i> Preview Full-Size / Zoom
+                                            </button>
+                                        </div>
                                     </div>
                                     <div class="upload-placeholder">
                                         <i class="fas fa-cloud-upload-alt fs-1 mb-2" style="color: var(--primary-color); opacity: 0.7;"></i>

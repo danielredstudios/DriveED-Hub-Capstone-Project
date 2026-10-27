@@ -849,5 +849,6 @@
     })();
     </script>
     @include('partials.toast-notifications')
+    @include('partials.image-lightbox-modal')
 </body>
 </html>

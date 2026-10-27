@@ -237,14 +237,35 @@
         background: white;
         border-radius: 16px;
         box-shadow: 0 2px 12px {{ $primaryColor }}10;
-        overflow: hidden;
+        overflow-x: auto;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+        position: relative;
+        max-width: 100%;
         border: 1px solid {{ $primaryColor }}08;
         margin-top: 25px;
     }
 
+    .branch-table-card::-webkit-scrollbar {
+        height: 8px;
+    }
+    .branch-table-card::-webkit-scrollbar-track {
+        background: #f8fafc;
+        border-radius: 4px;
+    }
+    .branch-table-card::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+    }
+    .branch-table-card::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+
     .branch-table {
         width: 100%;
-        border-collapse: collapse;
+        min-width: 960px;
+        border-collapse: separate;
+        border-spacing: 0;
     }
 
     .branch-table thead {
@@ -253,7 +274,7 @@
     }
 
     .branch-table thead th {
-        background: transparent;
+        background: {{ $primaryColor }};
         color: inherit;
         padding: 15px;
         text-align: left;
@@ -261,6 +282,45 @@
         font-size: 0.95rem;
         text-transform: none;
         letter-spacing: 0;
+    }
+
+    .branch-table th.col-actions,
+    .branch-table td.col-actions {
+        position: sticky;
+        right: 0;
+        z-index: 4;
+        background: #ffffff;
+        box-shadow: -5px 0 12px -3px rgba(15, 23, 42, 0.08);
+        text-align: right;
+        min-width: 210px;
+    }
+
+    .branch-table thead th.col-actions {
+        background: {{ $primaryColor }};
+        color: #ffffff;
+        z-index: 10;
+    }
+
+    .branch-table tbody tr:hover td.col-actions {
+        background: #f9fafb;
+    }
+
+    .branch-table tbody tr td {
+        border-bottom: 1px solid #e5e7eb;
+        background: #ffffff;
+    }
+
+    .branch-table tbody tr:hover td {
+        background: #f9fafb;
+    }
+
+    .action-buttons {
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 6px;
+        flex-wrap: nowrap;
+        white-space: nowrap;
     }
 
     .branch-table tbody tr {
@@ -717,7 +777,7 @@
                         <th>Students</th>
                         <th>Instructors</th>
                         <th>Status</th>
-                        <th>Actions</th>
+                        <th class="col-actions">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -753,7 +813,7 @@
                                 </span>
                             @endif
                         </td>
-                        <td>
+                        <td class="col-actions">
                             <div class="action-buttons">
                                 <button class="btn-action btn-edit" onclick="editBranch({{ json_encode($branch) }})">
                                     <i class="bi bi-pencil-fill"></i> Edit

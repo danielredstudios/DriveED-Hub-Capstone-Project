@@ -11,6 +11,42 @@ The following changes address feedback from capstone advisory consultations and 
 
 ---
 
+### Dedicated QR Code Scan Modal Popup & Image Zoom Lightbox — October 27, 2026
+- **Dedicated QR Code Scan Modal Popup (`#driveedQrScanModal`)**: Resolved payment QR scanning difficulties where cameras could not scan small in-page images. Clicking any payment QR code opens a dedicated high-contrast white card dialog optimized specifically for phone cameras and GCash auto-exposure.
+- **Interactive Zoom Toolbar**: Direct `[ - ] [ 100% ] [ + ] [ ↺ ]` zoom controls directly under the QR code allowing up to 200% magnification so users can scan from across a desk or with lower-resolution camera lenses.
+- **Account Details & 1-Click Copy**: Cleanly displays the School's official GCash Account Name and Account Number with a 1-click **"Copy"** button that gives instant **"Copied!"** visual feedback.
+- **Direct "Download QR Code" Action**: Mobile users can download the high-resolution QR image directly to their gallery to use GCash's *"Upload QR from Photos"* feature.
+- **High Stacking Priority (`z-index: 1000005`)**: Cleanly stacks on top of `#enrollmentPaymentModal` (`z-index: 99999`) and all Bootstrap modals without losing typed form input or closing the parent modal.
+- **Universal Lightbox (`#driveedImageLightbox`)**: Added full-size preview, zoom (+/-), mouse wheel zoom, pan/drag, 90° rotation, and download for official receipts, student permits, and license photos across student checkout, dashboard, and admin views.
+
+![Actual Student Payment Checkout](docs/screenshots/12_actual_payment_checkout_page.png)
+*Student checkout interface (/student/payment/38) with interactive QR container, zoom indicator, and Step 2 proof upload.*
+
+![Dedicated QR Scan Modal Popup Opened](docs/screenshots/12_qr_scan_modal_popup_opened.png)
+*Dedicated QR Scan Modal Popup with high-contrast card, camera-ready indicator, GCash details, and download capability.*
+
+![QR Modal Copied Number and Zoom](docs/screenshots/13_qr_scan_modal_copied_number.png)
+*1-click copy action with instant green confirmation and direct zoom-in controls.*
+
+![QR Scan Modal Stacked on Enrollment Modal](docs/screenshots/17_qr_scan_modal_stacked_on_enrollment_modal.png)
+*Dedicated QR Scan Modal Popup seamlessly stacked on top of the Enrollment Payment Modal without form disruption.*
+
+---
+
+### Table Responsiveness & Sticky Action Columns for Narrow Screens — October 27, 2026
+- Fixed an issue where narrow screens or split windows cut off the `Actions` column on the right edge of data tables.
+- Implemented `overflow-x: auto` container protection and minimum width boundaries (`min-width: 1020px`) on Admin Management, Branches, and User Management tables.
+- Pinned `.col-actions` stickily to the right edge (`position: sticky; right: 0; z-index: 2;`) with a clean elevation drop shadow so Edit, Deactivate, and Delete buttons remain visible and clickable regardless of horizontal scroll position.
+- Added responsive horizontal scroll indicator notices and customized touch-friendly scrollbars across all table views.
+
+![Admin Table Narrow Screen Sticky Actions](docs/screenshots/07_admin_table_narrow_screen_sticky_actions.png)
+*Admin Management table on narrow screens with sticky right Actions column permanently accessible.*
+
+![Admin Edit Modal Interacted](docs/screenshots/08_admin_edit_modal_interacted.png)
+*Clicking the pinned Edit action immediately opens the modal without obstruction.*
+
+---
+
 ### Admin User Management Search & Filters — October 27, 2026
 - Removed an orphaned JavaScript fragment that caused `SyntaxError: Unexpected token '}'` and prevented the entire User Management script from running, leaving search and every filter unresponsive.
 - Rebuilt the filter bar as a native `GET` form with explicit `Search` and `Clear` actions, preserving `role`, `status`, and `filtered` state in hidden fields and keeping a no-JS fallback.

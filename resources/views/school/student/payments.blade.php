@@ -392,10 +392,18 @@ nav[role="navigation"] span:not([aria-current]):not([aria-disabled]) {
         <h2 style="font-size: 1.5rem; font-weight: 600; margin-top: 0; margin-bottom: 20px; color: #111827;">Upload Proof of Payment</h2>
 
         @if(!empty($gcashPaymentImageUrl))
-            <div style="margin-bottom: 16px; border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; background: #f9fafb;">
-                <label style="display: block; font-size: 0.875rem; font-weight: 600; color: #374151; margin-bottom: 8px;">GCash Payment Image</label>
-                <img src="{{ $gcashPaymentImageUrl }}" alt="GCash payment image" style="width: 100%; max-height: 260px; object-fit: contain; border-radius: 8px; background: #fff; border: 1px solid #d1d5db;">
-                <p style="font-size: 0.75rem; color: #6b7280; margin-top: 8px; margin-bottom: 0;">Use this image as reference for payment destination details.</p>
+            <div style="margin-bottom: 16px; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; background: #f9fafb; text-align: center;">
+                <label style="display: block; font-size: 0.875rem; font-weight: 600; color: #374151; margin-bottom: 8px; text-align: left;">GCash Payment Image</label>
+                <div class="qr-zoom-interactive" style="cursor: zoom-in; display: inline-block; position: relative; max-width: 100%; border-radius: 8px; overflow: hidden;" onclick="openQrScanModal('{{ $gcashPaymentImageUrl }}')" title="Click to open QR popup to scan">
+                    <img src="{{ $gcashPaymentImageUrl }}" alt="GCash payment image" style="width: 100%; max-height: 260px; object-fit: contain; border-radius: 8px; background: #fff; border: 1px solid #d1d5db; display: block;">
+                    <span class="qr-zoom-hint-badge"><i class="fas fa-qrcode"></i> Scan</span>
+                </div>
+                <div style="margin-top: 8px;">
+                    <button type="button" class="btn btn-sm btn-outline-primary" style="border-radius: 9999px; font-size: 0.8rem; padding: 4px 14px; font-weight: 600; cursor: pointer;" onclick="openQrScanModal('{{ $gcashPaymentImageUrl }}')">
+                        <i class="fas fa-expand-arrows-alt me-1"></i> Tap to Enlarge / Scan QR
+                    </button>
+                </div>
+                <p style="font-size: 0.75rem; color: #6b7280; margin-top: 8px; margin-bottom: 0;">Use this image as reference for payment destination details. Tap to scan full-size.</p>
             </div>
         @else
             <div style="margin-bottom: 16px; border: 1px solid #fde68a; border-radius: 10px; padding: 12px; background: #fffbeb; color: #92400e; font-size: 0.875rem;">
