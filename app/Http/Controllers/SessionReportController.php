@@ -14,6 +14,26 @@ use Illuminate\Support\Facades\Auth;
 
 class SessionReportController extends Controller
 {
+    /**
+     * Schedule-log status groups shown in the export filters.
+     *
+     * "Completed" includes instructor-marked sessions (done) as well as
+     * admin-verified sessions. "Incoming" covers every still-active state.
+     */
+    private const STATUS_GROUPS = [
+        'cancelled' => ['cancelled'],
+        'completed' => ['done', 'completed'],
+        'incoming' => ['pending', 'scheduled', 'confirmed'],
+        'no_show' => ['no-show', 'no_show'],
+    ];
+
+    private const STATUS_LABELS = [
+        'cancelled' => 'Cancelled',
+        'completed' => 'Completed',
+        'incoming' => 'Incoming',
+        'no_show' => 'No-show',
+    ];
+
     public function download(Request $request, School $school, string $format)
     {
         $role = explode('.', $request->route()->getName())[1];
@@ -37,7 +57,25 @@ class SessionReportController extends Controller
             'instructor_id' => 'nullable|integer',
             'session_id' => 'nullable|integer',
             'booking_id' => 'nullable|integer',
+            'statuses' => 'nullable|array',
+            'statuses.*' => 'string|in:'.implode(',', array_keys(self::STATUS_GROUPS)),
         ]);
+
+        // Old links do not send statuses[]; default to every schedule state so
+        // existing bookmarks keep exporting the full log.
+        $selectedStatuses = array_values(array_intersect(
+            array_keys(self::STATUS_GROUPS),
+            (array) ($filters['statuses'] ?? [])
+        ));
+        if ($selectedStatuses === []) {
+            $selectedStatuses = array_keys(self::STATUS_GROUPS);
+        }
+
+        $statusValues = [];
+        foreach ($selectedStatuses as $statusGroup) {
+            $statusValues = array_merge($statusValues, self::STATUS_GROUPS[$statusGroup]);
+        }
+        $statusValues = array_values(array_unique($statusValues));
 
         $bookings = Booking::where('school_id', $school->id)->with(['student', 'instructor', 'course', 'timeSlot']);
         $logs = SessionCompletion::where('school_id', $school->id)->with(['enrollment.learner', 'enrollment.course', 'instructor']);
@@ -83,6 +121,18 @@ class SessionReportController extends Controller
                 $logs->whereDate('session_date', $operator, $filters[$filter]);
             }
         }
+
+        // Bookings are grouped into the four status buckets shown in the UI.
+        // Completed session logs are a separate table, so they only appear
+        // when the Completed status is selected. When every bucket is selected
+        // we leave the query unfiltered so legacy/unknown statuses still export.
+        if (count($selectedStatuses) < count(self::STATUS_GROUPS)) {
+            $bookings->whereIn('status', $statusValues);
+        }
+        if (!in_array('completed', $selectedStatuses, true)) {
+            $logs->whereRaw('0 = 1');
+        }
+
         $bookings = $bookings->orderBy('booking_date')->orderBy('id')->limit(5001)->get();
         $logs = $logs->orderBy('session_date')->orderBy('id')->limit(5001)->get();
         abort_if($bookings->count() + $logs->count() > 5000, 422, 'Too many records selected. Please choose a narrower date range (maximum 5,000 records).');
@@ -122,8 +172,19 @@ class SessionReportController extends Controller
         $isPerSession = !empty($filters['session_id']) || !empty($filters['booking_id']);
         $targetId = $filters['session_id'] ?? ($filters['booking_id'] ?? null);
 
-        $selectedStudent = !empty($filters['student_id']) ? Student::find($filters['student_id']) : null;
-        $selectedInstructor = !empty($filters['instructor_id']) ? Instructor::find($filters['instructor_id']) : null;
+        // Keep the selected labels inside the tenant (and branch, for branch
+        // secretaries). Instructors may only narrow to students they teach.
+        $studentQuery = Student::where('school_id', $school->id);
+        $instructorQuery = Instructor::where('school_id', $school->id);
+        if ($role === 'admin' && $user->isBranchSecretary()) {
+            abort_unless($user->branch_id, 403);
+            $studentQuery->where('branch_id', $user->branch_id);
+            $instructorQuery->where('branch_id', $user->branch_id);
+        } elseif ($role === 'instructor') {
+            $studentQuery->whereHas('bookings', fn ($q) => $q->where('instructor_id', $user->id));
+        }
+        $selectedStudent = !empty($filters['student_id']) ? $studentQuery->find($filters['student_id']) : null;
+        $selectedInstructor = !empty($filters['instructor_id']) ? $instructorQuery->find($filters['instructor_id']) : null;
 
         $filterParts = [];
         if (!empty($filters['start']) || !empty($filters['end'])) {
@@ -135,10 +196,18 @@ class SessionReportController extends Controller
         if ($selectedInstructor) {
             $filterParts[] = 'Instructor: '.$selectedInstructor->name;
         }
+        $filterParts[] = 'Statuses: '.implode(', ', array_map(
+            fn ($statusGroup) => self::STATUS_LABELS[$statusGroup],
+            $selectedStatuses
+        ));
+
+        $datePeriod = (!empty($filters['start']) || !empty($filters['end']))
+            ? ($filters['start'] ?? 'Beginning').' to '.($filters['end'] ?? 'Present')
+            : 'All dates';
 
         $periodText = $isPerSession
             ? (!empty($filters['session_id']) ? 'Single Session Record #'.$filters['session_id'] : 'Single Booked Lesson #'.($filters['booking_id'] ?? ''))
-            : (!empty($filterParts) ? implode(' | ', $filterParts) : 'All Records');
+            : $datePeriod;
 
         $data = [
             'school' => $school,
@@ -146,7 +215,8 @@ class SessionReportController extends Controller
             'generatedAt' => now(),
             'preparedFor' => $user->name.' ('.ucfirst($role).')',
             'period' => $periodText,
-            'filterSubtitle' => !empty($filterParts) ? implode(' | ', $filterParts) : 'All Records',
+            'filterSubtitle' => implode(' | ', $filterParts),
+            'reportTitle' => 'Schedule Logs',
             'summary' => [
                 'Booked lessons' => $bookings->count(),
                 'Completed sessions' => $logs->count(),
@@ -155,9 +225,9 @@ class SessionReportController extends Controller
             ],
         ];
 
-        $filenameParts = ['session-logs', $school->slug];
+        $filenameParts = ['schedule-logs', $school->slug];
         if ($isPerSession) {
-            $filenameParts = ['session-log', $targetId, $school->slug];
+            $filenameParts = ['schedule-log', $targetId, $school->slug];
         } elseif ($selectedStudent) {
             $filenameParts[] = 'student-'.$selectedStudent->id;
         } elseif ($selectedInstructor) {

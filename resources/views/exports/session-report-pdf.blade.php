@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Session report</title>
+    <title>{{ $reportTitle ?? 'Schedule Logs' }}</title>
     <style>
         @page { margin: 34px 32px 44px; }
         body { font-family: DejaVu Sans, sans-serif; font-size: 9px; color: #243247; line-height: 1.45; }
@@ -26,7 +26,7 @@
     </style>
 </head>
 <body>
-    <h1>Training Session History</h1>
+    <h1>{{ $reportTitle ?? 'Schedule Logs' }}</h1>
     <div class="school">{{ $school->name }}</div>
     <div class="meta">
         <strong>Prepared for:</strong> {{ $preparedFor }} &nbsp; | &nbsp;
@@ -35,7 +35,7 @@
             <br><strong>Filters:</strong> {{ $filterSubtitle }}
         @endif
         <br>
-        <span class="muted">Generated on {{ $generatedAt->timezone(!empty($school->timezone) ? $school->timezone : 'Asia/Manila')->format('M d, Y \a\t g:i A T') }}. Shows booked driving lessons and completed training sessions. Hours are shown separately for each record.</span>
+        <span class="muted">Generated on {{ $generatedAt->timezone(!empty($school->timezone) ? $school->timezone : 'Asia/Manila')->format('M d, Y \a\t g:i A T') }}. Shows scheduled, completed, cancelled, and no-show lessons. Hours are shown separately for each record.</span>
     </div>
     <table class="summary"><tr>
         @foreach($summary as $label => $value)
@@ -43,7 +43,7 @@
         @endforeach
     </tr></table>
     @if($rows->isEmpty())
-        <div class="empty">No training sessions found for this date range.</div>
+        <div class="empty">No schedule logs found for the selected filters.</div>
     @else
         <table class="records">
             <thead><tr>
@@ -71,6 +71,6 @@
             @endforeach
         </table>
     @endif
-    <footer>{{ $school->name }} | Training history | {{ $period }}</footer>
+    <footer>{{ $school->name }} | {{ $reportTitle ?? 'Schedule Logs' }} | {{ $period }}</footer>
 </body>
 </html>

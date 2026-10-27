@@ -29,6 +29,32 @@ The following changes address feedback from capstone advisory consultations and 
 
 ---
 
+### Schedule Logs Export (October 27, 2026)
+- Added schedule-log export with status filters: Cancelled, Completed, Incoming, and No-show.
+- Status filters apply to booked lessons and session completions; admins may also restrict by student or instructor.
+- Instructors see only their students in the Student selector; students see only their own sessions.
+- Date range filters control the included record window.
+- PDF and Excel downloads available; file names include status label, student/instructor, and date range.
+- Admin may select a specific instructor or student, or view all records across the school (or branch for branch secretaries).
+- Added the export card to the admin schedules page with a native GET form and no-JS fallback.
+
+ ![Admin schedules export card with status filters](docs/screenshots/25_admin_schedules_schedule_logs_export.png)
+*Admin schedules page with the new Schedule Logs export card — status checkboxes, date pickers, Student/Instructor selectors, and PDF/Excel download buttons.*
+
+ ![Schedule logs export with all statuses selected](docs/screenshots/26_schedule_logs_all_statuses.png)
+*All four status groups selected — Cancelled, Completed, Incoming, and No-show.*
+
+ ![Schedule logs export with Cancelled and Incoming selected](docs/screenshots/27_schedule_logs_cancelled_incoming.png)
+*Only Cancelled and Incoming statuses selected, filtering out Completed and No-show lessons.*
+
+ ![Schedule logs export with Instructor-selected students](docs/screenshots/28_schedule_logs_instructor_selected.png)
+*Instructor selected from the dropdown; the export is automatically scoped to that instructor's sessions and their enrolled students.*
+
+ ![Clear filters in export card](docs/screenshots/29_schedule_logs_clear_filters.png)
+*Clicking Clear filters on the export card resets all dropdowns and checkboxes to their defaults.*
+
+---
+
 ### Payment Receipt Viewing (404 Fix) — October 24, 2026
 - Fixed an issue where clicking "View Receipt" under Admin Payments & Transactions produced an HTTP 404 error.
 - Corrected the route parameter resolution in `ReceiptStorageService` so school slugs resolve from active models and authenticated contexts rather than falling back to an unmapped default route.
@@ -111,7 +137,7 @@ Unlike traditional driving schools that lose touch with learners after course gr
 ![Payment Receipt Pop-up Modal](docs/screenshots/10_reupload_receipt_popup_modal.png)
 *In-place payment receipt submission pop-up modal with GCash QR preview, account copy tool, and live validation.*
 
-![License Re-upload Pop-up Modal](docs/screenshots/11_reupload_license_popup_modal.png)
+![License Re-upload Pop-up Modal](docscreenshots/11_reupload_license_popup_modal.png)
 *In-place driver's license re-upload pop-up modal with LTO regulatory notice and direct file dropzone.*
 
 ---
@@ -141,7 +167,7 @@ Unlike traditional driving schools that lose touch with learners after course gr
 - **Unblocked Re-Enrollments:** Resolved an issue where students who completed a driving course were blocked from enrolling in new courses or re-enrolling in completed courses.
 - **Migration `2026_10_26_000001_drop_unique_student_course_enrollment_index`:** Dropped the unconditional unique index on `enrollment_requests` (`student_id`, `course_id`), permitting multiple historical completions over time.
 - **Auto-Unlock Upon Completion:** Updated `Course::complete()` and enrollment workflows to ensure database transactions commit, student records unlock (`is_course_locked = false`, `canEnrollInNewCourse() = true`), and role promotion logic remains consistent.
-- **Visual Completion & Re-Enrollment Badge:** Added a green `"✓ Course Previously Completed"` badge and an enabled `"Enroll Again"` button on course catalog and detail views.
+- **Visual Completion & Re-Enrollment Badge:** Added a green `"✓" Course Previously Completed"` badge and an enabled `"Enroll Again"` button on course catalog and detail views.
 
 ![Completed Course Re-enrollment](docs/screenshots/18_course_completed_reenroll.png)
 *Course details view displaying completed status badge and active "Enroll Again" action.*
@@ -180,7 +206,7 @@ Unlike traditional driving schools that lose touch with learners after course gr
 
 ---
 
-## Getting Started (Docker)
+### Getting Started (Docker)
 
 Run the system locally using Docker Compose:
 
@@ -204,7 +230,7 @@ docker compose exec app php artisan db:seed --class=DriveEdHubSeeder
 
 ---
 
-## Testing & Verification
+### Testing & Verification
 
 Automated regression test scripts are located in `tests/`:
 

@@ -1582,6 +1582,8 @@
     </style>
 
     <div class="timeslots-container">
+        @include('partials.session-report-export')
+
         <div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 3px solid var(--primary-color);">
             <div>
                 <h1 class="page-title">Manage Schedule</h1>
@@ -1593,8 +1595,8 @@
                     <button type="button" id="createScheduleBtn" class="btn btn-success" onclick="openCreateModal(); return false;" style="display: flex; align-items: center; gap: 8px; padding: 10px 20px; font-weight: 600; border-radius: 8px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">
                         <i class="bi bi-calendar-plus"></i> Create Schedule
                     </button>
-                    <a href="{{ school_route('admin.exports.schedules.pdf') }}" class="btn btn-info" style="display: flex; align-items: center; gap: 8px; padding: 10px 20px; font-weight: 600; border-radius: 8px; background: {{ $primaryColor }}; color: white; text-decoration: none; box-shadow: 0 4px 12px {{ $primaryColor }}40;">
-                        <i class="bi bi-file-earmark-pdf-fill" style="color: #ff4d4d;"></i> Export PDF
+                    <a href="{{ school_route('admin.exports.schedules.pdf') }}" title="Export the schedule grid (time slots) to PDF" class="btn btn-info" style="display: flex; align-items: center; gap: 8px; padding: 10px 20px; font-weight: 600; border-radius: 8px; background: {{ $primaryColor }}; color: white; text-decoration: none; box-shadow: 0 4px 12px {{ $primaryColor }}40;">
+                        <i class="bi bi-file-earmark-pdf-fill" style="color: #ff4d4d;"></i> Grid PDF
                     </a>
                 </div>
 

@@ -14,6 +14,7 @@ class SessionReportWorkbook
 
     public function build(array $data): string
     {
+        $reportTitle = $data['reportTitle'] ?? 'Schedule Logs';
         $headers = ['Date & Time', 'Student', 'Course', 'Instructor', 'Lesson Type', 'Hours', 'Status', 'Attendance', 'Grade', 'Notes', 'Instructor Feedback', 'Student Feedback', 'Skills Practiced', 'Record Type'];
         $sheet = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0" showGridLines="0"><pane ySplit="6" topLeftCell="A7" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols>';
         foreach ([14, 26, 32, 26, 18, 10, 16, 18, 12, 50, 50, 50, 36, 24] as $i => $width) {
@@ -46,7 +47,7 @@ class SessionReportWorkbook
             }
             $sheet .= '</row>';
         };
-        $write([$data['school']->name.' | Training Session History'], 1);
+        $write([$data['school']->name.' | '.$reportTitle], 1);
         $write(['Prepared for: '.$data['preparedFor']], 0);
         $write(['Period: '.$data['period'].' | Generated: '.$data['generatedAt']->timezone(!empty($data['school']->timezone) ? $data['school']->timezone : 'Asia/Manila')->format('Y-m-d H:i T')], 0);
         if (!empty($data['filterSubtitle'])) {
@@ -55,7 +56,7 @@ class SessionReportWorkbook
         $summary = [];
         foreach ($data['summary'] as $label => $value) { $summary[] = $label.': '.$value; }
         $write([implode('   |   ', $summary)], 0);
-        $write(['Shows booked driving lessons and completed training sessions. Hours are shown separately for each record.'], 0);
+        $write(['Shows scheduled, completed, cancelled, and no-show lessons. Hours are shown separately for each record.'], 0);
         $write($headers, 2);
         foreach ($data['rows'] as $i => $row) {
             $write(array_values($row), $i % 2 === 0 ? 0 : 3, true);
@@ -67,11 +68,11 @@ class SessionReportWorkbook
         $files = [
             '[Content_Types].xml' => '<?xml version="1.0"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>',
             '_rels/.rels' => '<?xml version="1.0"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>',
-            'xl/workbook.xml' => '<?xml version="1.0"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Session report" sheetId="1" r:id="rId1"/></sheets><definedNames><definedName name="_xlnm.Print_Titles" localSheetId="0">\'Session report\'!$1:$6</definedName></definedNames></workbook>',
+            'xl/workbook.xml' => '<?xml version="1.0"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="'.$this->xml($reportTitle).'" sheetId="1" r:id="rId1"/></sheets><definedNames><definedName name="_xlnm.Print_Titles" localSheetId="0">\''.$this->xml($reportTitle).'\'!$1:$6</definedName></definedNames></workbook>',
             'xl/_rels/workbook.xml.rels' => '<?xml version="1.0"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>',
             'xl/styles.xml' => $styles, 'xl/worksheets/sheet1.xml' => $sheet,
         ];
-        $path = tempnam(sys_get_temp_dir(), 'session-report-');
+        $path = tempnam(sys_get_temp_dir(), 'schedule-logs-');
         try {
             $zip = new ZipArchive;
             if ($zip->open($path, ZipArchive::OVERWRITE) !== true) { throw new \RuntimeException('Unable to create workbook.'); }
