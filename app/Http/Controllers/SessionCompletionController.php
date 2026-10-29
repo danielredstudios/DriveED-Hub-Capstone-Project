@@ -25,21 +25,32 @@ class SessionCompletionController extends Controller
         // Instructor view
         if (Auth::guard('instructor')->check()) {
             $instructor = Auth::guard('instructor')->user();
+            $isArchivedView = $request->boolean('archived') || $request->get('tab') === 'archived';
 
-            $sessionsQuery = SessionCompletion::with(['enrollment.student', 'enrollment.course'])
+            $rawQuery = SessionCompletion::with(['enrollment.student', 'enrollment.course'])
                 ->where('instructor_id', $instructor->id)
                 ->whereHas('enrollment.course', function ($query) use ($school) {
-                $query->where('school_id', $school->id);
-            })
+                    $query->where('school_id', $school->id);
+                });
+
+            $archivedCount = (clone $rawQuery)->whereNotNull('archived_at')->count();
+            $activeCount = (clone $rawQuery)->whereNull('archived_at')->count();
+
+            $sessionsQuery = (clone $rawQuery)
+                ->when($isArchivedView, function ($q) {
+                    $q->whereNotNull('archived_at');
+                }, function ($q) {
+                    $q->whereNull('archived_at');
+                })
                 ->when($request->session_type, function ($query, $type) {
-                $query->where('session_type', $type);
-            })
+                    $query->where('session_type', $type);
+                })
                 ->when($request->date_from, function ($query, $date) {
-                $query->whereDate('session_date', '>=', $date);
-            })
+                    $query->whereDate('session_date', '>=', $date);
+                })
                 ->when($request->date_to, function ($query, $date) {
-                $query->whereDate('session_date', '<=', $date);
-            })
+                    $query->whereDate('session_date', '<=', $date);
+                })
                 ->latest('session_date')
                 ->latest('session_time');
 
@@ -49,32 +60,24 @@ class SessionCompletionController extends Controller
                 'total_hours' => (clone $sessionsQuery)->sum('hours_completed'),
                 'theoretical_count' => (clone $sessionsQuery)->where('session_type', 'theoretical')->count(),
                 'practical_count' => (clone $sessionsQuery)->where('session_type', 'practical')->count(),
+                'active_count' => $activeCount,
+                'archived_count' => $archivedCount,
             ];
 
             $sessions = $sessionsQuery->paginate(10);
 
-            return view('school.instructor.sessions.index', compact('school', 'sessions', 'stats'))->with('isAjax', $request->ajax());
+            return view('school.instructor.sessions.index', compact('school', 'sessions', 'stats', 'isArchivedView'))->with('isAjax', $request->ajax());
         }
 
         // Admin view
         if (Auth::guard('admin')->check()) {
             $admin = Auth::guard('admin')->user();
+            $isArchivedView = $request->boolean('archived') || $request->get('tab') === 'archived';
             
             $baseSessionsQuery = SessionCompletion::with(['enrollment.student', 'enrollment.course', 'instructor'])
                 ->whereHas('enrollment.course', function ($query) use ($school) {
-                $query->where('school_id', $school->id);
-            })
-                ->when($request->instructor_id, function ($query, $instructorId) {
-                $query->where('instructor_id', $instructorId);
-            })
-                ->when($request->date_from, function ($query, $date) {
-                $query->whereDate('session_date', '>=', $date);
-            })
-                ->when($request->date_to, function ($query, $date) {
-                $query->whereDate('session_date', '<=', $date);
-            })
-                ->latest('session_date')
-                ->latest('session_time');
+                    $query->where('school_id', $school->id);
+                });
 
             // Branch secretary scope: filter by their branch
             if ($admin->isBranchSecretary() && $admin->branch_id) {
@@ -83,15 +86,38 @@ class SessionCompletionController extends Controller
                 });
             }
 
+            $archivedCount = (clone $baseSessionsQuery)->whereNotNull('archived_at')->count();
+            $activeCount = (clone $baseSessionsQuery)->whereNull('archived_at')->count();
+
+            $filteredBase = (clone $baseSessionsQuery)
+                ->when($isArchivedView, function ($q) {
+                    $q->whereNotNull('archived_at');
+                }, function ($q) {
+                    $q->whereNull('archived_at');
+                })
+                ->when($request->instructor_id, function ($query, $instructorId) {
+                    $query->where('instructor_id', $instructorId);
+                })
+                ->when($request->date_from, function ($query, $date) {
+                    $query->whereDate('session_date', '>=', $date);
+                })
+                ->when($request->date_to, function ($query, $date) {
+                    $query->whereDate('session_date', '<=', $date);
+                })
+                ->latest('session_date')
+                ->latest('session_time');
+
             // Pre-compute statistics before pagination
             $stats = [
-                'total_sessions' => (clone $baseSessionsQuery)->count(),
-                'total_hours' => (clone $baseSessionsQuery)->sum('hours_completed'),
-                'theoretical_count' => (clone $baseSessionsQuery)->where('session_type', 'theoretical')->count(),
-                'practical_count' => (clone $baseSessionsQuery)->where('session_type', 'practical')->count(),
+                'total_sessions' => (clone $filteredBase)->count(),
+                'total_hours' => (clone $filteredBase)->sum('hours_completed'),
+                'theoretical_count' => (clone $filteredBase)->where('session_type', 'theoretical')->count(),
+                'practical_count' => (clone $filteredBase)->where('session_type', 'practical')->count(),
+                'active_count' => $activeCount,
+                'archived_count' => $archivedCount,
             ];
 
-            $sessionsQuery = (clone $baseSessionsQuery)
+            $sessionsQuery = (clone $filteredBase)
                 ->when($request->session_type, function ($query, $type) {
                     $query->where('session_type', $type);
                 });
@@ -105,7 +131,7 @@ class SessionCompletionController extends Controller
 
             $isAjax = request()->ajax() || request()->header('X-Requested-With') === 'XMLHttpRequest';
 
-            return view('school.admin.sessions.index', compact('school', 'sessions', 'instructors', 'stats', 'isAjax'));
+            return view('school.admin.sessions.index', compact('school', 'sessions', 'instructors', 'stats', 'isAjax', 'isArchivedView'));
         }
 
         abort(403);
@@ -381,7 +407,67 @@ class SessionCompletionController extends Controller
     }
 
     /**
-     * Remove the specified session completion
+     * Archive the specified session completion
+     */
+    public function archive(School $school, $sessionCompletion)
+    {
+        $sessionCompletion = SessionCompletion::findOrFail($sessionCompletion);
+
+        if ($sessionCompletion->enrollment->course->school_id !== $school->id) {
+            abort(404);
+        }
+
+        if (Auth::guard('instructor')->check()) {
+            $instructor = Auth::guard('instructor')->user();
+            if ($sessionCompletion->instructor_id !== $instructor->id) {
+                abort(403);
+            }
+        } elseif (Auth::guard('admin')->check()) {
+            $admin = Auth::guard('admin')->user();
+            if ($admin->isBranchSecretary() && !$admin->canAccessBranch($sessionCompletion->enrollment?->branch_id)) {
+                abort(403, 'You do not have access to archive this session.');
+            }
+        } else {
+            abort(403);
+        }
+
+        $sessionCompletion->update(['archived_at' => now()]);
+
+        return back()->with('success', 'Session log archived successfully.');
+    }
+
+    /**
+     * Restore / Unarchive the specified session completion
+     */
+    public function unarchive(School $school, $sessionCompletion)
+    {
+        $sessionCompletion = SessionCompletion::findOrFail($sessionCompletion);
+
+        if ($sessionCompletion->enrollment->course->school_id !== $school->id) {
+            abort(404);
+        }
+
+        if (Auth::guard('instructor')->check()) {
+            $instructor = Auth::guard('instructor')->user();
+            if ($sessionCompletion->instructor_id !== $instructor->id) {
+                abort(403);
+            }
+        } elseif (Auth::guard('admin')->check()) {
+            $admin = Auth::guard('admin')->user();
+            if ($admin->isBranchSecretary() && !$admin->canAccessBranch($sessionCompletion->enrollment?->branch_id)) {
+                abort(403, 'You do not have access to unarchive this session.');
+            }
+        } else {
+            abort(403);
+        }
+
+        $sessionCompletion->update(['archived_at' => null]);
+
+        return back()->with('success', 'Session log restored from archive successfully.');
+    }
+
+    /**
+     * Remove the specified session completion (safely archives instead of hard deletion)
      */
     public function destroy(School $school, $sessionCompletion)
     {
@@ -393,31 +479,31 @@ class SessionCompletionController extends Controller
             abort(404);
         }
 
-        // Admin can delete any session
+        // Admin can archive any session in scope
         if (Auth::guard('admin')->check()) {
             $admin = Auth::guard('admin')->user();
 
-            // Branch secretary can only delete sessions from their branch
+            // Branch secretary can only archive sessions from their branch
             if ($admin->isBranchSecretary() && !$admin->canAccessBranch($sessionCompletion->enrollment?->branch_id)) {
-                abort(403, 'You do not have access to delete this session.');
+                abort(403, 'You do not have access to archive this session.');
             }
 
-            $sessionCompletion->delete();
+            $sessionCompletion->update(['archived_at' => now()]);
             return redirect()
                 ->route('schools.admin.sessions.index', ['school' => $school->slug])
-                ->with('success', 'Session deleted successfully.');
+                ->with('success', 'Session log archived successfully.');
         }
 
-        // Instructor can delete their own sessions
+        // Instructor can archive their own sessions
         if (Auth::guard('instructor')->check()) {
             $instructor = Auth::guard('instructor')->user();
             if ($sessionCompletion->instructor_id !== $instructor->id) {
                 abort(403);
             }
-            $sessionCompletion->delete();
+            $sessionCompletion->update(['archived_at' => now()]);
             return redirect()
                 ->route('schools.instructor.sessions.index', ['school' => $school->slug])
-                ->with('success', 'Session deleted successfully.');
+                ->with('success', 'Session log archived successfully.');
         }
 
         abort(403);

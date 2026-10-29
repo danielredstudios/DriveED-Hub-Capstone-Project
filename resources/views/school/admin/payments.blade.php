@@ -421,7 +421,12 @@
                                ($payment->paid_on ? $payment->paid_on->format('M d, Y') : 
                                $payment->created_at->format('M d, Y')) }}
                         </td>
-                        <td><strong>{{ $payment->payer->name ?? 'Guest' }}</strong></td>
+                        <td>
+                            <strong>{{ $payment->payer->name ?? 'Guest' }}</strong>
+                            <div style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.75rem; font-weight: 700; color: #2563eb; margin-top: 2px;">
+                                <i class="bi bi-hash"></i>{{ $payment->uid }}
+                            </div>
+                        </td>
                         <td>{{ $payment->booking->course->title ?? $payment->enrollmentRequest->course->title ?? 'N/A' }}</td>
                         <td class="amount-cell">₱{{ number_format($payment->amount, 2) }}</td>
                         <td>
@@ -435,6 +440,9 @@
                             </div>
                         </td>
                         <td class="reference-cell">
+                            <div style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.8rem; font-weight: 700; color: #047857; margin-bottom: 3px;">
+                                <i class="bi bi-receipt"></i> {{ $payment->receipt_uid }}
+                            </div>
                             @php
                                 $qrImgSrc = $payment->snap_qr_path ? (str_starts_with($payment->snap_qr_path, 'http') || str_starts_with($payment->snap_qr_path, '/') ? $payment->snap_qr_path : asset('storage/' . $payment->snap_qr_path)) : null;
                             @endphp

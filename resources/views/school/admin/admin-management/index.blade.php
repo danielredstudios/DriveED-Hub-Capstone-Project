@@ -635,13 +635,15 @@
     }
 
     .role-school-admin {
-        background: {{ $primaryColor }}15;
-        color: {{ $primaryColor }};
+        background: var(--role-school-admin-bg, #ede9fe);
+        color: var(--role-school-admin-text, #4338ca);
+        border: 1px solid var(--role-school-admin-border, #a5b4fc);
     }
 
     .role-branch-secretary {
-        background: {{ $secondaryColor }}15;
-        color: {{ $secondaryColor }};
+        background: var(--role-branch-secretary-bg, #ccfbf1);
+        color: var(--role-branch-secretary-text, #0f766e);
+        border: 1px solid var(--role-branch-secretary-border, #5eead4);
     }
 
     .status-badge {

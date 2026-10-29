@@ -1339,6 +1339,9 @@
                                 <strong>{{ $request->learner->name }}</strong>
                             </div>
                             <div class="learner-email">{{ $request->learner->email }}</div>
+                            <div style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.75rem; font-weight: 700; color: #2563eb; margin-top: 3px;">
+                                <i class="bi bi-hash"></i>{{ $request->uid }}
+                            </div>
                         </td>
                         <td>
                             @if($request->experience_level === 'experienced')
@@ -1956,6 +1959,7 @@ function openVerificationModal(enrollmentId) {
         .then(res => res.json())
         .then(data => {
             // Update Info Sidebar
+            document.getElementById('v-enrollment-uid').textContent = data.uid || ('ENR-' + enrollmentId);
             document.getElementById('v-student-name').textContent = data.student_name;
             document.getElementById('v-course-title').textContent = data.course_title;
             document.getElementById('v-dl-code').textContent = data.requested_dl_code || 'N/A';
@@ -1963,6 +1967,12 @@ function openVerificationModal(enrollmentId) {
             const paymentMethod = data.payment_method === 'on_site' ? 'on_site' : 'gcash';
             document.getElementById('v-reference-label').textContent = paymentMethod === 'on_site' ? 'OR Number' : 'GCash Reference No.';
             document.getElementById('v-reference').textContent = data.reference_number || 'N/A';
+            if (data.receipt_uid) {
+                document.getElementById('v-receipt-uid').textContent = data.receipt_uid;
+                document.getElementById('v-receipt-uid-wrap').style.display = 'block';
+            } else {
+                document.getElementById('v-receipt-uid-wrap').style.display = 'none';
+            }
             
             // Update Statuses in Panel Titles
             updatePanelStatus('license', data.license_status);
@@ -2455,6 +2465,10 @@ function finalApproveFromModal() {
             <!-- Sidebar with Info -->
             <div class="v-modal-sidebar">
                 <div class="mb-3">
+                    <div class="v-info-label">Enrollment UID</div>
+                    <div id="v-enrollment-uid" class="v-info-value" style="font-family: ui-monospace, monospace; font-weight: 700; color: #2563eb;">-</div>
+                </div>
+                <div class="mb-3">
                     <div class="v-info-label">Learner Name</div>
                     <div id="v-student-name" class="v-info-value">-</div>
                 </div>
@@ -2474,6 +2488,10 @@ function finalApproveFromModal() {
                 <div class="mb-3">
                     <div id="v-reference-label" class="v-info-label">GCash Reference No.</div>
                     <div id="v-reference" class="v-info-value" style="font-family: monospace; font-size: 1.1rem; color: #2563eb;">-</div>
+                    <div id="v-receipt-uid-wrap" class="mt-1" style="font-family: ui-monospace, monospace; font-size: 0.8rem; color: #4b5563; display: none;">
+                        Receipt UID: <span id="v-receipt-uid" style="font-weight: 700; color: #111827;"></span>
+                    </div>
+                </div>
                 
                 <!-- Cancellation Warning -->
                 <div id="v-cancellation-warning" style="display: none; margin-top: 20px; padding: 12px; background: #fff5f5; border-radius: 8px; border: 1px solid #fed7d7;">

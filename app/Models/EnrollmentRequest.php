@@ -48,6 +48,16 @@ class EnrollmentRequest extends Model
         'payment_proof_path',
     ];
 
+    protected $appends = [
+        'uid',
+    ];
+
+    public function getUidAttribute(): string
+    {
+        $year = $this->created_at ? $this->created_at->format('Y') : date('Y');
+        return sprintf('ENR-%s-%05d', $year, $this->id);
+    }
+
     protected function casts(): array
     {
         return [

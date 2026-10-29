@@ -514,7 +514,12 @@
         {{-- Active Course Card --}}
         <div class="course-card">
             <div class="course-header">
-                <h2 class="course-title">{{ $course->title }}</h2>
+                <div>
+                    <h2 class="course-title" style="margin-bottom: 4px;">{{ $course->title }}</h2>
+                    <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.8rem; font-weight: 700; color: #2563eb; background: #eff6ff; padding: 2px 8px; border-radius: 4px; border: 1px solid #bfdbfe; display: inline-block;">
+                        Enrollment UID: {{ $activeEnrollment->uid }}
+                    </span>
+                </div>
                 <div style="display: flex; gap: 10px; align-items: center;">
                     <span class="course-type-badge course-type-{{ $course->course_type ?? 'theoretical' }}">
                         {{ $course->course_type === 'theoretical' ? 'Theoretical' : 'Practical' }}

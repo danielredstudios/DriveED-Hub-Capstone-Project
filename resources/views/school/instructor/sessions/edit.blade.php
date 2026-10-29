@@ -9,6 +9,7 @@
     $primaryColor = $settings?->primary_color ?? '#2563eb';
     $secondaryColor = $settings?->secondary_color ?? '#1d4ed8';
     $useGradient = false;
+    $errors = $errors ?? new \Illuminate\Support\ViewErrorBag;
 @endphp
 
 @include('school.admin.partials.admin-styles')
@@ -276,12 +277,28 @@
         </a>
     </div>
 
+    @if(session('error'))
+        <div style="background: #fef2f2; border: 1px solid #f87171; color: #b91c1c; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px;">
+            {{ session('error') }}
+        </div>
+    @endif
+    @if(session('success'))
+        <div style="background: #f0fdf4; border: 1px solid #4ade80; color: #15803d; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px;">
+            {{ session('success') }}
+        </div>
+    @endif
+
     <div class="form-card">
         <div class="card-body">
             <form action="{{ route('schools.instructor.sessions.update', ['school' => $school->slug, 'sessionCompletion' => $sessionCompletion->id]) }}" 
-                  method="POST">
+                  method="POST"
+                  class="native-form"
+                  data-no-ajax="1">
                 @csrf
-                @method('PATCH')
+                @method('PUT')
+
+                <input type="hidden" name="enrollment_id" value="{{ $sessionCompletion->enrollment_id }}">
+                <input type="hidden" name="session_type" value="{{ $sessionCompletion->session_type }}">
 
                 <!-- Student Info (Read-only) -->
                 <div class="student-info-box">
@@ -310,7 +327,7 @@
                                class="form-input {{ $errors->has('session_date') ? 'has-error' : '' }}" 
                                id="session_date" 
                                name="session_date" 
-                               value="{{ old('session_date', $sessionCompletion->session_date->format('Y-m-d')) }}"
+                               value="{{ old('session_date', $sessionCompletion->session_date ? \Carbon\Carbon::parse($sessionCompletion->session_date)->format('Y-m-d') : '') }}"
                                max="{{ date('Y-m-d') }}"
                                required>
                         @error('session_date')
@@ -324,7 +341,7 @@
                                class="form-input {{ $errors->has('session_time') ? 'has-error' : '' }}" 
                                id="session_time" 
                                name="session_time" 
-                               value="{{ old('session_time', $sessionCompletion->session_time) }}"
+                               value="{{ old('session_time', $sessionCompletion->session_time ? \Carbon\Carbon::parse($sessionCompletion->session_time)->format('H:i') : '') }}"
                                required>
                         @error('session_time')
                             <div class="field-error">{{ $message }}</div>

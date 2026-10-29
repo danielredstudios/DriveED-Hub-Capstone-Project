@@ -22,9 +22,11 @@ class StoreSessionCompletionRequest extends FormRequest
      */
     public function rules(): array
     {
+        $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH') || $this->route('sessionCompletion');
+
         return [
-            'enrollment_id' => ['required', 'exists:enrollment_requests,id'],
-            'session_type' => ['required', 'in:theoretical,practical'],
+            'enrollment_id' => [$isUpdate ? 'nullable' : 'required', 'exists:enrollment_requests,id'],
+            'session_type' => [$isUpdate ? 'nullable' : 'required', 'in:theoretical,practical'],
             'hours_completed' => ['required', 'numeric', 'min:0.5', 'max:8'],
             'session_date' => ['required', 'date', 'before_or_equal:today'],
             'session_time' => ['required', 'date_format:H:i'],
@@ -71,13 +73,22 @@ class StoreSessionCompletionRequest extends FormRequest
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
+            $isUpdate = $this->isMethod('PUT') || $this->isMethod('PATCH') || $this->route('sessionCompletion');
+            if ($isUpdate) {
+                return;
+            }
+
+            if (!$this->filled('enrollment_id')) {
+                return;
+            }
+
             $enrollment = \App\Models\EnrollmentRequest::find($this->enrollment_id);
 
             if ($enrollment) {
                 // Verify session type matches course type
                 $courseType = $enrollment->course->course_type;
                 
-                if ($this->session_type !== $courseType) {
+                if ($this->filled('session_type') && $this->session_type !== $courseType) {
                     $validator->errors()->add('session_type', "Session type must match the course type ({$courseType}).");
                 }
 
@@ -124,6 +135,16 @@ class StoreSessionCompletionRequest extends FormRequest
             $this->merge([
                 'hours_completed' => (float) $this->hours_completed,
             ]);
+        }
+
+        // Normalize session_time if provided with seconds (e.g., 14:30:00 -> 14:30)
+        if ($this->filled('session_time')) {
+            $time = trim((string) $this->session_time);
+            if (preg_match('/^(\d{1,2}:\d{2})(:\d{2})?$/', $time, $matches)) {
+                $parts = explode(':', $matches[1]);
+                $formattedTime = sprintf('%02d:%02d', (int) $parts[0], (int) $parts[1]);
+                $this->merge(['session_time' => $formattedTime]);
+            }
         }
     }
 }

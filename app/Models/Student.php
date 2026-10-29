@@ -41,6 +41,7 @@ class Student extends Authenticatable
         'last_login_at',
         'last_logout_at',
         'status',
+        'archived_at',
         'is_active',
         'is_course_locked',
         'active_enrollment_id',
@@ -71,6 +72,7 @@ class Student extends Authenticatable
             'locked_until' => 'datetime',
             'last_login_at' => 'datetime',
             'last_logout_at' => 'datetime',
+            'archived_at' => 'datetime',
             'license_expiration_date' => 'date',
         ];
     }

@@ -1109,6 +1109,14 @@ class StudentController extends Controller
             ->filter(fn ($booking) => $booking->startsAt($schoolTimezone)?->gt($schoolNow) ?? true)
             ->sortBy('booking_date');
         
+        $currentMonth = $request->input('month', now()->format('Y-m'));
+        try {
+            $calendarStartDate = Carbon::parse($currentMonth . '-01')->format('Y-m-d');
+        } catch (\Exception $e) {
+            $currentMonth = now()->format('Y-m');
+            $calendarStartDate = now()->startOfMonth()->format('Y-m-d');
+        }
+
         return view($school->resolveView('student.schedule'), [
             'isAjax' => $request->ajax(),
             'school' => $school,
@@ -1132,6 +1140,8 @@ class StudentController extends Controller
             'queueEnabled' => $queueEnabled,
             'queueDays' => $queueDays,
             'upcomingBookings' => $upcomingBookings,
+            'currentMonth' => $currentMonth,
+            'calendarStartDate' => $calendarStartDate,
         ]);
     }
 

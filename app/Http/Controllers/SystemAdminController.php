@@ -687,29 +687,50 @@ class SystemAdminController extends Controller
                 });
             }
 
-            $totalStudents = (clone $studentsBase)->count();
-            $activeStudents = (clone $studentsBase)->where('status', 'active')->count();
-            $totalInstructors = (clone $instructorsBase)->count();
-            $activeInstructors = (clone $instructorsBase)->where('status', 'active')->count();
+            $totalStudents = (clone $studentsBase)->whereNull('archived_at')->count();
+            $activeStudents = (clone $studentsBase)->whereNull('archived_at')->where('status', 'active')->count();
+            $totalInstructors = (clone $instructorsBase)->whereNull('archived_at')->count();
+            $activeInstructors = (clone $instructorsBase)->whereNull('archived_at')->where('status', 'active')->count();
+
+            $archivedStudentsCount = (clone $studentsBase)->whereNotNull('archived_at')->count();
+            $archivedInstructorsCount = (clone $instructorsBase)->whereNotNull('archived_at')->count();
+            $totalArchivedUsers = $archivedStudentsCount + $archivedInstructorsCount;
 
             $students = (clone $studentsBase)
+                ->whereNull('archived_at')
                 ->orderBy('created_at', 'desc')
                 ->paginate(20, ['*'], 'students_page');
 
             $instructors = (clone $instructorsBase)
+                ->whereNull('archived_at')
                 ->orderBy('created_at', 'desc')
                 ->paginate(20, ['*'], 'instructors_page');
+
+            $archivedStudents = (clone $studentsBase)
+                ->whereNotNull('archived_at')
+                ->orderBy('archived_at', 'desc')
+                ->paginate(20, ['*'], 'archived_students_page');
+
+            $archivedInstructors = (clone $instructorsBase)
+                ->whereNotNull('archived_at')
+                ->orderBy('archived_at', 'desc')
+                ->paginate(20, ['*'], 'archived_instructors_page');
 
             $schools = School::orderBy('name')->get();
 
             return view('system-admin.users', compact(
                 'students',
                 'instructors',
+                'archivedStudents',
+                'archivedInstructors',
                 'schools',
                 'totalStudents',
                 'activeStudents',
                 'totalInstructors',
-                'activeInstructors'
+                'activeInstructors',
+                'archivedStudentsCount',
+                'archivedInstructorsCount',
+                'totalArchivedUsers'
             ));
         }
         catch (\Exception $e) {
@@ -766,6 +787,116 @@ class SystemAdminController extends Controller
             );
 
             return back()->with('error', 'Failed to update user status.');
+        }
+    }
+
+    /**
+     * Archive a user (student or instructor)
+     */
+    public function archiveUser($type, $id)
+    {
+        try {
+            $user = $type === 'student' ? Student::findOrFail($id) : Instructor::findOrFail($id);
+            $user->update([
+                'archived_at' => now(),
+                'status' => 'archived',
+            ]);
+
+            SystemLog::logInfo(
+                ucfirst($type) . " archived: {$user->name}",
+                'database',
+                ['user_id' => $user->id, 'type' => $type],
+                $user->school_id,
+                'archive_user'
+            );
+
+            return back()->with('success', ucfirst($type) . " '{$user->name}' has been archived.");
+        } catch (\Exception $e) {
+            SystemLog::logError('Failed to archive user', 'database', $e, ['type' => $type, 'id' => $id], null, 'archive_user');
+            return back()->with('error', 'Failed to archive user.');
+        }
+    }
+
+    /**
+     * Restore an archived user (student or instructor)
+     */
+    public function unarchiveUser($type, $id)
+    {
+        try {
+            $user = $type === 'student' ? Student::findOrFail($id) : Instructor::findOrFail($id);
+            $user->update([
+                'archived_at' => null,
+                'status' => 'active',
+            ]);
+
+            SystemLog::logInfo(
+                ucfirst($type) . " unarchived/restored: {$user->name}",
+                'database',
+                ['user_id' => $user->id, 'type' => $type],
+                $user->school_id,
+                'unarchive_user'
+            );
+
+            return back()->with('success', ucfirst($type) . " '{$user->name}' has been restored to active.");
+        } catch (\Exception $e) {
+            SystemLog::logError('Failed to restore user', 'database', $e, ['type' => $type, 'id' => $id], null, 'unarchive_user');
+            return back()->with('error', 'Failed to restore user.');
+        }
+    }
+
+    /**
+     * Automatically archive users who are inactive for X days
+     */
+    public function archiveInactiveUsers(Request $request)
+    {
+        try {
+            $days = max(1, (int) $request->input('days', 90));
+            $cutoff = now()->subDays($days);
+
+            $studentCount = Student::whereNull('archived_at')
+                ->where(function ($q) use ($cutoff) {
+                    $q->where('status', 'inactive')
+                      ->orWhere(function ($sub) use ($cutoff) {
+                          $sub->whereNotNull('last_login_at')->where('last_login_at', '<', $cutoff);
+                      })
+                      ->orWhere(function ($sub) use ($cutoff) {
+                          $sub->whereNull('last_login_at')->where('created_at', '<', $cutoff);
+                      });
+                })
+                ->update([
+                    'archived_at' => now(),
+                    'status' => 'archived',
+                ]);
+
+            $instructorCount = Instructor::whereNull('archived_at')
+                ->where(function ($q) use ($cutoff) {
+                    $q->where('status', 'inactive')
+                      ->orWhere(function ($sub) use ($cutoff) {
+                          $sub->whereNotNull('last_login_at')->where('last_login_at', '<', $cutoff);
+                      })
+                      ->orWhere(function ($sub) use ($cutoff) {
+                          $sub->whereNull('last_login_at')->where('created_at', '<', $cutoff);
+                      });
+                })
+                ->update([
+                    'archived_at' => now(),
+                    'status' => 'archived',
+                ]);
+
+            $totalArchived = $studentCount + $instructorCount;
+
+            SystemLog::logInfo(
+                "Auto-archived {$totalArchived} inactive users (Threshold: {$days} days)",
+                'database',
+                ['students' => $studentCount, 'instructors' => $instructorCount, 'days' => $days],
+                null,
+                'archive_inactive_users'
+            );
+
+            return back()->with('success', "Auto-archive completed: {$studentCount} student(s) and {$instructorCount} instructor(s) inactive for {$days}+ days were archived.");
+        } catch (\Exception $e) {
+            SystemLog::logError('Failed to auto-archive inactive users', 'database', $e, [], null, 'archive_inactive_users');
+            return back()->with('error', 'Failed to auto-archive inactive users.');
         }
     }
 

@@ -11,6 +11,79 @@ The following changes address feedback from capstone advisory consultations and 
 
 ---
 
+### Capstone Advisory Revisions & System Enhancements — October 29, 2026
+
+The following features and improvements were implemented based on capstone review and defense feedback:
+
+#### 1. Human-Readable Unique Identifiers (UID) for Enrollments, Payments, and Receipts
+- **Enrollment Tracking UID**: Generated sequential tracking IDs formatted as `ENR-YYYY-XXXXX` (e.g. `ENR-2026-00002`) via accessor in `EnrollmentRequest`. Displayed in the Admin Enrollment Requests table under the student name, in the Unified Verification Dashboard modal, and on the student's My Course page.
+- **Payment & Receipt UIDs**: Implemented `PAY-YYYY-XXXXX` for transactions and `RCP-YYYY-XXXXX` (or manual `OR-XXXXX`) for receipts in the `Payment` model. Rendered across Admin Payments, Student Payment history tables, and mobile card layouts.
+- **API & Unified Verification**: The enrollment verification API endpoint (`/admin/enrollments/api/{id}`) returns `uid`, `payment_uid`, and `receipt_uid` for seamless client-side verification workflows.
+
+![Enrollment Tracking UIDs](docs/screenshots/capstone_01_enrollment_uids.png)
+*Admin Enrollment Requests table displaying human-readable Tracking UID `ENR-2026-00038` and student details.*
+
+![Payment and Receipt UIDs](docs/screenshots/capstone_02_payments_uids.png)
+*Admin Payments table displaying Payment UID (`PAY-2026-00005`) and Receipt UID (`RCP-2026-00005`).*
+
+---
+
+#### 2. Distinct & Unique Colors for Each User Role
+- Replaced ambiguous badge styling with distinct color combinations across all application views:
+  - **System Admin**: Royal Purple (`#6b21a8` on `#f3e8ff`, border `#d8b4fe`)
+  - **School Admin**: Deep Indigo (`#4338ca` on `#ede9fe`, border `#a5b4fc`)
+  - **Branch Secretary**: Emerald Teal (`#0f766e` on `#ccfbf1`, border `#5eead4`)
+  - **Instructor**: Forest Green (`#166534` on `#dcfce7`, border `#86efac`)
+  - **Student**: Slate Blue (`#1e40af` on `#dbeafe`, border `#93c5fd`)
+  - **Guest**: Warm Amber (`#92400e` on `#fef3c7`, border `#fcd34d`)
+- Integrated into `resources/views/layouts/app.blade.php` with custom CSS variables and applied to Admin Management and User Management tables.
+
+![Unique Role Badges](docs/screenshots/capstone_03_role_badges_unique_colors.png)
+*Admin Management table showcasing distinct color-coded badges for System Admin, School Admin, and Branch Secretary roles.*
+
+---
+
+#### 3. Session Log Archiving & Soft-Deletion
+- **Non-Destructive Archiving**: Replaced hard deletion (`destroy()`) of training session completions with soft-archiving by adding the `archived_at` timestamp column to `session_completions`.
+- **Active & Archived Tabs**: Implemented dual-tab navigation with live record badges on both Instructor and School Admin session completion management pages.
+- **Archive & Restore Controls**: Instructors and School Admins can archive logs with a confirmation dialog, view them in the Archived Sessions tab, and restore them back to active status at any time.
+
+![Session Log Archiving](docs/screenshots/capstone_04_session_logs_archive.png)
+*Instructor Session Completions page displaying Active Sessions / Archived Sessions tabs and non-destructive Archive action buttons.*
+
+---
+
+#### 4. User Account Archiving & Automated Inactivity Archiving
+- **Account Archiving**: Added `archived_at` column to `students`, `instructors`, and `admins` tables, allowing System Admins to archive accounts rather than permanently deleting historical training data.
+- **Archived Users Tab**: Added a dedicated Archived Users tab in System Admin User Management (`/system-admin/users`) with separate tables for Archived Students and Archived Instructors, complete with one-click **"Restore to Active"** buttons.
+- **Web Auto-Archive Control**: Added an interactive "Auto-Archive Inactive" tool in the System Admin filter bar allowing administrators to specify an inactivity threshold (e.g. 90 days) and archive dormant users with one click.
+- **CLI Artisan Command**: Created `users:archive-inactive` command supporting automated daily cron execution:
+  ```bash
+  php artisan users:archive-inactive --days=90
+  ```
+
+![System Admin User Archiving & Auto-Archive](docs/screenshots/capstone_05_system_admin_user_archive.png)
+*System Admin Users Management displaying the Archived Users counter, the Auto-Archive Inactive tool, and Archive action buttons.*
+
+![System Admin Archived Users Tab](docs/screenshots/capstone_05_system_admin_archived_tab.png)
+*System Admin Archived Users tab showing archived records with one-click Restore to Active actions.*
+
+---
+
+#### 5. Instructor and Student Schedule Calendar Views
+- **Admin Calendar Replication**: Modeled after the School Admin Calendar grid layout with month navigation, full day cells, and standard status indicators.
+- **Instructor Calendar View**: Accessible via the "Calendar" toggle on `/instructor/my-schedule?view=calendar`. Color-codes practical driving sessions (green badge) and theoretical classes (blue badge) with current booking capacity counts.
+- **Student Calendar View**: Accessible via the "Calendar" toggle on `/student/schedule?view=calendar`. Displays booked lessons with course codes, instructor names, and status indicators (confirmed, pending, completed).
+- **Persistent View & Navigation**: Supports full month navigation arrows (`changeCalendarMonth`) with query string persistence (`?view=calendar&month=YYYY-MM`).
+
+![Instructor Calendar View](docs/screenshots/capstone_06_instructor_calendar_view.png)
+*Instructor Session Schedule in Calendar view showing month grid, color-coded sessions, and legend.*
+
+![Student Calendar View](docs/screenshots/capstone_07_student_calendar_view.png)
+*Student Schedule in Calendar view showing month grid, confirmed bookings, and legend.*
+
+---
+
 ### Dedicated QR Code Scan Modal Popup & Image Zoom Lightbox — October 27, 2026
 - **Dedicated QR Code Scan Modal Popup (`#driveedQrScanModal`)**: Resolved payment QR scanning difficulties where cameras could not scan small in-page images. Clicking any payment QR code opens a dedicated high-contrast white card dialog optimized specifically for phone cameras and GCash auto-exposure.
 - **Interactive Zoom Toolbar**: Direct `[ - ] [ 100% ] [ + ] [ ↺ ]` zoom controls directly under the QR code allowing up to 200% magnification so users can scan from across a desk or with lower-resolution camera lenses.

@@ -21,6 +21,7 @@ class Instructor extends Authenticatable
         'password',
         'contact',
         'status',
+        'archived_at',
         'availability',
         'license_number',
         'license_image',
@@ -52,6 +53,7 @@ class Instructor extends Authenticatable
             'locked_until' => 'datetime',
             'last_login_at' => 'datetime',
             'last_logout_at' => 'datetime',
+            'archived_at' => 'datetime',
             'restriction_codes' => 'array',
             'license_expiration_date' => 'date',
         ];

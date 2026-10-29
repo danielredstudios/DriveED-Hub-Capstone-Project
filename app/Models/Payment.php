@@ -67,6 +67,31 @@ class Payment extends Model
         'snap_at',
     ];
 
+    protected $appends = [
+        'proof_url',
+        'uid',
+        'receipt_uid',
+    ];
+
+    public function getUidAttribute(): string
+    {
+        $year = $this->created_at ? $this->created_at->format('Y') : date('Y');
+        return sprintf('PAY-%s-%05d', $year, $this->id);
+    }
+
+    public function getReceiptUidAttribute(): string
+    {
+        if ($this->or_number) {
+            $trimmed = trim($this->or_number);
+            if (str_starts_with($trimmed, 'OR-') || str_starts_with($trimmed, 'RCP-')) {
+                return $trimmed;
+            }
+            return 'OR-' . $trimmed;
+        }
+        $year = $this->created_at ? $this->created_at->format('Y') : date('Y');
+        return sprintf('RCP-%s-%05d', $year, $this->id);
+    }
+
     protected $casts = [
         'amount' => 'decimal:2',
         'paid_on' => 'datetime',

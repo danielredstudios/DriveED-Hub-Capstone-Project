@@ -324,7 +324,15 @@ nav[role="navigation"] span:not([aria-current]):not([aria-disabled]) {
                 @forelse($payments as $payment)
                 <tr>
                     <td>{{ $payment->paid_on ? $payment->paid_on->format('M d, Y') : 'N/A' }}</td>
-                    <td><strong>{{ $payment->booking?->course?->title ?? $payment->enrollmentRequest?->course?->title ?? 'N/A' }}</strong></td>
+                    <td>
+                        <strong>{{ $payment->booking?->course?->title ?? $payment->enrollmentRequest?->course?->title ?? 'N/A' }}</strong>
+                        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.75rem; color: #2563eb; margin-top: 2px;">
+                            UID: {{ $payment->uid }}
+                        </div>
+                        <div style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.75rem; color: #059669;">
+                            Receipt: {{ $payment->receipt_uid }}
+                        </div>
+                    </td>
                     <td><strong class="amount-emphasis">&#8369;{{ number_format($payment->amount, 2) }}</strong></td>
                     <td>{{ ucfirst($payment->method ?? 'N/A') }}</td>
                     <td><span class="badge badge-{{ $payment->status }}">{{ ucfirst($payment->status) }}</span></td>
@@ -353,6 +361,14 @@ nav[role="navigation"] span:not([aria-current]):not([aria-disabled]) {
             <div class="payment-card-row">
                 <span class="payment-card-label">Course</span>
                 <span class="payment-card-value">{{ $payment->booking?->course?->title ?? $payment->enrollmentRequest?->course?->title ?? 'N/A' }}</span>
+            </div>
+            <div class="payment-card-row">
+                <span class="payment-card-label">Payment UID</span>
+                <span class="payment-card-value font-monospace" style="color: #2563eb; font-weight: 600;">{{ $payment->uid }}</span>
+            </div>
+            <div class="payment-card-row">
+                <span class="payment-card-label">Receipt UID</span>
+                <span class="payment-card-value font-monospace" style="color: #059669; font-weight: 600;">{{ $payment->receipt_uid }}</span>
             </div>
             <div class="payment-card-row">
                 <span class="payment-card-label">Amount</span>

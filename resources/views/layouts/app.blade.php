@@ -114,19 +114,73 @@
                 {{ $settings->button_danger_text ?? '#ffffff' }}
             ;
 
-            /* Role Colors (Customizable in future) */
-            --role-student-bg:
-                {{ $settings->role_student_bg ?? '#dbeafe' }}
-            ;
-            --role-student-text:
-                {{ $settings->role_student_text ?? '#1e40af' }}
-            ;
-            --role-instructor-bg:
-                {{ $settings->role_instructor_bg ?? '#e0f2fe' }}
-            ;
-            --role-instructor-text:
-                {{ $settings->role_instructor_text ?? '#0369a1' }}
-            ;
+            /* Role Colors (Distinct & Unique for each user role) */
+            --role-system-admin-bg: #f3e8ff;
+            --role-system-admin-text: #6b21a8;
+            --role-system-admin-border: #d8b4fe;
+
+            --role-school-admin-bg: #ede9fe;
+            --role-school-admin-text: #4338ca;
+            --role-school-admin-border: #a5b4fc;
+
+            --role-branch-secretary-bg: #ccfbf1;
+            --role-branch-secretary-text: #0f766e;
+            --role-branch-secretary-border: #5eead4;
+
+            --role-instructor-bg: {{ $settings->role_instructor_bg ?? '#dcfce7' }};
+            --role-instructor-text: {{ $settings->role_instructor_text ?? '#166534' }};
+            --role-instructor-border: #86efac;
+
+            --role-student-bg: {{ $settings->role_student_bg ?? '#dbeafe' }};
+            --role-student-text: {{ $settings->role_student_text ?? '#1e40af' }};
+            --role-student-border: #93c5fd;
+
+            --role-guest-bg: #fef3c7;
+            --role-guest-text: #92400e;
+            --role-guest-border: #fcd34d;
+
+            /* Global Role Badge Classes */
+            .role-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-size: 0.8rem;
+                font-weight: 600;
+                letter-spacing: 0.02em;
+                border: 1px solid transparent;
+            }
+            .role-badge.role-system-admin, .role-badge.role-system_admin {
+                background: var(--role-system-admin-bg) !important;
+                color: var(--role-system-admin-text) !important;
+                border-color: var(--role-system-admin-border) !important;
+            }
+            .role-badge.role-school-admin, .role-badge.role-school_admin, .role-badge.role-admin {
+                background: var(--role-school-admin-bg) !important;
+                color: var(--role-school-admin-text) !important;
+                border-color: var(--role-school-admin-border) !important;
+            }
+            .role-badge.role-branch-secretary, .role-badge.role-branch_secretary {
+                background: var(--role-branch-secretary-bg) !important;
+                color: var(--role-branch-secretary-text) !important;
+                border-color: var(--role-branch-secretary-border) !important;
+            }
+            .role-badge.role-instructor {
+                background: var(--role-instructor-bg) !important;
+                color: var(--role-instructor-text) !important;
+                border-color: var(--role-instructor-border) !important;
+            }
+            .role-badge.role-student {
+                background: var(--role-student-bg) !important;
+                color: var(--role-student-text) !important;
+                border-color: var(--role-student-border) !important;
+            }
+            .role-badge.role-guest {
+                background: var(--role-guest-bg) !important;
+                color: var(--role-guest-text) !important;
+                border-color: var(--role-guest-border) !important;
+            }
 
             /* Brand Shadow */
             --brand-shadow: rgba(var(--primary-rgb), 0.2);

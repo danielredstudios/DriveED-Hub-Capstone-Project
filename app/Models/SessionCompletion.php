@@ -24,6 +24,7 @@ class SessionCompletion extends Model
         'start_time',
         'end_time',
         'status',
+        'archived_at',
         'notes',
         'logged_by',
     ];
@@ -32,6 +33,7 @@ class SessionCompletion extends Model
         'hours_completed' => 'decimal:2',
         'session_date' => 'date',
         'session_time' => 'string',
+        'archived_at' => 'datetime',
     ];
 
     /**
@@ -137,5 +139,29 @@ class SessionCompletion extends Model
     public function scopeRecent($query, $days = 30)
     {
         return $query->where('session_date', '>=', now()->subDays($days));
+    }
+
+    /**
+     * Scope for non-archived sessions
+     */
+    public function scopeActive($query)
+    {
+        return $query->whereNull('archived_at');
+    }
+
+    /**
+     * Scope for archived sessions
+     */
+    public function scopeArchived($query)
+    {
+        return $query->whereNotNull('archived_at');
+    }
+
+    /**
+     * Check if session is archived
+     */
+    public function isArchived(): bool
+    {
+        return !is_null($this->archived_at);
     }
 }

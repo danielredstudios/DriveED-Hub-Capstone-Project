@@ -20,13 +20,16 @@ class SchedulingConflictService
      */
     public function checkInstructorAvailability($instructorId, $date, $startTime, $endTime, $excludeSessionId = null)
     {
+        // Normalize date to Y-m-d string
+        $dateStr = $date instanceof Carbon ? $date->format('Y-m-d') : Carbon::parse($date)->format('Y-m-d');
+
         // Convert times to Carbon instances for comparison
-        $requestStart = Carbon::parse($date . ' ' . $startTime);
-        $requestEnd = Carbon::parse($date . ' ' . $endTime);
+        $requestStart = Carbon::parse($dateStr . ' ' . $startTime);
+        $requestEnd = Carbon::parse($dateStr . ' ' . $endTime);
 
         // Find overlapping sessions for this instructor
         $query = SessionCompletion::where('instructor_id', $instructorId)
-            ->where('session_date', $date)
+            ->whereDate('session_date', $dateStr)
             ->whereNotNull('start_time')
             ->whereNotNull('end_time')
             ->where(function($q) {
@@ -42,8 +45,12 @@ class SchedulingConflictService
 
         $conflicts = [];
         foreach ($existingSessions as $session) {
-            $sessionStart = Carbon::parse($session->session_date . ' ' . $session->start_time);
-            $sessionEnd = Carbon::parse($session->session_date . ' ' . $session->end_time);
+            $sessionDateStr = $session->session_date instanceof Carbon 
+                ? $session->session_date->format('Y-m-d') 
+                : Carbon::parse($session->session_date)->format('Y-m-d');
+
+            $sessionStart = Carbon::parse($sessionDateStr . ' ' . $session->start_time);
+            $sessionEnd = Carbon::parse($sessionDateStr . ' ' . $session->end_time);
 
             // Check if times overlap
             // Overlap occurs if: requestStart < sessionEnd AND requestEnd > sessionStart
@@ -53,7 +60,7 @@ class SchedulingConflictService
                     'student_name' => $session->enrollment->student->name ?? 'Unknown',
                     'start_time' => Carbon::parse($session->start_time)->format('H:i'),
                     'end_time' => Carbon::parse($session->end_time)->format('H:i'),
-                    'date' => $session->session_date->format('Y-m-d'),
+                    'date' => $sessionDateStr,
                     'status' => $session->status ?? 'completed',
                     'session_type' => $session->session_type,
                 ];
@@ -89,9 +96,11 @@ class SchedulingConflictService
      */
     public function getAvailableTimeSlots($instructorId, $date, $durationMinutes = 60)
     {
+        $dateStr = $date instanceof Carbon ? $date->format('Y-m-d') : Carbon::parse($date)->format('Y-m-d');
+
         // Get all booked sessions for this instructor on this date
         $bookedSessions = SessionCompletion::where('instructor_id', $instructorId)
-            ->where('session_date', $date)
+            ->whereDate('session_date', $dateStr)
             ->whereNotNull('start_time')
             ->whereNotNull('end_time')
             ->where(function($q) {
@@ -102,15 +111,15 @@ class SchedulingConflictService
             ->get(['start_time', 'end_time']);
 
         // Define working hours (8 AM to 6 PM)
-        $workStart = Carbon::parse($date . ' 08:00:00');
-        $workEnd = Carbon::parse($date . ' 18:00:00');
+        $workStart = Carbon::parse($dateStr . ' 08:00:00');
+        $workEnd = Carbon::parse($dateStr . ' 18:00:00');
 
         $availableSlots = [];
         $currentTime = $workStart->copy();
 
         foreach ($bookedSessions as $session) {
-            $sessionStart = Carbon::parse($date . ' ' . $session->start_time);
-            $sessionEnd = Carbon::parse($date . ' ' . $session->end_time);
+            $sessionStart = Carbon::parse($dateStr . ' ' . $session->start_time);
+            $sessionEnd = Carbon::parse($dateStr . ' ' . $session->end_time);
 
             // Check if there's a gap before this session
             if ($currentTime->diffInMinutes($sessionStart) >= $durationMinutes) {

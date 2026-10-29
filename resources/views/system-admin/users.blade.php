@@ -7,7 +7,7 @@
     /* Statistics Cards */
     .stats-row {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 1rem;
         margin-bottom: 1.5rem;
     }
@@ -474,11 +474,16 @@
         <div class="label">Active Users</div>
         <div class="sub">Currently active</div>
     </div>
+    <div class="stat-box" style="border-left-color: #64748b;">
+        <div class="number" style="color: #475569;">{{ $totalArchivedUsers ?? 0 }}</div>
+        <div class="label">Archived Users</div>
+        <div class="sub">{{ $archivedStudentsCount ?? 0 }} students, {{ $archivedInstructorsCount ?? 0 }} instructors</div>
+    </div>
 </div>
 
 <!-- Filter Bar -->
-<div class="filter-bar">
-    <form method="GET" class="filter-form-inline">
+<div class="filter-bar" style="display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; flex-wrap: wrap;">
+    <form method="GET" class="filter-form-inline" style="flex: 1; min-width: 320px;">
         <div class="filter-group">
             <label>School</label>
             <select name="school_id">
@@ -497,6 +502,19 @@
             <a href="{{ route('system-admin.users') }}" class="btn-filter secondary"><i class="fas fa-times"></i> Clear</a>
         </div>
     </form>
+    <form method="POST" action="{{ route('system-admin.users.archive-inactive') }}" class="auto-archive-form" style="display: flex; gap: 8px; align-items: flex-end; background: #fffbeb; border: 1px solid #fde68a; padding: 10px 14px; border-radius: 10px;" onsubmit="return confirm('Archive all users inactive for this many days?')">
+        @csrf
+        <div>
+            <label style="display: block; font-size: 0.72rem; font-weight: 700; color: #92400e; text-transform: uppercase; margin-bottom: 4px;">Auto-Archive Inactive</label>
+            <div style="display: flex; align-items: center; gap: 6px;">
+                <input type="number" name="days" value="90" min="1" max="3650" style="width: 75px; padding: 6px 8px; border: 1px solid #d97706; border-radius: 6px; font-size: 0.85rem;" title="Days of inactivity">
+                <span style="font-size: 0.8rem; color: #92400e; font-weight: 500;">days</span>
+            </div>
+        </div>
+        <button type="submit" class="btn-sm" style="background: #d97706; color: white; padding: 8px 12px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; height: 33px;">
+            <i class="fas fa-history"></i> Run Archive
+        </button>
+    </form>
 </div>
 
 <!-- Tabs -->
@@ -507,6 +525,9 @@
         </button>
         <button class="tab" type="button" data-tab="instructors" id="instructors-tab-btn" role="tab" aria-selected="false" aria-controls="instructors-tab" tabindex="-1" onclick="switchTab('instructors', this)">
             <i class="fas fa-chalkboard-teacher"></i> Instructors ({{ $totalInstructors }})
+        </button>
+        <button class="tab" type="button" data-tab="archived" id="archived-tab-btn" role="tab" aria-selected="false" aria-controls="archived-tab" tabindex="-1" onclick="switchTab('archived', this)">
+            <i class="fas fa-archive"></i> Archived Users ({{ $totalArchivedUsers ?? 0 }})
         </button>
     </div>
 </div>
@@ -565,6 +586,12 @@
                                             title="{{ $student->status === 'active' ? 'Deactivate' : 'Activate' }}">
                                         <i class="fas {{ $student->status === 'active' ? 'fa-toggle-on' : 'fa-toggle-off' }}"></i>
                                         {{ $student->status === 'active' ? 'Deactivate' : 'Activate' }}
+                                    </button>
+                                </form>
+                                <form action="{{ route('system-admin.users.archive', ['type' => 'student', 'id' => $student->id]) }}" method="POST" class="inline-form" onsubmit="return confirm('Archive student {{ $student->name }}?')">
+                                    @csrf
+                                    <button type="submit" class="btn-sm" style="background: #fef3c7; color: #92400e;" title="Archive Student">
+                                        <i class="fas fa-archive"></i> Archive
                                     </button>
                                 </form>
                                 <button type="button" class="btn-sm btn-danger" 
@@ -648,6 +675,12 @@
                                         {{ $instructor->status === 'active' ? 'Deactivate' : 'Activate' }}
                                     </button>
                                 </form>
+                                <form action="{{ route('system-admin.users.archive', ['type' => 'instructor', 'id' => $instructor->id]) }}" method="POST" class="inline-form" onsubmit="return confirm('Archive instructor {{ $instructor->name }}?')">
+                                    @csrf
+                                    <button type="submit" class="btn-sm" style="background: #fef3c7; color: #92400e;" title="Archive Instructor">
+                                        <i class="fas fa-archive"></i> Archive
+                                    </button>
+                                </form>
                                 <button type="button" class="btn-sm btn-danger" 
                                         data-action="delete-user" data-type="instructor" data-id="{{ $instructor->id }}" data-name="{{ $instructor->name }}"
                                         title="Delete Instructor">
@@ -667,6 +700,167 @@
             <div class="empty-state">
                 <i class="fas fa-chalkboard-teacher"></i>
                 <p>No instructors found.</p>
+            </div>
+            @endif
+        </div>
+    </div>
+</div>
+
+<!-- Archived Users Tab Content -->
+<div id="archived-tab" class="tab-content" role="tabpanel" aria-labelledby="archived-tab-btn" tabindex="0">
+    <div class="card" style="margin-bottom: 2rem;">
+        <div class="card-header" style="background: #f8fafc; padding: 16px 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="margin: 0; font-size: 1.1rem; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-user-graduate" style="color: #64748b;"></i> Archived Students ({{ $archivedStudentsCount ?? 0 }})
+            </h3>
+        </div>
+        <div class="card-body">
+            @if(isset($archivedStudents) && $archivedStudents->count() > 0)
+            <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="hide-mobile">ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>School</th>
+                        <th>Archived Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($archivedStudents as $student)
+                    <tr>
+                        <td class="hide-mobile">{{ $student->id }}</td>
+                        <td>
+                            <div class="user-name-wrap">
+                                <div class="user-avatar student" style="opacity: 0.7;">
+                                    {{ strtoupper(substr($student->name, 0, 1)) }}
+                                </div>
+                                <div>
+                                    <strong>{{ $student->name }}</strong>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">{{ $student->contact ?: 'No contact' }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ $student->email }}</td>
+                        <td>
+                            <span class="school-badge">
+                                <i class="fas fa-school"></i>
+                                {{ $student->school->name }}
+                            </span>
+                        </td>
+                        <td>
+                            <span style="font-size: 0.85rem; color: #64748b;">
+                                {{ $student->archived_at ? $student->archived_at->format('M d, Y h:i A') : 'N/A' }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="actions-cell">
+                                <form action="{{ route('system-admin.users.unarchive', ['type' => 'student', 'id' => $student->id]) }}" method="POST" class="inline-form" onsubmit="return confirm('Restore student {{ $student->name }} to active?')">
+                                    @csrf
+                                    <button type="submit" class="btn-sm" style="background: #dcfce7; color: #166534;" title="Restore to Active">
+                                        <i class="fas fa-undo"></i> Restore
+                                    </button>
+                                </form>
+                                <button type="button" class="btn-sm btn-danger" 
+                                        data-action="delete-user" data-type="student" data-id="{{ $student->id }}" data-name="{{ $student->name }}"
+                                        title="Permanently Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            </div>
+            <div class="users-pagination">
+                {{ $archivedStudents->appends(array_merge(request()->query(), ['tab' => 'archived']))->links() }}
+            </div>
+            @else
+            <div class="empty-state">
+                <i class="fas fa-archive"></i>
+                <p>No archived students.</p>
+            </div>
+            @endif
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header" style="background: #f8fafc; padding: 16px 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="margin: 0; font-size: 1.1rem; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-chalkboard-teacher" style="color: #64748b;"></i> Archived Instructors ({{ $archivedInstructorsCount ?? 0 }})
+            </h3>
+        </div>
+        <div class="card-body">
+            @if(isset($archivedInstructors) && $archivedInstructors->count() > 0)
+            <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="hide-mobile">ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>School</th>
+                        <th>Archived Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($archivedInstructors as $instructor)
+                    <tr>
+                        <td class="hide-mobile">{{ $instructor->id }}</td>
+                        <td>
+                            <div class="user-name-wrap">
+                                <div class="user-avatar instructor" style="opacity: 0.7;">
+                                    {{ strtoupper(substr($instructor->name, 0, 1)) }}
+                                </div>
+                                <div>
+                                    <strong>{{ $instructor->name }}</strong>
+                                    <div style="font-size: 0.75rem; color: #94a3b8;">{{ $instructor->contact ?: 'No contact' }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ $instructor->email }}</td>
+                        <td>
+                            <span class="school-badge">
+                                <i class="fas fa-school"></i>
+                                {{ $instructor->school->name }}
+                            </span>
+                        </td>
+                        <td>
+                            <span style="font-size: 0.85rem; color: #64748b;">
+                                {{ $instructor->archived_at ? $instructor->archived_at->format('M d, Y h:i A') : 'N/A' }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="actions-cell">
+                                <form action="{{ route('system-admin.users.unarchive', ['type' => 'instructor', 'id' => $instructor->id]) }}" method="POST" class="inline-form" onsubmit="return confirm('Restore instructor {{ $instructor->name }} to active?')">
+                                    @csrf
+                                    <button type="submit" class="btn-sm" style="background: #dcfce7; color: #166534;" title="Restore to Active">
+                                        <i class="fas fa-undo"></i> Restore
+                                    </button>
+                                </form>
+                                <button type="button" class="btn-sm btn-danger" 
+                                        data-action="delete-user" data-type="instructor" data-id="{{ $instructor->id }}" data-name="{{ $instructor->name }}"
+                                        title="Permanently Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            </div>
+            <div class="users-pagination">
+                {{ $archivedInstructors->appends(array_merge(request()->query(), ['tab' => 'archived']))->links() }}
+            </div>
+            @else
+            <div class="empty-state">
+                <i class="fas fa-archive"></i>
+                <p>No archived instructors.</p>
             </div>
             @endif
         </div>
@@ -833,6 +1027,11 @@ if (initialTab === 'instructors') {
     const instructorsTabButton = document.querySelector('.tab[data-tab="instructors"]');
     if (instructorsTabButton) {
         switchTab('instructors', instructorsTabButton);
+    }
+} else if (initialTab === 'archived') {
+    const archivedTabButton = document.querySelector('.tab[data-tab="archived"]');
+    if (archivedTabButton) {
+        switchTab('archived', archivedTabButton);
     }
 }
 </script>

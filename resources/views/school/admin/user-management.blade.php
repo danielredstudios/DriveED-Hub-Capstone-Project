@@ -480,19 +480,44 @@
             font-weight: 500;
         }
 
-        .role-student,
-        .role-guest {
+        .role-student {
             background: var(--role-student-bg);
             color: var(--role-student-text);
+            border: 1px solid var(--role-student-border);
         }
 
         .role-guest {
-            border: 1px dashed var(--role-student-text);
+            background: var(--role-guest-bg);
+            color: var(--role-guest-text);
+            border: 1px solid var(--role-guest-border);
         }
 
         .role-instructor {
             background: var(--role-instructor-bg);
             color: var(--role-instructor-text);
+            border: 1px solid var(--role-instructor-border);
+        }
+
+        .role-school-admin,
+        .role-school_admin,
+        .role-admin {
+            background: var(--role-school-admin-bg);
+            color: var(--role-school-admin-text);
+            border: 1px solid var(--role-school-admin-border);
+        }
+
+        .role-branch-secretary,
+        .role-branch_secretary {
+            background: var(--role-branch-secretary-bg);
+            color: var(--role-branch-secretary-text);
+            border: 1px solid var(--role-branch-secretary-border);
+        }
+
+        .role-system-admin,
+        .role-system_admin {
+            background: var(--role-system-admin-bg);
+            color: var(--role-system-admin-text);
+            border: 1px solid var(--role-system-admin-border);
         }
 
         .branch-label {

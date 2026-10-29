@@ -1320,6 +1320,155 @@
             max-width: none;
         }
     }
+
+    /* ── Calendar View (Admin-Style Match) ── */
+    .calendar-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        padding: 20px;
+        margin-top: 20px;
+    }
+    .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .month-nav {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+    .month-nav h3 {
+        margin: 0;
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #1e293b;
+        min-width: 180px;
+        text-align: center;
+    }
+    .nav-arrow {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        background: #f1f5f9;
+        color: #334155;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .nav-arrow:hover {
+        background: #e2e8f0;
+        color: #0f172a;
+    }
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 10px;
+    }
+    .calendar-day-name {
+        padding: 10px;
+        text-align: center;
+        font-weight: 600;
+        color: #64748b;
+        font-size: 13px;
+        text-transform: capitalize;
+    }
+    .calendar-day {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        min-height: 120px;
+        padding: 10px;
+        transition: all 0.2s ease;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+    }
+    .calendar-day:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        border-color: #cbd5e1;
+    }
+    .calendar-day.other-month {
+        background: #f8fafc;
+        color: #94a3b8;
+        opacity: 0.5;
+    }
+    .calendar-day.has-slots {
+        border: 2px solid {{ $primaryColor }};
+        background: {{ $primaryColor }}08;
+    }
+    .calendar-day.is-today {
+        border-color: #f59e0b;
+        background: #fffbeb20;
+    }
+    .day-number {
+        font-weight: 700;
+        font-size: 14px;
+        color: #1e293b;
+        margin-bottom: 6px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .today-label {
+        background: #f59e0b;
+        color: white;
+        font-size: 9px;
+        font-weight: 700;
+        padding: 2px 6px;
+        border-radius: 20px;
+        text-transform: uppercase;
+    }
+    .day-slots-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-top: auto;
+    }
+    .slot-bar {
+        width: 100%;
+        padding: 4px 6px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+        color: white;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block;
+        text-decoration: none;
+    }
+    .slot-bar.confirmed { background: #10b981; }
+    .slot-bar.pending { background: #f59e0b; }
+    .slot-bar.completed { background: #3b82f6; }
+    .slot-bar.available { background: #8b5cf6; }
+    .slot-bar.more-indicator { background: #64748b; font-size: 10px; }
+    .calendar-legend-box {
+        margin-top: 20px;
+        padding: 16px;
+        background: #f8fafc;
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+    }
+    @media (max-width: 768px) {
+        .calendar-grid { gap: 4px; }
+        .calendar-day { min-height: 60px; padding: 4px; }
+        .day-slots-wrap { display: none; }
+        .calendar-day.has-slots::after {
+            content: '';
+            display: block;
+            width: 6px;
+            height: 6px;
+            background: {{ $primaryColor }};
+            border-radius: 50%;
+            margin: 4px auto 0;
+        }
+    }
 </style>
 
 <div class="schedule-container">
@@ -1329,6 +1478,7 @@
         <div class="main-toggle">
             <button class="main-toggle-btn active" onclick="switchMainView('my-schedule')">My Schedule</button>
             <button class="main-toggle-btn" onclick="switchMainView('available-schedules')">Available Schedules</button>
+            <button class="main-toggle-btn" onclick="switchMainView('calendar')"><i class="bi bi-calendar3"></i> Calendar</button>
         </div>
     </div>
     
@@ -1776,6 +1926,103 @@
     </div>
 </div>
 
+<!-- Calendar View (Admin-Style Match) -->
+<div id="calendar-view" class="main-view-section">
+    <div class="calendar-container">
+        <div class="calendar-header">
+            <div class="month-nav">
+                <div class="nav-arrow" onclick="changeCalendarMonth(-1)"><i class="bi bi-chevron-left"></i></div>
+                <h3 id="currentMonth">{{ \Carbon\Carbon::parse($calendarStartDate)->format('F Y') }}</h3>
+                <div class="nav-arrow" onclick="changeCalendarMonth(1)"><i class="bi bi-chevron-right"></i></div>
+            </div>
+        </div>
+
+        <div class="calendar-grid">
+            @foreach(['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as $dayName)
+                <div class="calendar-day-name">{{ $dayName }}</div>
+            @endforeach
+
+            @php
+                $startDateObj = \Carbon\Carbon::parse($calendarStartDate)->startOfMonth();
+                $endDateObj = $startDateObj->copy()->endOfMonth();
+                $startOfGrid = $startDateObj->copy()->startOfWeek(\Carbon\Carbon::SUNDAY);
+                $endOfGrid = $endDateObj->copy()->endOfWeek(\Carbon\Carbon::SATURDAY);
+                $currentDate = $startOfGrid->copy();
+                $todayDateStr = \Carbon\Carbon::today()->format('Y-m-d');
+            @endphp
+
+            @while($currentDate <= $endOfGrid)
+                @php
+                    $dateStr = $currentDate->format('Y-m-d');
+                    $isToday = $dateStr === $todayDateStr;
+                    $isOtherMonth = $currentDate->format('m') !== $startDateObj->format('m');
+                    $dayBookings = $groupedBookings->get($dateStr) ?? collect();
+                    $hasBookings = $dayBookings->isNotEmpty();
+                @endphp
+
+                <div class="calendar-day {{ $isToday ? 'is-today' : '' }} {{ $isOtherMonth ? 'other-month' : '' }} {{ $hasBookings ? 'has-slots' : '' }}">
+                    <div class="day-number">
+                        {{ $currentDate->format('j') }}
+                        @if($isToday)
+                            <span class="today-label">Today</span>
+                        @endif
+                    </div>
+
+                    @if(!$isOtherMonth && $hasBookings)
+                        <div class="day-slots-wrap">
+                            @foreach($dayBookings->take(3) as $booking)
+                                @php
+                                    $bStatus = strtolower((string) ($booking->status ?? 'scheduled'));
+                                    $barClass = 'confirmed';
+                                    if (in_array($bStatus, ['done', 'completed'])) {
+                                        $barClass = 'completed';
+                                    } elseif ($bStatus === 'pending') {
+                                        $barClass = 'pending';
+                                    }
+                                    $courseName = $booking->course->title ?? 'Lesson';
+                                    $startTime = $booking->timeSlot ? \Carbon\Carbon::parse($booking->timeSlot->start_time)->format('g:i A') : '';
+                                @endphp
+                                <div class="slot-bar {{ $barClass }}" title="{{ $courseName }} - {{ $booking->instructor->name ?? 'Instructor' }} ({{ ucfirst($bStatus) }})">
+                                    @if($startTime){{ $startTime }} • @endif{{ Str::limit($courseName, 14) }}
+                                </div>
+                            @endforeach
+                            @if($dayBookings->count() > 3)
+                                <div class="slot-bar more-indicator">
+                                    +{{ $dayBookings->count() - 3 }} more
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+                </div>
+                @php $currentDate->addDay(); @endphp
+            @endwhile
+        </div>
+
+        <!-- Legend -->
+        <div class="calendar-legend-box">
+            <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                <span style="font-weight: 700; color: #1e293b; font-size: 0.95rem;">Legend:</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="width: 14px; height: 14px; background: #10b981; border-radius: 4px;"></span>
+                    <span style="font-size: 0.85rem; color: #475569; font-weight: 500;">Confirmed / Scheduled Booking</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="width: 14px; height: 14px; background: #f59e0b; border-radius: 4px;"></span>
+                    <span style="font-size: 0.85rem; color: #475569; font-weight: 500;">Pending Confirmation</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="width: 14px; height: 14px; background: #3b82f6; border-radius: 4px;"></span>
+                    <span style="font-size: 0.85rem; color: #475569; font-weight: 500;">Completed Lesson</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="width: 14px; height: 14px; background: #f59e0b; border-radius: 4px;"></span>
+                    <span style="font-size: 0.85rem; color: #475569; font-weight: 500;">Today</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     function switchMainView(viewName) {
         // Toggle buttons
@@ -1787,10 +2034,38 @@
         if (viewName === 'my-schedule') {
             document.querySelectorAll('.main-toggle-btn')[0].classList.add('active');
             document.getElementById('my-schedule-view').classList.add('active');
-        } else {
+        } else if (viewName === 'available-schedules') {
             document.querySelectorAll('.main-toggle-btn')[1].classList.add('active');
             document.getElementById('available-schedules-view').classList.add('active');
+        } else if (viewName === 'calendar') {
+            document.querySelectorAll('.main-toggle-btn')[2].classList.add('active');
+            document.getElementById('calendar-view').classList.add('active');
         }
+    }
+
+    function changeCalendarMonth(offset) {
+        const currentMonth = '{{ $currentMonth ?? now()->format("Y-m") }}';
+        const parts = currentMonth.split('-');
+        let year = parseInt(parts[0], 10);
+        let month = parseInt(parts[1], 10) - 1;
+        month += offset;
+        if (month < 0) {
+            month = 11;
+            year -= 1;
+        } else if (month > 11) {
+            month = 0;
+            year += 1;
+        }
+        const newMonthStr = year + '-' + String(month + 1).padStart(2, '0');
+        const url = new URL(window.location.href);
+        url.searchParams.set('month', newMonthStr);
+        url.searchParams.set('view', 'calendar');
+        window.location.href = url.toString();
+    }
+
+    const initialStudentViewParam = new URLSearchParams(window.location.search).get('view');
+    if (initialStudentViewParam === 'calendar') {
+        switchMainView('calendar');
     }
     
     function toggleDate(header) {

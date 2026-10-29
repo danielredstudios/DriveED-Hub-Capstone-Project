@@ -302,6 +302,14 @@ class InstructorTimeSlotController extends Controller
             return \Carbon\Carbon::parse($booking->booking_date)->format('Y-m-d');
         });
 
+        $currentMonth = $request->input('month', now()->format('Y-m'));
+        try {
+            $calendarStartDate = \Carbon\Carbon::parse($currentMonth . '-01')->format('Y-m-d');
+        } catch (\Exception $e) {
+            $currentMonth = now()->format('Y-m');
+            $calendarStartDate = now()->startOfMonth()->format('Y-m-d');
+        }
+
         return view('school.instructor.schedule-new', [
             'school' => $school,
             'instructorId' => $instructorId,
@@ -318,6 +326,8 @@ class InstructorTimeSlotController extends Controller
             'cancelledBookings' => $cancelledBookings,
             'groupedCancelledBookings' => $groupedCancelledBookings,
             'instructorSchedule' => $instructorSchedule,
+            'currentMonth' => $currentMonth,
+            'calendarStartDate' => $calendarStartDate,
             'isAjax' => $request->ajax(),
         ]);
     }

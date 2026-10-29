@@ -1569,6 +1569,7 @@ class EnrollmentRequestController extends Controller
 
         return response()->json([
             'id' => $enrollmentRequest->id,
+            'uid' => $enrollmentRequest->uid,
             'student_name' => $enrollmentRequest->learner->name,
             'course_title' => $enrollmentRequest->course->title,
             'total_price' => number_format($displayPrice, 2),
@@ -1579,6 +1580,8 @@ class EnrollmentRequestController extends Controller
             // Data
             'payment_method' => $enrollmentRequest->payment_method,
             'reference_number' => $enrollmentRequest->payment_reference,
+            'payment_uid' => $latestPayment ? $latestPayment->uid : null,
+            'receipt_uid' => $latestPayment ? $latestPayment->receipt_uid : ($enrollmentRequest->payment_reference ? 'RCP-' . $enrollmentRequest->payment_reference : null),
             'requested_dl_code' => $enrollmentRequest->requested_dl_code,
             'remarks' => $enrollmentRequest->remarks,
             'cancellation_requested' => (bool) $enrollmentRequest->cancellation_requested,

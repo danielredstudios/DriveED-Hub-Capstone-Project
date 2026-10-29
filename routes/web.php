@@ -87,6 +87,9 @@ Route::prefix('system-admin')->name('system-admin.')->group(function () {
             // Users management
             Route::get('/users', [SystemAdminController::class , 'users'])->name('users');
             Route::patch('/users/{type}/{id}/toggle-status', [SystemAdminController::class , 'toggleUserStatus'])->name('users.toggle-status')->whereIn('type', ['student', 'instructor']);
+            Route::post('/users/{type}/{id}/archive', [SystemAdminController::class , 'archiveUser'])->name('users.archive')->whereIn('type', ['student', 'instructor']);
+            Route::post('/users/{type}/{id}/unarchive', [SystemAdminController::class , 'unarchiveUser'])->name('users.unarchive')->whereIn('type', ['student', 'instructor']);
+            Route::post('/users/archive-inactive', [SystemAdminController::class , 'archiveInactiveUsers'])->name('users.archive-inactive');
             Route::delete('/users/{type}/{id}', [SystemAdminController::class , 'deleteUser'])->name('users.delete')->where('type', 'student|instructor');
 
             // Logs
@@ -388,6 +391,8 @@ Route::prefix('{school:slug}')
                         Route::prefix('sessions')->name('sessions.')->group(function () {
                             Route::get('/', [SessionCompletionController::class , 'index'])->name('index');
                             Route::get('/{sessionCompletion}', [SessionCompletionController::class , 'show'])->name('show');
+                            Route::post('/{sessionCompletion}/archive', [SessionCompletionController::class , 'archive'])->name('archive');
+                            Route::post('/{sessionCompletion}/unarchive', [SessionCompletionController::class , 'unarchive'])->name('unarchive');
                             Route::delete('/{sessionCompletion}', [SessionCompletionController::class , 'destroy'])->name('destroy');
                             Route::get('/enrollment/{enrollment}/stats', [SessionCompletionController::class , 'enrollmentStats'])->name('enrollmentStats');
                         }
@@ -489,7 +494,9 @@ Route::prefix('{school:slug}')
                             Route::post('/', [SessionCompletionController::class , 'store'])->name('store');
                             Route::get('/{sessionCompletion}', [SessionCompletionController::class , 'show'])->name('show');
                             Route::get('/{sessionCompletion}/edit', [SessionCompletionController::class , 'edit'])->name('edit');
-                            Route::put('/{sessionCompletion}', [SessionCompletionController::class , 'update'])->name('update');
+                            Route::match(['put', 'patch', 'post'], '/{sessionCompletion}', [SessionCompletionController::class , 'update'])->name('update');
+                            Route::post('/{sessionCompletion}/archive', [SessionCompletionController::class , 'archive'])->name('archive');
+                            Route::post('/{sessionCompletion}/unarchive', [SessionCompletionController::class , 'unarchive'])->name('unarchive');
                             Route::delete('/{sessionCompletion}', [SessionCompletionController::class , 'destroy'])->name('destroy');
                             Route::get('/enrollment/{enrollment}/stats', [SessionCompletionController::class , 'enrollmentStats'])->name('enrollmentStats');
                         }

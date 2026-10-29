@@ -246,6 +246,51 @@
     .btn-pdf:hover { background: #fecaca; color: #991b1b; }
     .btn-excel { background: #dcfce7; color: #15803d; }
     .btn-excel:hover { background: #bbf7d0; color: #166534; }
+    .btn-archive { background: #fef2f2; color: #dc2626; }
+    .btn-archive:hover { background: #fee2e2; color: #b91c1c; }
+    .btn-restore { background: #ecfdf5; color: #059669; }
+    .btn-restore:hover { background: #d1fae5; color: #047857; }
+
+    /* ── Tab Bar ── */
+    .session-tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+    .session-tab-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 18px;
+        border-radius: 8px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        text-decoration: none;
+        color: #4b5563;
+        background: #f3f4f6;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+    }
+    .session-tab-btn:hover {
+        background: #e5e7eb;
+        color: #1f2937;
+    }
+    .session-tab-btn.active {
+        background: {{ $primaryColor }};
+        color: #ffffff;
+        box-shadow: 0 2px 8px {{ $primaryColor }}30;
+    }
+    .session-tab-badge {
+        padding: 2px 7px;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        background: rgba(255, 255, 255, 0.25);
+    }
+    .session-tab-btn:not(.active) .session-tab-badge {
+        background: #e5e7eb;
+        color: #374151;
+    }
 
     /* ── Empty State ── */
     .empty-state { text-align: center; padding: 48px 20px; }
@@ -478,6 +523,18 @@
         </div>
     </div>
 
+    <!-- Session Active / Archived Tabs -->
+    <div class="session-tabs">
+        <a href="{{ school_route('instructor.sessions.index', ['tab' => 'active']) }}" class="session-tab-btn {{ empty($isArchivedView) ? 'active' : '' }}">
+            <span>Active Sessions</span>
+            <span class="session-tab-badge">{{ $stats['active_count'] ?? 0 }}</span>
+        </a>
+        <a href="{{ school_route('instructor.sessions.index', ['tab' => 'archived']) }}" class="session-tab-btn {{ !empty($isArchivedView) ? 'active' : '' }}">
+            <span>Archived Sessions</span>
+            <span class="session-tab-badge">{{ $stats['archived_count'] ?? 0 }}</span>
+        </a>
+    </div>
+
     <!-- Filter Bar -->
     <div class="filter-bar">
         <label>Filter by:</label>
@@ -543,6 +600,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                     </svg>
                                 </a>
+                                @if(empty($isArchivedView))
                                 <a href="{{ school_route('instructor.sessions.edit', ['sessionCompletion' => $session->id]) }}" 
                                    class="btn-action btn-edit" title="Edit Session">
                                     <svg class="icon-16" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -561,6 +619,24 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                     </svg>
                                 </a>
+                                <form method="POST" action="{{ school_route('instructor.sessions.archive', ['sessionCompletion' => $session->id]) }}" style="display:inline;" onsubmit="return confirm('Archive this session log?')">
+                                    @csrf
+                                    <button type="submit" class="btn-action btn-archive" title="Archive Session">
+                                        <svg class="icon-16" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
+                                        </svg>
+                                    </button>
+                                </form>
+                                @else
+                                <form method="POST" action="{{ school_route('instructor.sessions.unarchive', ['sessionCompletion' => $session->id]) }}" style="display:inline;" onsubmit="return confirm('Restore this session log to active?')">
+                                    @csrf
+                                    <button type="submit" class="btn-action btn-restore" title="Restore Session">
+                                        <svg class="icon-16" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                        </svg>
+                                    </button>
+                                </form>
+                                @endif
                             </div>
                         </td>
                     </tr>
@@ -594,9 +670,20 @@
                 </div>
                 <div class="card-actions">
                     <a href="{{ school_route('instructor.sessions.show', ['sessionCompletion' => $session->id]) }}" class="btn-view-card">View</a>
+                    @if(empty($isArchivedView))
                     <a href="{{ school_route('instructor.sessions.edit', ['sessionCompletion' => $session->id]) }}" class="btn-edit-card">Edit</a>
                     <a href="{{ school_route('instructor.session-report', ['format' => 'pdf', 'session_id' => $session->id]) }}" class="btn-view-card" style="background: #fee2e2; color: #b91c1c;" title="Export Session (PDF)" download>PDF</a>
                     <a href="{{ school_route('instructor.session-report', ['format' => 'xlsx', 'session_id' => $session->id]) }}" class="btn-view-card" style="background: #dcfce7; color: #15803d;" title="Export Session (Excel)" download>XLSX</a>
+                    <form method="POST" action="{{ school_route('instructor.sessions.archive', ['sessionCompletion' => $session->id]) }}" style="flex: 1;" onsubmit="return confirm('Archive this session log?')">
+                        @csrf
+                        <button type="submit" class="btn-view-card" style="background: #fef2f2; color: #dc2626; border: none; width: 100%; cursor: pointer;">Archive</button>
+                    </form>
+                    @else
+                    <form method="POST" action="{{ school_route('instructor.sessions.unarchive', ['sessionCompletion' => $session->id]) }}" style="flex: 1;" onsubmit="return confirm('Restore this session log?')">
+                        @csrf
+                        <button type="submit" class="btn-view-card" style="background: #ecfdf5; color: #059669; border: none; width: 100%; cursor: pointer;">Restore</button>
+                    </form>
+                    @endif
                 </div>
             </div>
             @endforeach
