@@ -7,7 +7,7 @@
     $schoolNameSize = $settings?->login_school_name_size ?? 24;
     $welcomeSize = $settings?->login_welcome_size ?? 16;
     $logoSize = $settings?->login_logo_size ?? 40;
-    $schoolName = $school?->name ?? 'SMART Driving School';
+    $schoolName = $settings?->login_school_name_text ?: ($school?->name ?? 'DriveED Hub');
 @endphp
 <!DOCTYPE html>
 <html>

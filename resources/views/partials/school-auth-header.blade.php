@@ -4,7 +4,7 @@
     $settings = $school?->schoolSetting;
     
     // School branding
-    $schoolName = $school?->name ?? 'SMART Driving School';
+    $schoolName = $settings?->login_school_name_text ?: ($school?->name ?? 'DriveED Hub');
     
     // Get custom colors from school settings or use defaults
     $primaryColor = $settings?->primary_color ?? '#2563eb';
@@ -15,10 +15,10 @@
     $logoImage = $settings?->login_logo_image;
     $logoUrl = $logoImage
         ? asset('storage/' . $logoImage)
-        : asset('images/logo-smart-transparent.png');
+        : null;
     $logoPosition = $settings?->login_logo_position ?? 'left';
     $logoSize = $settings?->login_logo_size ?? 40;
-    $schoolNameText = $settings?->login_school_name_text ?? $schoolName;
+    $schoolNameText = $schoolName;
     $showSchoolName = $settings?->login_show_school_name ?? true;
     $schoolNamePosition = $settings?->login_school_name_position ?? 'left';
     $schoolNameSize = $settings?->login_school_name_size ?? 24;
@@ -39,13 +39,7 @@
     $useGradient = false;
     
     // Generate header background
-    if ($headerBgType === 'solid' && $headerBgColor) {
-        $headerBackground = $headerBgColor;
-    } elseif ($headerBgType === 'image' && $headerBgImage) {
-        $headerBackground = "url('" . asset('storage/' . $headerBgImage) . "')";
-    } else {
-        $headerBackground = $primaryColor;
-    }
+    $headerBackground = $settings?->getLoginHeaderBackground() ?? $primaryColor;
 
     // Page Background Settings (shared across all auth pages)
     $pageBgType = $settings?->login_page_bg_type ?? 'color';
@@ -236,9 +230,9 @@
 <nav class="login-header login-header-{{ $headerLayout }}">
     @if($headerLayout === 'horizontal')
         <div class="header-section header-left">
-            @if($logoPosition === 'left')
+            @if($logoUrl && $logoPosition === 'left')
                 <div class="header-logo">
-                    <img src="{{ $logoUrl }}" alt="SMART Driving School logo" class="logo-image">
+                    <img src="{{ $logoUrl }}" alt="{{ $schoolName }} logo" class="logo-image">
                 </div>
             @endif
             @if($showSchoolName && $schoolNamePosition === 'left')
@@ -249,9 +243,9 @@
         </div>
         
         <div class="header-section header-center">
-            @if($logoPosition === 'center')
+            @if($logoUrl && $logoPosition === 'center')
                 <div class="header-logo">
-                    <img src="{{ $logoUrl }}" alt="SMART Driving School logo" class="logo-image">
+                    <img src="{{ $logoUrl }}" alt="{{ $schoolName }} logo" class="logo-image">
                 </div>
             @endif
             @if($showSchoolName && $schoolNamePosition === 'center')
@@ -262,9 +256,9 @@
         </div>
         
         <div class="header-section header-right">
-            @if($logoPosition === 'right')
+            @if($logoUrl && $logoPosition === 'right')
                 <div class="header-logo">
-                    <img src="{{ $logoUrl }}" alt="SMART Driving School logo" class="logo-image">
+                    <img src="{{ $logoUrl }}" alt="{{ $schoolName }} logo" class="logo-image">
                 </div>
             @endif
             @if($showSchoolName && $schoolNamePosition === 'right')
@@ -285,7 +279,7 @@
         <div class="header-vertical-content">
             @if($logoUrl)
                 <div class="header-logo">
-                    <img src="{{ $logoUrl }}" alt="SMART Driving School logo" class="logo-image">
+                    <img src="{{ $logoUrl }}" alt="{{ $schoolName }} logo" class="logo-image">
                 </div>
             @endif
             @if($showSchoolName)
@@ -307,7 +301,7 @@
             <div class="header-main">
                 @if($logoUrl)
                     <div class="header-logo">
-                        <img src="{{ $logoUrl }}" alt="SMART Driving School logo" class="logo-image">
+                        <img src="{{ $logoUrl }}" alt="{{ $schoolName }} logo" class="logo-image">
                     </div>
                 @endif
                 @if($showSchoolName)
@@ -328,8 +322,8 @@
     @elseif($headerLayout === 'logo-only')
         <div class="header-logo-only">
             @if($logoUrl)
-                <img src="{{ $logoUrl }}" alt="SMART Driving School logo" class="logo-image">
-            @else
+                <img src="{{ $logoUrl }}" alt="{{ $schoolName }} logo" class="logo-image">
+            @elseif($showSchoolName)
                 <div class="header-school-name">{{ $schoolNameText }}</div>
             @endif
         </div>

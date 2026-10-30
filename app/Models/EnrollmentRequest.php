@@ -9,6 +9,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class EnrollmentRequest extends Model
 {
+    public function scopeForInstructor($query, Instructor $instructor)
+    {
+        return $query->where('school_id', $instructor->school_id)->where(function ($connected) use ($instructor) {
+            $connected->whereHas('learner.bookings', fn ($booking) => $booking->where('instructor_id', $instructor->id))
+                ->orWhereHas('learner.enrollmentRequests.sessionCompletions', fn ($session) => $session->where('instructor_id', $instructor->id));
+        });
+    }
+
     use HasSchoolScope;
     use HasFactory;
 

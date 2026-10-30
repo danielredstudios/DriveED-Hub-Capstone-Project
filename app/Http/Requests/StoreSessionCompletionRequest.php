@@ -34,6 +34,8 @@ class StoreSessionCompletionRequest extends FormRequest
             'end_time' => ['nullable', 'date_format:H:i', 'after:start_time'],
             'status' => ['nullable', 'in:scheduled,completed,cancelled'],
             'notes' => ['nullable', 'string', 'max:1000'],
+            'session_grade' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'attendance_status' => ['nullable', 'in:attended,late,absent'],
         ];
     }
 
@@ -88,7 +90,7 @@ class StoreSessionCompletionRequest extends FormRequest
                 // Verify session type matches course type
                 $courseType = $enrollment->course->course_type;
                 
-                if ($this->filled('session_type') && $this->session_type !== $courseType) {
+                if (in_array($courseType, ['theoretical', 'practical'], true) && $this->filled('session_type') && $this->session_type !== $courseType) {
                     $validator->errors()->add('session_type', "Session type must match the course type ({$courseType}).");
                 }
 

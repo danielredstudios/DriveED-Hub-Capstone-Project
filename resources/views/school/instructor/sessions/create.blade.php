@@ -452,6 +452,18 @@
                         <div class="form-hint">Enter duration in hours (0.5 to 8 hours, increment by 0.5)</div>
                     </div>
 
+                    <div class="form-group">
+                        <label class="form-label" for="session_grade">Grade (0 to 100)</label>
+                        <input class="form-input" type="number" id="session_grade" name="session_grade" min="0" max="100" step="0.01" value="{{ old('session_grade') }}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="attendance_status">Attendance</label>
+                        <select class="form-input" id="attendance_status" name="attendance_status">
+                            @foreach(['attended' => 'Attended', 'late' => 'Late', 'absent' => 'Absent'] as $key => $label)
+                                <option value="{{ $key }}" @selected(old('attendance_status', 'attended') === $key)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                     <!-- Notes -->
                     <div class="form-group">
                         <label class="form-label">Session Notes</label>

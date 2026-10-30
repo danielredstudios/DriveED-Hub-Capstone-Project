@@ -626,7 +626,7 @@
                                     @endif
                                 </div>
 
-                                <form action="{{ school_route('admin.theoretical.complete', $enrollment->id) }}" method="POST">
+                                <form action="{{ school_route('admin.theoretical.complete', ['enrollment' => $enrollment->id]) }}" method="POST">
                                     @csrf
                                     <button type="submit" class="btn btn-success w-100" style="font-weight: 600; background: #10b981; border: none;" {{ $pdcProgress < 100 ? 'disabled' : '' }} onclick="return confirm('{{ $pendingProgression && $pendingProgression->to_phase === 'completed' ? 'Approve graduation request and complete course?' : 'Graduate student? This will mark the entire course as COMPLETED.' }}')">
                                         {{ $pendingProgression && $pendingProgression->to_phase === 'completed' ? 'Approve Request & Graduate' : 'Graduate & Issue Certificate' }}

@@ -154,6 +154,7 @@ class SessionCompletionController extends Controller
             $query->where('school_id', $school->id);
         })
             ->where('status', 'approved')
+            ->forInstructor($instructor)
             ->get();
 
         // Compute total hours for each enrollment (used in the view)
@@ -163,7 +164,7 @@ class SessionCompletionController extends Controller
 
         // Pre-select enrollment if provided
         $selectedEnrollment = $request->enrollment_id
-            ?EnrollmentRequest::find($request->enrollment_id)
+            ? $enrollments->firstWhere('id', $request->enrollment_id)
             : null;
 
         return view('school.instructor.sessions.create', compact('school', 'enrollments', 'selectedEnrollment'))->with('isAjax', $request->ajax());
@@ -185,6 +186,11 @@ class SessionCompletionController extends Controller
         if ($enrollment->course->school_id !== $school->id) {
             abort(404);
         }
+        abort_unless($instructor->school_id === $school->id, 403);
+        abort_unless(
+            EnrollmentRequest::forInstructor($instructor)->whereKey($enrollment->id)->exists(),
+            403, 'This student has not been assigned to you.'
+        );
 
         // Calculate start and end times if provided, or use session_time and hours_completed
         $startTime = $request->start_time ?? $request->session_time;
@@ -229,6 +235,15 @@ class SessionCompletionController extends Controller
                 'notes' => $request->notes,
                 'logged_by' => $instructor->id,
             ]);
+
+            $sessionCompletion->update([
+                'session_grade' => $request->session_grade,
+                'attendance_status' => $request->attendance_status ?? 'attended',
+            ]);
+            if ($request->attendance_status === 'absent') {
+                $sessionCompletion->update(['status' => 'cancelled']);
+            }
+            app(\App\Services\SessionLoggingService::class)->linkManual($sessionCompletion);
 
             // Phase transition is student-driven (license upload -> admin
             // confirmation on the Enrollment Request). Logging hours no
@@ -391,15 +406,20 @@ class SessionCompletionController extends Controller
             }
         }
 
-        $sessionCompletion->update([
-            'hours_completed' => $request->hours_completed,
-            'session_date' => $request->session_date,
-            'session_time' => $request->session_time,
-            'start_time' => $startTime,
-            'end_time' => $endTime,
-            'status' => $request->status ?? $sessionCompletion->status ?? 'completed',
-            'notes' => $request->notes,
-        ]);
+        DB::transaction(function () use ($sessionCompletion, $request, $startTime, $endTime) {
+            $sessionCompletion->update([
+                'hours_completed' => $request->hours_completed,
+                'session_date' => $request->session_date,
+                'session_time' => $request->session_time,
+                'start_time' => $startTime,
+                'end_time' => $endTime,
+                'status' => $request->attendance_status === 'absent' ? 'cancelled' : ($request->status ?? $sessionCompletion->status ?? 'completed'),
+                'notes' => $request->notes,
+                'session_grade' => $request->input('session_grade', $sessionCompletion->session_grade),
+                'attendance_status' => $request->input('attendance_status', $sessionCompletion->attendance_status),
+            ]);
+            app(\App\Services\SessionLoggingService::class)->linkManual($sessionCompletion);
+        });
 
         return redirect()
             ->route('schools.instructor.sessions.show', ['school' => $school->slug, 'sessionCompletion' => $sessionCompletion->id])

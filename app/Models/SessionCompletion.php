@@ -15,6 +15,9 @@ class SessionCompletion extends Model
 
     protected $fillable = [
         'school_id',
+        'booking_id',
+        'session_grade',
+        'attendance_status',
         'enrollment_id',
         'instructor_id',
         'session_type',

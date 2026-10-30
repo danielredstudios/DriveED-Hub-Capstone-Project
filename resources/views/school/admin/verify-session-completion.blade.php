@@ -5,7 +5,7 @@
 @section('content')
     @php
         $school = $school ?? $currentSchool ?? null;
-        $schoolName = $school->name ?? 'Driving School';
+        $schoolName = $school?->schoolSetting?->login_school_name_text ?: ($school?->name ?? 'DriveED Hub');
         $settings = $school?->schoolSetting;
         $primaryColor = $settings?->primary_color ?? '#2563eb';
         $secondaryColor = $settings?->secondary_color ?? '#1d4ed8';
@@ -309,25 +309,6 @@
                 <p class="page-subtitle">Verify instructor-logged sessions and manage training completion logs for
                     {{ $schoolName }}</p>
             </div>
-            {{-- Unified Export Dropdown --}}
-            <div class="export-dropdown" id="bookingExport">
-                <button type="button" class="btn-export-trigger" onclick="this.parentElement.classList.toggle('open')">
-                    <i class="bi bi-download"></i>
-                    Export Report
-                    <i class="bi bi-chevron-down chevron"></i>
-                </button>
-                <div class="export-dropdown-menu">
-                    <div class="dropdown-header">Export Options</div>
-                    <a
-                        href="{{ route('schools.admin.exports.verify-session-completion.excel', ['school' => $school->slug]) }}">
-                        <i class="bi bi-file-earmark-excel-fill" style="color: #10b981;"></i> Full Export (Excel)
-                    </a>
-                    <div class="dropdown-header" style="font-size: 0.72rem; color: #94a3b8;">Format help</div>
-                    <div style="padding: 10px 16px; font-size: 0.8rem; color: #64748b; line-height: 1.4;">
-                        Export contains all verified and pending completions for the current branch.
-                    </div>
-                </div>
-            </div>
         </div>
 
         @include('partials.session-report-export')
@@ -482,8 +463,8 @@
                         $sessionType = $booking->timeSlot->session_type
                             ?? (($booking->course && $booking->course->course_type === 'practical') ? 'practical' : 'theoretical');
 
-                        $sessionHours = null;
-                        if ($booking->timeSlot && $booking->timeSlot->start_time && $booking->timeSlot->end_time) {
+                        $sessionHours = $booking->sessionCompletion?->hours_completed;
+                        if (is_null($sessionHours) && $booking->timeSlot && $booking->timeSlot->start_time && $booking->timeSlot->end_time) {
                             $start = \Carbon\Carbon::parse($booking->timeSlot->start_time);
                             $end = \Carbon\Carbon::parse($booking->timeSlot->end_time);
                             $sessionHours = round($start->diffInMinutes($end) / 60, 2);
@@ -493,7 +474,7 @@
                             $sessionHours = $booking->package->training_hours ?? $booking->course->duration_hours ?? 1;
                         }
                     @endphp
-                    <div class="booking-card" data-status="{{ $booking->status }}" style="position: relative; border-left: 6px solid {{ $sessionType === 'theoretical' ? '#3b82f6' : '#8b5cf6' }};">
+                    <div class="booking-card" data-booking-id="{{ $booking->id }}" data-status="{{ $booking->status }}" style="position: relative; border-left: 6px solid {{ $sessionType === 'theoretical' ? '#3b82f6' : '#8b5cf6' }};">
                         
                         <!-- Session Type Float Badge -->
                         <div style="position: absolute; top: 0; right: 0; padding: 6px 15px; background: {{ $sessionType === 'theoretical' ? '#3b82f6' : '#8b5cf6' }}; color: white; font-size: 0.75rem; font-weight: 800; border-bottom-left-radius: 12px; text-transform: uppercase; letter-spacing: 1px;">
@@ -562,10 +543,18 @@
                                 </span>
                             </div>
 
-                            @if($booking->notes)
+                            <div class="detail-item">
+                                <span class="detail-label">Attendance</span>
+                                <span class="detail-value">{{ ucfirst($booking->attendance_status ?? 'Not recorded') }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Grade</span>
+                                <span class="detail-value">{{ $booking->session_grade ?? 'Not graded' }}</span>
+                            </div>
+                            @if($booking->instructor_feedback || $booking->notes)
                                 <div class="detail-item detail-item-full" style="background: #fff; padding: 10px; border: 1px dashed #d1d5db; border-radius: 6px; margin-top: 5px;">
                                     <span class="detail-label">Instructor Notes</span>
-                                    <span class="detail-value" style="font-style: italic; font-size: 0.85rem;">"{{ $booking->notes }}"</span>
+                                    <span class="detail-value" style="font-style: italic; font-size: 0.85rem;">{{ $booking->instructor_feedback ?: $booking->notes }}</span>
                                 </div>
                             @endif
                         </div>

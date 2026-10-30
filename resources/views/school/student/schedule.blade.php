@@ -1366,7 +1366,7 @@
     }
     .calendar-grid {
         display: grid;
-        grid-template-columns: repeat(7, 1fr);
+        grid-template-columns: repeat(7, minmax(0, 1fr));
         gap: 10px;
     }
     .calendar-day-name {
@@ -1457,6 +1457,7 @@
     }
     @media (max-width: 768px) {
         .calendar-grid { gap: 4px; }
+        .calendar-day-name {padding:8px 0;font-size:11px;min-width:0;}
         .calendar-day { min-height: 60px; padding: 4px; }
         .day-slots-wrap { display: none; }
         .calendar-day.has-slots::after {
@@ -1956,11 +1957,23 @@
                     $dateStr = $currentDate->format('Y-m-d');
                     $isToday = $dateStr === $todayDateStr;
                     $isOtherMonth = $currentDate->format('m') !== $startDateObj->format('m');
-                    $dayBookings = $groupedBookings->get($dateStr) ?? collect();
+                    $dayBookings = $calendarBookings->get($dateStr) ?? collect();
                     $hasBookings = $dayBookings->isNotEmpty();
                 @endphp
 
-                <div class="calendar-day {{ $isToday ? 'is-today' : '' }} {{ $isOtherMonth ? 'other-month' : '' }} {{ $hasBookings ? 'has-slots' : '' }}">
+                <div class="calendar-day {{ $isToday ? 'is-today' : '' }} {{ $isOtherMonth ? 'other-month' : '' }} {{ $hasBookings ? 'has-slots' : '' }}" role="button" tabindex="0" aria-label="Schedules for {{ $dateStr }}" data-calendar-date="{{ $currentDate->format('F j, Y') }}">
+                    <template>
+                        @forelse($dayBookings as $dayBooking)
+                            <article style="padding:16px 0;border-bottom:1px solid #e5e7eb;">
+                                <h3>{{ $dayBooking->course->title ?? 'Lesson' }}</h3>
+                                <p>{{ $dayBooking->timeSlot ? \Carbon\Carbon::parse($dayBooking->timeSlot->start_time)->format('g:i A') : 'Time not set' }} · {{ $dayBooking->instructor->name ?? 'Instructor not assigned' }}</p>
+                                <p>Status: {{ ucfirst($dayBooking->status) }}</p>
+                                @if($dayBooking->instructor_feedback)<p>{{ $dayBooking->instructor_feedback }}</p>@endif
+                            </article>
+                        @empty
+                            <p>No schedules for this day.</p>
+                        @endforelse
+                    </template>
                     <div class="day-number">
                         {{ $currentDate->format('j') }}
                         @if($isToday)
@@ -2982,5 +2995,6 @@ function closeConfirmModal(confirmed = false) {
 }
 </script>
 
+@include('partials.calendar-day-dialog')
 @endsection
 

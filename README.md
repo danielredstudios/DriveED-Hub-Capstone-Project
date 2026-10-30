@@ -7,6 +7,90 @@ DriveED Hub is a multi-tenant web application built for driving schools to manag
 
 ## Recent Updates & Advisory Fixes (October 2026)
 
+### Bug Report Fixes and Screenshots October 30 2026
+
+Fixed branding settings, pending email visibility, report exports, student training reviews, instructor session logging, and interactive calendars. Manual logs and schedule logs now share a booking link so attendance, grades, notes, edits, verification, and cancellation stay synchronized. Seventeen existing manual logs were linked to the admin verification queue.
+
+**Verification: 96 checks passed** across backend regressions and admin, instructor, and student browser workflows. Changed PHP files passed syntax checks, and Blade templates compiled successfully. Screenshots below use temporary QA records and branding settings; those records were removed and the original settings restored after testing. Invitation email actions were tested with fake mail.
+
+See the [full fix and test report](docs/BUG_REPORT_FIXES_2026-10-30.md) and [browser test results](docs/screenshots/bug-report-2026-10-30/results.json).
+
+#### 1. Pending Emails in User Management
+
+Student and instructor setup emails appear with recipient, role, status, expiry, and resend/remove actions.
+
+![Pending emails in User Management](docs/screenshots/bug-report-2026-10-30/admin-user-management.png)
+
+#### 2. Add Student Label
+
+The student creation dialog uses Add New Student for consistency with instructor and admin creation.
+
+![Add Student dialog](docs/screenshots/bug-report-2026-10-30/admin-add-student.png)
+
+#### 3. Unified Export Report Menu
+
+One menu offers Export All Records and Export Filtered Records, with PDF and Excel formats.
+
+![Unified Export Report menu](docs/screenshots/bug-report-2026-10-30/admin-verify-session-completion.png)
+
+#### 4. Student Training Review
+
+The Student Training List View action opens the training review. If there is no enrollment information, it displays: "This student has no data/information."
+
+![Student training review](docs/screenshots/bug-report-2026-10-30/admin-student-training.png)
+
+#### 5. Instructor Calendar Day Details
+
+Clicking a calendar day opens its schedules and session logging actions. Keyboard interaction and Escape are supported.
+
+![Instructor calendar day details](docs/screenshots/bug-report-2026-10-30/instructor-calendar-day.png)
+
+#### 6. Session Logging from the Schedule
+
+Instructors can record attendance, grade, and notes together. Manual logging only offers students with a current or historical instructor connection.
+
+![Schedule session logging form](docs/screenshots/bug-report-2026-10-30/instructor-session-log.png)
+
+#### 7. Logged Session Visible to Admin
+
+The same booking appears for admin verification with its attendance, grade, logged hours, and instructor notes.
+
+![Saved session visible to admin](docs/screenshots/bug-report-2026-10-30/admin-logged-session-visible.png)
+
+#### 8. Past Instructor Schedules
+
+Show Past Schedules reveals historical sessions. Common management and session action buttons use shared styles and visible labels.
+
+![Past instructor schedules](docs/screenshots/bug-report-2026-10-30/instructor-past-schedules.png)
+
+#### 9. Manual Session Logging
+
+The manual form also supports grades and attendance and shares the session record used by schedule logging.
+
+![Manual session logging](docs/screenshots/bug-report-2026-10-30/instructor-manual-session.png)
+
+#### 10. Student Calendar Day Details
+
+Students can open a day to review schedules and instructor notes, including lessons awaiting admin verification.
+
+![Student calendar day details](docs/screenshots/bug-report-2026-10-30/student-calendar-day.png)
+
+#### 11. Mobile Calendar Dialog
+
+The calendar grid and day dialog fit a 390px mobile viewport.
+
+![Student calendar on mobile](docs/screenshots/bug-report-2026-10-30/student-calendar-mobile.png)
+
+#### 12. Hidden School Name and Removed Logo
+
+Headers use the configured school display name and colors. Disabling the school name hides it, and removing the logo renders no fallback image.
+
+![School name and logo hidden](docs/screenshots/bug-report-2026-10-30/branding-name-and-logo-hidden.png)
+
+For other installations, apply the new migration and link existing manual logs using the commands in the [fix report](docs/BUG_REPORT_FIXES_2026-10-30.md#running-the-checks).
+
+---
+
 The following changes address feedback from capstone advisory consultations and defense preparations:
 
 ---

@@ -95,10 +95,15 @@ class TheoreticalCompletionController extends Controller
             ->where('has_passed_theoretical', true)
             ->count();
 
+        $passedEnrollmentIds = EnrollmentRequest::where('school_id', $school->id)
+            ->whereIn('learner_id', $passedStudents->pluck('id'))
+            ->whereHas('course', fn ($query) => $query->where('course_type', 'theoretical'))
+            ->orderBy('id')->get()->pluck('id', 'learner_id');
+
         return view($ctx['viewPrefix'] . '.index', array_merge(compact(
             'school', 'activeEnrollments', 'totalInTraining', 'readyToPass',
             'readyEnrollments', 'notReadyEnrollments',
-            'passedStudents', 'totalPassed'
+            'passedStudents', 'totalPassed', 'passedEnrollmentIds'
         ), ['isAjax' => $request->ajax()]));
     }
 

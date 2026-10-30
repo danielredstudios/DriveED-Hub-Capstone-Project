@@ -35,7 +35,8 @@ class BookingController extends Controller
                 'course:id,title,duration_hours,price,course_type',
                 'package:id,course_id,name,price,training_hours,transmission_type',
                 'timeSlot:id,date,start_time,end_time,session_type',
-                'enrollmentRequest:id,learner_id,course_id,package_id,status,completed_at'
+                'enrollmentRequest:id,learner_id,course_id,package_id,status,completed_at',
+                'sessionCompletion',
             ]);
 
         // Base query for statistics cards (before status/date filters)
@@ -83,12 +84,10 @@ class BookingController extends Controller
             $query->where('bookings.branch_id', $request->branch_id);
         }
         if ($request->filled('date_from')) {
-            $query->whereDate('bookings.booking_date', '>=', $request->date_from)
-                ->orWhereDate('bookings.scheduled_at', '>=', $request->date_from);
+            $query->whereDate(DB::raw('COALESCE(bookings.scheduled_at, bookings.booking_date)'), '>=', $request->date_from);
         }
         if ($request->filled('date_to')) {
-            $query->whereDate('bookings.booking_date', '<=', $request->date_to)
-                ->orWhereDate('bookings.scheduled_at', '<=', $request->date_to);
+            $query->whereDate(DB::raw('COALESCE(bookings.scheduled_at, bookings.booking_date)'), '<=', $request->date_to);
         }
         if ($request->filled('instructor_id')) {
             $query->where('bookings.instructor_id', $request->instructor_id);
@@ -1007,7 +1006,7 @@ class BookingController extends Controller
 
             // [AUTO-LOGGING LOGIC]
             // When Admin marks as completed, create the official SessionCompletion record
-            if ($validated['status'] === 'completed' && $oldStatus !== 'completed') {
+            if (($validated['status'] === 'completed' && $oldStatus !== 'completed') || $booking->sessionCompletion()->exists()) {
                 $this->autoLogSession($booking, $school);
             }
 
@@ -1042,69 +1041,7 @@ class BookingController extends Controller
      */
     private function autoLogSession(Booking $booking, School $school)
     {
-        // Fail-Closed Guard (Secondary check, primary is in updateStatus)
-        if (!$booking->enrollment_request_id) {
-            Log::warning("Session auto-log skipped: Enrollment Request ID missing for Booking #{$booking->id}");
-            return;
-        }
-
-        $timeSlot = $booking->timeSlot;
-        $course = $booking->course;
-
-        $sessionType = $timeSlot?->session_type;
-        if (!in_array($sessionType, ['theoretical', 'practical'], true)) {
-            $sessionType = ($course && $course->course_type === 'practical') ? 'practical' : 'theoretical';
-        }
-
-        $sessionDate = $timeSlot ? $timeSlot->date : ($booking->scheduled_at ? $booking->scheduled_at->toDateString() : now()->toDateString());
-        $sessionTime = $timeSlot ? $timeSlot->start_time : ($booking->scheduled_at ? $booking->scheduled_at->toTimeString() : now()->toTimeString());
-        $startTime = $timeSlot ? $timeSlot->start_time : null;
-        $endTime = $timeSlot ? $timeSlot->end_time : null;
-
-        $existingCompletion = \App\Models\SessionCompletion::query()
-            ->where('school_id', $school->id)
-            ->where('enrollment_id', $booking->enrollment_request_id)
-            ->where('instructor_id', $booking->instructor_id)
-            ->where('session_type', $sessionType)
-            ->whereDate('session_date', $sessionDate)
-            ->where(function ($query) use ($startTime, $endTime, $sessionTime) {
-                if ($startTime && $endTime) {
-                    $query->where('start_time', $startTime)
-                        ->where('end_time', $endTime);
-                    return;
-                }
-
-                $query->where('session_time', $sessionTime);
-            })
-            ->exists();
-
-        if ($existingCompletion) {
-            Log::info("Session auto-log skipped: matching completion already exists for Booking #{$booking->id}");
-            return;
-        }
-
-        // Calculate hours from time slot if possible, otherwise fallback to course default
-        $hours = 1.0;
-        if ($timeSlot && $timeSlot->start_time && $timeSlot->end_time) {
-            $start = \Carbon\Carbon::parse($timeSlot->start_time);
-            $end = \Carbon\Carbon::parse($timeSlot->end_time);
-            $hours = round($start->diffInMinutes($end) / 60, 2);
-        }
-
-        \App\Models\SessionCompletion::create([
-            'school_id' => $school->id,
-            'enrollment_id' => $booking->enrollment_request_id,
-            'instructor_id' => $booking->instructor_id,
-            'session_type' => $sessionType,
-            'hours_completed' => $hours,
-            'session_date' => $sessionDate,
-            'session_time' => $sessionTime,
-            'start_time' => $startTime,
-            'end_time' => $endTime,
-            'status' => 'completed',
-            'notes' => $booking->instructor_feedback ?? 'Auto-generated from verified schedule.',
-            'logged_by' => Auth::id() ?? $booking->instructor_id,
-        ]);
+        app(\App\Services\SessionLoggingService::class)->syncBooking($booking);
     }
 
     /**

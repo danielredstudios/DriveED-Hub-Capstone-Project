@@ -1533,66 +1533,11 @@
                 <!-- Pending Accounts -->
                 <div class="operations-subsection" id="section-invitations" data-nav-section>
                     <div class="section-header" onclick="toggleSection(this)">
-                        <h3 class="section-title">Pending Accounts</h3>
+                        <h3 class="section-title">Pending Emails</h3>
                     </div>
 
                     <div class="section-inputs">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Recipient</th>
-                                        <th>Role</th>
-                                        <th>Status</th>
-                                        <th>Sent At</th>
-                                        <th>Expires At</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse($pendingInvitations as $invitation)
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex flex-column">
-                                                    <span class="font-weight-bold">{{ $invitation->name }}</span>
-                                                    <small class="text-muted">{{ $invitation->email }}</small>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <span class="badge" style="background-color: {{ $invitation->role === 'student' ? ($settings->role_student_bg ?? '#dbeafe') : ($settings->role_instructor_bg ?? '#e0f2fe') }}; color: {{ $invitation->role === 'student' ? ($settings->role_student_text ?? '#1e40af') : ($settings->role_instructor_text ?? '#0369a1') }};">
-                                                    {{ ucfirst($invitation->role) }}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                @if($invitation->isExpired())
-                                                    <span class="badge bg-danger">Expired</span>
-                                                @else
-                                                    <span class="badge bg-warning">Pending</span>
-                                                @endif
-                                            </td>
-                                            <td>{{ $invitation->created_at->format('M d, Y H:i') }}</td>
-                                            <td>{{ $invitation->expires_at->format('M d, Y H:i') }}</td>
-                                            <td>
-                                                <div class="btn-group">
-                                                    <button type="button" class="btn btn-sm btn-outline-primary" title="Resend Setup Link" onclick="submitInvitationAction('{{ route('schools.admin.invitations.resend', ['school' => $school, 'invitation' => $invitation]) }}', 'POST')">
-                                                        <i class="fas fa-sync"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-sm btn-outline-danger" title="Remove Account Setup" onclick="submitInvitationAction('{{ route('schools.admin.invitations.cancel', ['school' => $school, 'invitation' => $invitation]) }}', 'DELETE', 'Are you sure you want to remove this pending account?')">
-                                                        <i class="fas fa-times"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="6" class="text-center py-4 text-muted">
-                                                No pending accounts found.
-                                            </td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
+                        <p>Monitor student and instructor setup emails in <a href="{{ school_route('admin.userManagement') }}">User Management</a>.</p>
                     </div>
                 </div>
 

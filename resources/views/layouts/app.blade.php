@@ -6,12 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title') - {{ $schoolName ?? 'Driving School' }}</title>
+    <title>@yield('title') - {{ ($school ?? $currentSchool ?? null)?->schoolSetting?->login_school_name_text ?: (($school ?? $currentSchool ?? null)?->name ?? 'DriveED Hub') }}</title>
 
     @php
         // Get school and its color settings
         $currentSchool = $school ?? $currentSchool ?? null;
         $settings = $currentSchool?->schoolSetting;
+        $schoolName = $settings?->login_school_name_text ?: ($currentSchool?->name ?? 'DriveED Hub');
 
         // Default colors (blue to yellow gradient)
         $primaryColor = $settings->primary_color ?? '#2563eb';
@@ -34,7 +35,7 @@
         $backgroundRgb = sscanf($backgroundColor, "#%02x%02x%02x");
 
         // Header background (solid primary color)
-        $headerBg = $primaryColor;
+        $headerBg = $settings?->getLoginHeaderBackground() ?? $primaryColor;
 
         // Generate body background
         if ($backgroundType === 'image' && $backgroundImage) {
@@ -298,7 +299,9 @@
             background:
                 {{ $headerBg }}
             ;
-            color: white;
+            background-size: cover;
+            background-position: center;
+            color: {{ $settings?->login_header_text_color ?? '#ffffff' }};
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -1136,7 +1139,7 @@
         }
 
         /* Universal fix: Remove top margin from ANY direct child of main-content */
-        .main-content>* {
+        .main-content > :not(dialog) {
             margin-top: 0 !important;
         }
 
@@ -1945,10 +1948,10 @@
             <div class="topbar-logo" role="heading" aria-level="1" style="display: flex; align-items: center; gap: 8px;">
                 @if(!empty($settings?->login_logo_image))
                     <img src="{{ asset('storage/' . $settings->login_logo_image) }}" alt="{{ $schoolName ?? 'Driving School' }} Logo" style="height: 40px; width: auto; object-fit: contain;">
-                @else
-                    <img src="{{ asset('images/logo-smart-transparent.png') }}" alt="{{ $schoolName ?? 'Driving School' }} Logo" style="height: 40px; width: auto; object-fit: contain;">
                 @endif
-                <span>{{ $schoolName ?? config('app.name', 'SMART Driving School') }}</span>
+                @if($settings?->login_show_school_name ?? true)
+                    <span>{{ $schoolName }}</span>
+                @endif
             </div>
         </div>
 
@@ -2285,6 +2288,7 @@
     <main class="main-content" id="mainContent" role="main">
         @yield('content')
     </main>
+    @include('partials.action-button-styles')
 
     <script>
         let sidebarOpen = false;

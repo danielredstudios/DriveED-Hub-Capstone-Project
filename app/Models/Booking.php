@@ -57,6 +57,11 @@ class Booking extends Model
         'skills_practiced' => 'array',
     ];
 
+    public function sessionCompletion(): HasOne
+    {
+        return $this->hasOne(SessionCompletion::class, 'booking_id');
+    }
+
     /**
      * Get the school that owns the booking.
      */

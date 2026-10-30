@@ -869,7 +869,7 @@
     }
     .calendar-grid {
         display: grid;
-        grid-template-columns: repeat(7, 1fr);
+        grid-template-columns: repeat(7, minmax(0, 1fr));
         gap: 10px;
     }
     .calendar-day-name {
@@ -959,6 +959,7 @@
     }
     @media (max-width: 768px) {
         .calendar-grid { gap: 4px; }
+        .calendar-day-name {padding:8px 0;font-size:11px;min-width:0;}
         .calendar-day { min-height: 60px; padding: 4px; }
         .day-slots-wrap { display: none; }
         .calendar-day.has-slots::after {
@@ -1095,11 +1096,9 @@
         <div class="schedule-grid">
             <div class="schedule-main">
                 <div class="filter-bar">
-{{-- 
                     <label>
-                        <input type="checkbox" id="show-past-my" onchange="toggleShowPastMy(this)"> Show Past Slots
+                        <input type="checkbox" id="show-past-my" onchange="toggleShowPastMy(this)"> Show Past Schedules
                     </label>
---}}
                     <label>
                         <input type="checkbox" id="collapse-all-my" onchange="toggleCollapseAllMy(this)"> Collapse All
                     </label>
@@ -1233,7 +1232,7 @@
 
                                             @if($canMarkDone)
                                                 <div class="lesson-action-row">
-                                                    <button type="button" class="btn-mark-done" onclick="markLessonStatus({{ $booking->id }}, 'done', this)">Mark Done</button>
+                                                    <button type="button" class="btn-mark-done" onclick="markLessonStatus({{ $booking->id }}, 'done', this)">Log Session</button>
                                                     <button type="button" class="btn-mark-no-show" onclick="markLessonStatus({{ $booking->id }}, 'no-show', this)">No-Show</button>
                                                 </div>
                                             @elseif($bookingStatus === 'done')
@@ -1439,7 +1438,7 @@
 
                                             @if($canMarkDone)
                                                 <div class="lesson-action-row">
-                                                    <button type="button" class="btn-mark-done" onclick="markLessonStatus({{ $booking->id }}, 'done', this)">Mark Done</button>
+                                                    <button type="button" class="btn-mark-done" onclick="markLessonStatus({{ $booking->id }}, 'done', this)">Log Session</button>
                                                     <button type="button" class="btn-mark-no-show" onclick="markLessonStatus({{ $booking->id }}, 'no-show', this)">No-Show</button>
                                                 </div>
                                             @elseif($bookingStatus === 'done')
@@ -1528,7 +1527,7 @@
 
                                         @if($canMarkDone)
                                             <div class="lesson-action-row">
-                                                <button type="button" class="btn-mark-done" onclick="markLessonStatus({{ $booking->id }}, 'done', this)">Mark Done</button>
+                                                <button type="button" class="btn-mark-done" onclick="markLessonStatus({{ $booking->id }}, 'done', this)">Log Session</button>
                                                 <button type="button" class="btn-mark-no-show" onclick="markLessonStatus({{ $booking->id }}, 'no-show', this)">No-Show</button>
                                             </div>
                                         @elseif($bookingStatus === 'done')
@@ -1616,7 +1615,21 @@
                         $hasSchedule = $daySlots->isNotEmpty();
                     @endphp
 
-                    <div class="calendar-day {{ $isToday ? 'is-today' : '' }} {{ $isOtherMonth ? 'other-month' : '' }} {{ $hasSchedule ? 'has-slots' : '' }}">
+                    <div class="calendar-day {{ $isToday ? 'is-today' : '' }} {{ $isOtherMonth ? 'other-month' : '' }} {{ $hasSchedule ? 'has-slots' : '' }}" role="button" tabindex="0" aria-label="Schedules for {{ $dateStr }}" data-calendar-date="{{ $currentDate->format('F j, Y') }}">
+                        <template>
+                            @forelse($daySlots as $daySlot)
+                                <article style="padding:16px 0;border-bottom:1px solid #e5e7eb;">
+                                    <h3>{{ $daySlot->course->title ?? ucfirst($daySlot->session_type) . ' session' }}</h3>
+                                    <p>{{ \Carbon\Carbon::parse($daySlot->start_time)->format('g:i A') }} to {{ \Carbon\Carbon::parse($daySlot->end_time)->format('g:i A') }} · {{ $daySlot->branch->name ?? 'School' }}</p>
+                                    @foreach($daySlot->bookings->where('instructor_id', $instructorId) as $dayBooking)
+                                        <p>{{ $dayBooking->student->name ?? 'Student' }} · {{ ucfirst($dayBooking->status) }}</p>
+                                        <button type="button" class="btn btn-primary" onclick="document.getElementById('calendarDayDialog').close();openScheduleSessionLog({{ $dayBooking->id }})">Log Session</button>
+                                    @endforeach
+                                </article>
+                            @empty
+                                <p>No schedules for this day.</p>
+                            @endforelse
+                        </template>
                         <div class="day-number">
                             {{ $currentDate->format('j') }}
                             @if($isToday)
@@ -1728,6 +1741,10 @@
     })();
 
     function markLessonStatus(bookingId, sessionStatus, button) {
+        if (sessionStatus !== 'no-show') {
+            openScheduleSessionLog(bookingId);
+            return;
+        }
         var attendanceStatus = sessionStatus === 'no-show' ? 'absent' : 'attended';
         var promptMessage = sessionStatus === 'no-show'
             ? 'Mark this student as no-show for the selected lesson?'
@@ -1818,6 +1835,7 @@
     function toggleShowPastMy(checkbox) {
         var pastItems = document.querySelectorAll('#my-slots-view .schedule-item[data-is-past="true"]');
         pastItems.forEach(function(item) {
+            item.classList.toggle('is-hidden', !checkbox.checked);
             item.style.display = checkbox.checked ? '' : 'none';
         });
     }
@@ -2108,4 +2126,6 @@
         switchMainView('calendar');
     }
 </script>
+@include('partials.calendar-day-dialog')
+@include('partials.schedule-session-log')
 @endsection

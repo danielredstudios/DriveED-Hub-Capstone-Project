@@ -600,10 +600,15 @@ class InstructorTimeSlotController extends Controller
         ]);
 
         try {
-            $booking->update([
-                'attendance_status' => $request->attendance_status,
-                'attendance_marked_at' => now()
-            ]);
+            \Illuminate\Support\Facades\DB::transaction(function () use ($booking, $request) {
+                $booking->update([
+                    'attendance_status' => $request->attendance_status,
+                    'attendance_marked_at' => now()
+                ]);
+                if ($booking->sessionCompletion()->exists()) {
+                    app(\App\Services\SessionLoggingService::class)->syncBooking($booking);
+                }
+            });
 
             return response()->json([
                 'success' => true,
@@ -635,7 +640,12 @@ class InstructorTimeSlotController extends Controller
         ]);
 
         try {
-            $booking->update(['instructor_feedback' => $request->instructor_feedback]);
+            \Illuminate\Support\Facades\DB::transaction(function () use ($booking, $request) {
+                $booking->update(['instructor_feedback' => $request->instructor_feedback]);
+                if ($booking->sessionCompletion()->exists()) {
+                    app(\App\Services\SessionLoggingService::class)->syncBooking($booking);
+                }
+            });
 
             return response()->json([
                 'success' => true,
@@ -680,7 +690,8 @@ class InstructorTimeSlotController extends Controller
             'cancellation_reason' => 'sometimes|nullable|string|max:500'
         ]);
 
-        $willBeCompleted = ($validated['session_status'] ?? null) === 'done'
+        $willBeCompleted = ($validated['session_status'] ?? null) === 'no-show'
+            || ($validated['session_status'] ?? null) === 'done'
             || ($validated['session_status'] ?? null) === 'completed'
             || $booking->status === 'done'
             || $booking->status === 'completed'
@@ -747,7 +758,12 @@ class InstructorTimeSlotController extends Controller
                 $updateData['status'] = Booking::STATUS_NO_SHOW;
             }
 
-            $booking->update($updateData);
+            \Illuminate\Support\Facades\DB::transaction(function () use ($booking, $updateData) {
+                $booking->update($updateData);
+                if (in_array($booking->session_status, ['done', 'completed', 'no-show'], true)) {
+                    app(\App\Services\SessionLoggingService::class)->syncBooking($booking);
+                }
+            });
 
             $message = 'Lesson details updated successfully';
             if (($updateData['status'] ?? null) === Booking::STATUS_DONE) {

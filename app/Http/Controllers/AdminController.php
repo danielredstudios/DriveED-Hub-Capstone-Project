@@ -500,6 +500,11 @@ class AdminController extends Controller
                 'activeLicenseFilter' => $activeLicenseFilter,
                 'licenseStats' => $licenseStats,
                 'filtersApplied' => $filtersApplied,
+                'pendingInvitations' => Invitation::where('school_id', $school->id)
+                    ->whereIn('role', ['student', 'instructor'])
+                    ->whereNull('used_at')
+                    ->when($admin->isBranchSecretary() && $admin->branch_id, fn ($query) => $query->where('branch_id', $admin->branch_id))
+                    ->latest()->get(),
             ]);
         } catch (\Exception $e) {
             SystemLog::logError(
@@ -1740,11 +1745,11 @@ class AdminController extends Controller
                 'login_logo_image' => $loginLogoPath,
                 'login_logo_position' => $request->login_logo_position ?? 'left',
                 'login_logo_size' => $request->login_logo_size ?? 40,
-                'login_show_school_name' => $request->has('login_show_school_name'),
+                'login_show_school_name' => $request->boolean('login_show_school_name'),
                 'login_school_name_text' => $request->login_school_name_text,
                 'login_school_name_position' => $request->login_school_name_position ?? 'left',
                 'login_school_name_size' => $request->login_school_name_size ?? 24,
-                'login_show_welcome_text' => $request->has('login_show_welcome_text'),
+                'login_show_welcome_text' => $request->boolean('login_show_welcome_text'),
                 'login_welcome_text' => $request->login_welcome_text ?? 'Welcome!',
                 'login_welcome_position' => $request->login_welcome_position ?? 'right',
                 'login_welcome_size' => $request->login_welcome_size ?? 16,

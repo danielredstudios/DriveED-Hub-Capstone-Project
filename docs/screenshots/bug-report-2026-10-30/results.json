@@ -1,0 +1,94 @@
+[
+  {
+    "pass": true,
+    "message": "admin header uses configured school name/color and no removed logo"
+  },
+  {
+    "pass": true,
+    "message": "admin/user-management loads successfully"
+  },
+  {
+    "pass": true,
+    "message": "User Management lists pending student email with resend/remove actions"
+  },
+  {
+    "pass": true,
+    "message": "admin/verify-session-completion loads successfully"
+  },
+  {
+    "pass": true,
+    "message": "One Export Report menu offers all records and filtered records"
+  },
+  {
+    "pass": true,
+    "message": "Authenticated all/filtered downloads produce valid PDF and Excel files"
+  },
+  {
+    "pass": true,
+    "message": "admin/theoretical loads successfully"
+  },
+  {
+    "pass": true,
+    "message": "Passed-student View opens the training review"
+  },
+  {
+    "pass": true,
+    "message": "instructor header uses configured school name/color and no removed logo"
+  },
+  {
+    "pass": true,
+    "message": "instructor/my-schedule?view=calendar loads successfully"
+  },
+  {
+    "pass": true,
+    "message": "Instructor calendar day opens schedules and session-log actions"
+  },
+  {
+    "pass": true,
+    "message": "Instructor saves attendance, grade, and notes through the schedule form"
+  },
+  {
+    "pass": true,
+    "message": "instructor/my-schedule loads successfully"
+  },
+  {
+    "pass": true,
+    "message": "Show Past Schedules reveals historical instructor sessions"
+  },
+  {
+    "pass": true,
+    "message": "instructor/sessions/create loads successfully"
+  },
+  {
+    "pass": true,
+    "message": "admin/verify-session-completion loads successfully"
+  },
+  {
+    "pass": true,
+    "message": "Admin receives the same booking ID, grade, and attendance"
+  },
+  {
+    "pass": true,
+    "message": "student header uses configured school name/color and no removed logo"
+  },
+  {
+    "pass": true,
+    "message": "student/schedule?view=calendar loads successfully"
+  },
+  {
+    "pass": true,
+    "message": "Student calendar day shows the logged schedule and instructor notes"
+  },
+  {
+    "pass": true,
+    "message": "Calendar day dialog fits a 390px mobile viewport"
+  },
+  {
+    "pass": true,
+    "message": "Calendar day dialog closes with Escape"
+  },
+  {
+    "pass": true,
+    "message": "Disabled school name and removed logo stay hidden after reload"
+  }
+]

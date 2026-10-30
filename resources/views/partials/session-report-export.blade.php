@@ -237,6 +237,12 @@
         margin-left: auto;
     }
 
+    .schedule-log-export__actions details {position:relative;}
+    .schedule-log-export__actions details[open] {display:flex;flex-direction:column;gap:8px;min-width:240px;}
+    .schedule-log-export__actions summary {list-style:none;}
+    .schedule-log-export__actions summary::-webkit-details-marker {display:none;}
+    .schedule-log-export__actions button {width:100%;}
+
     .schedule-log-export__button {
         height: 40px;
         padding: 0 17px;
@@ -388,16 +394,15 @@
                 <i class="bi bi-shield-lock"></i> {{ $scopeNote }}
             </p>
             <div class="schedule-log-export__actions">
-                <button type="submit"
-                        formaction="{{ route('schools.'.$reportRole.'.session-report', ['school' => $school->slug, 'format' => 'pdf']) }}"
-                        class="schedule-log-export__button schedule-log-export__button--pdf">
-                    <i class="bi bi-file-earmark-pdf-fill" style="color:#fca5a5;"></i> Export PDF
-                </button>
-                <button type="submit"
-                        formaction="{{ route('schools.'.$reportRole.'.session-report', ['school' => $school->slug, 'format' => 'xlsx']) }}"
-                        class="schedule-log-export__button schedule-log-export__button--excel">
-                    <i class="bi bi-file-earmark-excel-fill" style="color:#d1fae5;"></i> Export Excel
-                </button>
+                <details>
+                    <summary class="schedule-log-export__button schedule-log-export__button--pdf">Export Report</summary>
+                    <label for="scheduleExportFormat">File format</label>
+                    <select id="scheduleExportFormat" class="schedule-log-export__control">
+                        <option value="pdf">PDF</option><option value="xlsx">Excel</option>
+                    </select>
+                    <button type="submit" name="export_scope" value="all" class="schedule-log-export__button schedule-log-export__button--pdf">Export All Records</button>
+                    <button type="submit" name="export_scope" value="filtered" class="schedule-log-export__button schedule-log-export__button--pdf">Export Filtered Records</button>
+                </details>
             </div>
         </div>
     </form>
@@ -415,11 +420,20 @@
             if (!form || form.id !== 'scheduleLogsExportForm') {
                 return;
             }
-            if (!form.querySelector('input[name="statuses[]"]:checked')) {
+            if (event.submitter?.value !== 'all' && !form.querySelector('input[name="statuses[]"]:checked')) {
                 event.preventDefault();
                 event.stopImmediatePropagation();
                 window.alert('Choose at least one status to export.');
+                return;
             }
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            const format = document.getElementById('scheduleExportFormat').value;
+            const target = new URL(form.action.replace(/\/pdf$/, '/' + format));
+            if (event.submitter?.value !== 'all') {
+                for (const [key, value] of new FormData(form)) target.searchParams.append(key, value);
+            }
+            window.location.assign(target.href);
         }, true);
     })();
 </script>

@@ -1017,7 +1017,7 @@ class StudentController extends Controller
         // Separate bookings by status.
         // Pending (queued) bookings are shown in the main schedule too, so students
         // can cancel them directly — the dedicated "Queued Schedules" section was removed.
-        $confirmedBookings = $allBookings->whereIn('status', ['scheduled', 'confirmed', 'completed', 'pending']);
+        $confirmedBookings = $allBookings->whereIn('status', ['scheduled', 'confirmed', 'done', 'completed', 'pending', 'no-show', 'no_show']);
         $cancelledBookings = $allBookings->where('status', 'cancelled');
         $queuedBookings = $allBookings->where('status', 'pending');
         $bookingStatusBySlot = $allBookings
@@ -1028,8 +1028,9 @@ class StudentController extends Controller
         
         // Group bookings by date
         $groupedBookings = $confirmedBookings->groupBy(function($booking) {
-            return Carbon::parse($booking->booking_date)->format('Y-m-d');
+            return Carbon::parse($booking->timeSlot?->date ?? $booking->scheduled_at ?? $booking->booking_date)->format('Y-m-d');
         });
+        $calendarBookings = $allBookings->groupBy(fn ($booking) => Carbon::parse($booking->timeSlot?->date ?? $booking->scheduled_at ?? $booking->booking_date)->format('Y-m-d'));
         
         $groupedCancelledBookings = $cancelledBookings->groupBy(function($booking) {
             return Carbon::parse($booking->booking_date)->format('Y-m-d');
@@ -1129,6 +1130,7 @@ class StudentController extends Controller
             'queuedBookings' => $queuedBookings,
             'bookingStatusBySlot' => $bookingStatusBySlot,
             'groupedBookings' => $groupedBookings,
+            'calendarBookings' => $calendarBookings,
             'groupedCancelledBookings' => $groupedCancelledBookings,
             'groupedQueuedBookings' => $groupedQueuedBookings,
             'enrollmentRequests' => $enrollmentRequests,

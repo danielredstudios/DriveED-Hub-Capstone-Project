@@ -6,7 +6,7 @@
     @php
         $school = $school ?? $currentSchool ?? null;
         $settings = $school?->schoolSetting;
-        $schoolName = $school->name ?? 'Driving School';
+        $schoolName = $school?->schoolSetting?->login_school_name_text ?: ($school?->name ?? 'DriveED Hub');
 
         $primaryColor = $settings->primary_color ?? '#3b82f6';
         $secondaryColor = $settings->secondary_color ?? '#60a5fa';
@@ -1843,6 +1843,7 @@
             </div>
         </div>
 
+        @include('partials.pending-user-emails')
         <!-- Statistics Cards -->
         <div class="stats-grid">
             <div class="stat-card total {{ ($filtersApplied ?? true) && (($activeRoleFilter ?? 'all') === 'all' && ($activeStatusFilter ?? 'all') === 'all') ? 'filter-selected' : '' }}"
@@ -2425,7 +2426,7 @@
     <div id="createStudentModal" class="modal">
         <div class="modal-content" style="width: min(600px, 95%);">
             <div class="modal-header">
-                <h3><i class="bi bi-person-plus me-2"></i>Invite New Student</h3>
+                <h3><i class="bi bi-person-plus me-2"></i>Add New Student</h3>
                 <button type="button" class="btn-close-modal" onclick="closeCreateStudentModal()">×</button>
             </div>
             <form id="createStudentInviteForm" method="POST" action="{{ school_route('admin.storeAccount') }}"

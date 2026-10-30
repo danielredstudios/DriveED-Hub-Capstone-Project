@@ -176,6 +176,8 @@
         </div>
 
         <div class="notes">
+            <p><strong>Attendance:</strong> {{ ucfirst($sessionCompletion->attendance_status ?? 'Not recorded') }}</p>
+            <p><strong>Grade:</strong> {{ $sessionCompletion->session_grade ?? 'Not graded' }}</p>
             <div class="label">Notes</div>
             <div class="notes-box">{{ $sessionCompletion->notes ?: 'No notes provided.' }}</div>
         </div>

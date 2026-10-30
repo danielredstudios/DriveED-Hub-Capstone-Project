@@ -42,7 +42,12 @@ Thumbs.db
 /tests/Browser/screenshots/**/*.jpeg
 /tests/Browser/screenshots/**/*.webp
 
-/tests
+/tests/*
+!/tests/verify-bug-report.php
+!/tests/verify-session-report-export.php
+!/tests/verify-session-features.php
+!/tests/capture-bug-report.mjs
+!/tests/bug-report-browser-fixture.php
 /routes.json
 /routes_list.txt
 /routes_utf8.json
