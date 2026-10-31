@@ -18,45 +18,74 @@ A school portal for managing students, instructors, courses, schedules, payments
 
 ## School Admin and Home Page Fixes
 
-- Course and package hours save correctly, including fractional totals. Required course hours can be edited in the course form.
-- Login adapts to phone, tablet, desktop, and landscape screens with readable mobile inputs.
-- New schools can open User Management before creating courses. Empty-course links use the correct school route.
-- Payments retains the admin layout on direct loads and shows one empty state per screen size.
-- Archived and deactivated users appear in the inactive list, with statistics matching the list. Each school sees only its own users.
-- The home page title and copyright use DriveED Hub.
+<details>
+<summary>Course and package hours save correctly</summary>
 
-| Fix | Screenshot evidence |
-| --- | --- |
-| Saved course hours | [Course form](docs/screenshots/hours-login-fix/course-hours.png) |
-| Saved package hours | [Package form](docs/screenshots/hours-login-fix/package-created.png) |
-| Mobile login | [390px phone](docs/screenshots/hours-login-fix/login-390.png) |
-| New-school User Management | [Empty-school page](docs/screenshots/new-school-user-management/user-management-loaded.png) |
-| Payments empty state | [Payments page](docs/screenshots/new-school-audit/payments.index.png) |
-| Five inactive users in one school | [Matching card and roster](docs/screenshots/inactive-roster-fix/inactive-card-five-users.png) |
-| Users in separate schools | [Four archived users](docs/screenshots/inactive-roster-fix/qa-inactive-roster-school-scoped.png), [one deactivated instructor](docs/screenshots/inactive-roster-fix/qa-inactive-roster-other-school-scoped.png) |
-| Home branding | [DriveED Hub home](docs/screenshots/home-branding/driveed-hub-home.png) |
+Required course hours can be edited and saved. Package TDC and PDC hours remain saved when reopened, including fractional hours.
 
-### Verification
+![Course and package hours save correctly](docs/screenshots/hours-login-fix/course-hours.png)
 
-The local regression run passed: 22 admin GET routes loaded directly and through AJAX, six creation dialogs opened, 16 export/statistics endpoints succeeded, and 65 additional backend assertions passed. Tests also covered hour persistence, five login viewport sizes, new/existing schools, inactive-user filters, and school isolation. Temporary test data was removed.
+![Course and package hours save correctly](docs/screenshots/hours-login-fix/package-created.png)
 
-[Full verification report and 49 screenshots](docs/screenshots/full-regression/README.md).
+</details>
 
-These results describe local testing; they do not certify the deployed site or every possible workflow.
+<details>
+<summary>Login fits different screen sizes</summary>
 
-### Database Update and Regression Command
+The login form uses the available screen width with readable text and larger controls on phones.
 
-Apply the migration that changes package total hours from an integer to a decimal before using fractional hours:
+![Login fits different screen sizes](docs/screenshots/hours-login-fix/login-390.png)
 
-```sh
-php artisan migrate --force
-```
+</details>
 
-For the bundled local regression scripts, start the Docker app at http://localhost:8004 with the seeded demo accounts, install puppeteer-core in the local Node environment, and make Google Chrome available at the executable path configured in the scripts. The scripts use the driveed_hub_app container and create isolated test schools.
+<details>
+<summary>New schools can open User Management</summary>
 
-```sh
-node tests/run-chat-regression.mjs
-```
+Schools without courses can open User Management. The empty-course message links to the correct course page.
+
+![New schools can open User Management](docs/screenshots/new-school-user-management/user-management-loaded.png)
+
+![New schools can open User Management](docs/screenshots/new-school-user-management/no-courses-student-modal.png)
+
+</details>
+
+<details>
+<summary>Payments keeps the admin layout</summary>
+
+The Payments page keeps the admin navigation and shows one empty-state message on each screen size.
+
+![Payments keeps the admin layout](docs/screenshots/new-school-audit/payments.index.png)
+
+</details>
+
+<details>
+<summary>Inactive users appear in the matching list</summary>
+
+Archived and deactivated users appear under Inactive Users. The card and list show matching totals: two students and three instructors when all five belong to the same school.
+
+![Inactive users appear in the matching list](docs/screenshots/inactive-roster-fix/inactive-card-five-users.png)
+
+</details>
+
+<details>
+<summary>Each school sees its own inactive users</summary>
+
+Archived and deactivated users stay in their own school. Four archived users in one school and a deactivated instructor in another appear in their respective lists.
+
+![Each school sees its own inactive users](docs/screenshots/inactive-roster-fix/qa-inactive-roster-school-scoped.png)
+
+![Each school sees its own inactive users](docs/screenshots/inactive-roster-fix/qa-inactive-roster-other-school-scoped.png)
+
+</details>
+
+<details>
+<summary>Home page uses DriveED Hub branding</summary>
+
+The home page title and copyright now use DriveED Hub.
+
+![Home page uses DriveED Hub branding](docs/screenshots/home-branding/driveed-hub-home.png)
+
+</details>
 
 ## TDC to PDC Enrollment
 
@@ -566,9 +595,3 @@ School staff can download training records from Verify Session Completion and na
 
 </details>
 
-<details>
-<summary>12. School walkthrough guides are available</summary>
-
-The [presentation guide](docs/CAPSTONE_DEFENSE_MASTER_GUIDE.md) and [school process walkthroughs](docs/SYSTEM_PROCESS_FLOWS_PRESENTATION.md) explain enrollment, payments, training, and common problems step by step.
-
-</details>
