@@ -1,0 +1,6 @@
+PASS login 320 568 { viewport: 320, overflow: false, card: 288, font: 16 }
+PASS login 390 844 { viewport: 390, overflow: false, card: 358, font: 16 }
+PASS login 768 1024 { viewport: 768, overflow: false, card: 400, font: 16 }
+PASS login 1440 900 { viewport: 1440, overflow: false, card: 380, font: 13 }
+PASS login 667 375 { viewport: 667, overflow: false, card: 400, font: 16 }
+PASS course hours, package create/update/zero/fractional totals and negative-hour rejection

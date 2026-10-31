@@ -294,13 +294,29 @@ class AdminController extends Controller
             $studentQuery = $admin->scopeToBranch(Student::where('school_id', $school->id)->where('role', 'student'));
             $instructorQuery = $admin->scopeToBranch(Instructor::where('school_id', $school->id));
 
+            $applyAccountStatus = function ($query, string $status): void {
+                if ($status === 'active') {
+                    $query->where('status', 'active')->whereNull('archived_at');
+                } elseif ($status === 'inactive') {
+                    $query->where(function ($q): void {
+                        $q->where('status', '!=', 'active')
+                            ->orWhereNull('status')
+                            ->orWhereNotNull('archived_at');
+                    });
+                }
+            };
+
             // Calculate stats for view
             $totalStudents = (clone $studentQuery)->count();
-            $activeStudents = (clone $studentQuery)->where('status', 'active')->count();
+            $activeStudentQuery = clone $studentQuery;
+            $applyAccountStatus($activeStudentQuery, 'active');
+            $activeStudents = $activeStudentQuery->count();
             $inactiveStudents = $totalStudents - $activeStudents;
 
             $totalInstructors = (clone $instructorQuery)->count();
-            $activeInstructors = (clone $instructorQuery)->where('status', 'active')->count();
+            $activeInstructorQuery = clone $instructorQuery;
+            $applyAccountStatus($activeInstructorQuery, 'active');
+            $activeInstructors = $activeInstructorQuery->count();
             $inactiveInstructors = $totalInstructors - $activeInstructors;
 
             // License expiration overview stats
@@ -341,7 +357,7 @@ class AdminController extends Controller
                 || $activeLicenseFilter !== 'all'
                 || $activeBranchFilter !== 'all';
 
-            $applySharedFilters = function ($query) use ($activeSearch, $activeStatusFilter, $activeBranchFilter, $activeLicenseFilter): void {
+            $applySharedFilters = function ($query) use ($activeSearch, $activeStatusFilter, $activeBranchFilter, $activeLicenseFilter, $applyAccountStatus): void {
                 if ($activeSearch !== '') {
                     $query->where(function ($q) use ($activeSearch): void {
                         $q->where('name', 'like', '%' . $activeSearch . '%')
@@ -351,7 +367,7 @@ class AdminController extends Controller
                 }
 
                 if ($activeStatusFilter !== 'all') {
-                    $query->where('status', '=', $activeStatusFilter);
+                    $applyAccountStatus($query, $activeStatusFilter);
                 }
 
                 if ($activeLicenseFilter === 'expiring') {
@@ -2728,6 +2744,8 @@ class AdminController extends Controller
                 'vehicle_category_id' => 'nullable|exists:vehicle_categories,id',
                 'transmission_type' => 'required|in:manual,automatic',
                 'price' => 'required|numeric|min:0',
+                'tdc_hours' => 'nullable|numeric|min:0|max:500',
+                'pdc_hours' => 'nullable|numeric|min:0|max:500',
                 'description' => 'nullable|string',
                 'is_popular' => 'nullable',
                 'features' => 'nullable|array',
@@ -2779,6 +2797,8 @@ class AdminController extends Controller
                 'vehicle_category_id' => 'nullable|exists:vehicle_categories,id',
                 'transmission_type' => 'required|in:manual,automatic',
                 'price' => 'required|numeric|min:0',
+                'tdc_hours' => 'nullable|numeric|min:0|max:500',
+                'pdc_hours' => 'nullable|numeric|min:0|max:500',
                 'description' => 'nullable|string',
                 'is_popular' => 'nullable',
                 'features' => 'nullable|array',

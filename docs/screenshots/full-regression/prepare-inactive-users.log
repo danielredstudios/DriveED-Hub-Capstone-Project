@@ -1,0 +1,7 @@
+PASS: {"status":"inactive"} shows 5 matching users; card shows 2 students and 3 instructors.
+PASS: {"status":"inactive","role":"student"} shows 2 matching users; card shows 2 students and 3 instructors.
+PASS: {"status":"inactive","role":"instructor"} shows 3 matching users; card shows 2 students and 3 instructors.
+PASS: {"status":"active"} shows 2 matching users; card shows 2 students and 3 instructors.
+PASS: {"filtered":1} shows 7 matching users; card shows 2 students and 3 instructors.
+PASS: {"status":"inactive","search":"Instructor 3"} shows 1 matching users; card shows 2 students and 3 instructors.
+PASS: Fixture created using real system-admin archive/deactivate handlers; other-school users excluded.

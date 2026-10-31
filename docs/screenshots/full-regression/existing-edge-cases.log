@@ -1,0 +1,28 @@
+PASS: Old standalone TDC completes even when a newer Combo exists
+PASS: Completing old TDC preserves the newer Combo lock
+PASS: TDC passing notes are persisted
+PASS: Repeating a pass without notes preserves the original passing notes
+PASS: TDC training records are untouched by completion
+PASS: Rejected TDC pass returns without leaking a database transaction
+PASS: Rejected TDC pass leaves the enrollment active
+PASS: Enrollment search scopes matches correctly for testperson1@gmail.com
+PASS: Enrollment search scopes matches correctly for ENR-2026-00027
+PASS: Schedule logging returns a clear validation error at the hour limit
+PASS: Rejected schedule logging rolls back the booking and creates no session
+PASS: Schedule logging succeeds when training hours remain
+PASS: Existing session grades and feedback can be corrected even with legacy excess hours
+PASS: Feedback correction does not duplicate the training log
+PASS: Assigned instructor can export a valid individual training PDF
+PASS: Instructor training-list PDF renders successfully
+PASS: Admin can verify an existing session even at the training-hour limit
+PASS: Admin verification does not duplicate the existing session
+PASS: Admin verification rejects extra legacy hours with validation feedback and rolls back
+PASS: Training PDF export rejects cross-school access
+PASS: Training PDF export respects branch-secretary restrictions
+PASS: admin header color input retains a valid hex value when login uses an image
+PASS: instructor header color input retains a valid hex value when login uses an image
+PASS: student header color input retains a valid hex value when login uses an image
+PASS: admin layout renders its independently configured header background
+PASS: instructor layout renders its independently configured header background
+PASS: student layout renders its independently configured header background
+PASS: 27 recheck edge-case assertions; database changes rolled back.

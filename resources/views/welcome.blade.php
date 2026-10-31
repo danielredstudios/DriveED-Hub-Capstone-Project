@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMART Driving School</title>
+    <title>DriveED Hub</title>
     <style>
         * {
             margin: 0;
@@ -301,7 +301,7 @@
 
     <!-- Footer with hidden admin link -->
     <div class="footer">
-        <span>&copy; {{ date('Y') }} SMART Driving School. All rights reserved.</span>
+        <span>&copy; {{ date('Y') }} DriveED Hub. All rights reserved.</span>
         <a href="{{ route('system-admin.login') }}">Admin</a>
     </div>
 </body>

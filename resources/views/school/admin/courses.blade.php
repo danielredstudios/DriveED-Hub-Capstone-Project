@@ -2090,9 +2090,10 @@
                         </div>
 
 
-                        <div style="display: none;">
-                            <input type="number" name="hours_required" id="courseHoursRequired" value="1">
-                            <input type="number" name="price" id="coursePrice" value="0">
+                        <div class="form-group">
+                            <label class="form-label" for="courseHoursRequired">Required Training Hours</label>
+                            <input type="number" name="hours_required" id="courseHoursRequired" class="form-control" min="1" max="500" step="0.5" value="1" required>
+                            <input type="hidden" name="price" id="coursePrice" value="0">
                         </div>
 
                         <div class="form-grid-two">
@@ -2567,8 +2568,8 @@
                     document.getElementById('packageVehicleCategory').value = package.vehicle_category_id || '';
                     document.getElementById('packageTransmission').value = package.transmission_type || 'manual';
                     document.getElementById('packagePrice').value = package.price || '';
-                    document.getElementById('packageTdcHours').value = package.tdc_hours || '';
-                    document.getElementById('packagePdcHours').value = package.pdc_hours || '';
+                    document.getElementById('packageTdcHours').value = package.tdc_hours ?? 0;
+                    document.getElementById('packagePdcHours').value = package.pdc_hours ?? 0;
                     document.getElementById('packageDescription').value = package.description || '';
                     document.getElementById('packagePopular').checked = package.is_popular || false;
 

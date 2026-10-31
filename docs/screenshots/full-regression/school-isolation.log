@@ -1,0 +1,2 @@
+PASS qa-inactive-roster: card and roster both show 4 users, with no cross-school leakage.
+PASS qa-inactive-roster-other: card and roster both show 1 users, with no cross-school leakage.

@@ -1,0 +1,38 @@
+{
+  "results": [
+    "Inactive card click displays all 5 users: 2 archived students, 2 archived instructors, 1 deactivated instructor.",
+    "students: 2 correct users",
+    "instructors: 3 correct users",
+    "deactivated-instructor: 1 correct users",
+    "active-users: 2 correct users",
+    "all-users: 7 correct users"
+  ],
+  "errors": [],
+  "users": [
+    {
+      "name": "Instructor 3",
+      "status": "inactive",
+      "role": "instructor"
+    },
+    {
+      "name": "Instructor 2",
+      "status": "archived",
+      "role": "instructor"
+    },
+    {
+      "name": "Student 2",
+      "status": "archived",
+      "role": "student"
+    },
+    {
+      "name": "Instructor 1",
+      "status": "archived",
+      "role": "instructor"
+    },
+    {
+      "name": "Student 1",
+      "status": "archived",
+      "role": "student"
+    }
+  ]
+}

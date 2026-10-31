@@ -16,6 +16,48 @@ A school portal for managing students, instructors, courses, schedules, payments
 - Admins, instructors, and students can have their own header colors.
 - Review windows close properly, including when using the Escape key.
 
+## School Admin and Home Page Fixes
+
+- Course and package hours save correctly, including fractional totals. Required course hours can be edited in the course form.
+- Login adapts to phone, tablet, desktop, and landscape screens with readable mobile inputs.
+- New schools can open User Management before creating courses. Empty-course links use the correct school route.
+- Payments retains the admin layout on direct loads and shows one empty state per screen size.
+- Archived and deactivated users appear in the inactive list, with statistics matching the list. Each school sees only its own users.
+- The home page title and copyright use DriveED Hub.
+
+| Fix | Screenshot evidence |
+| --- | --- |
+| Saved course hours | [Course form](docs/screenshots/hours-login-fix/course-hours.png) |
+| Saved package hours | [Package form](docs/screenshots/hours-login-fix/package-created.png) |
+| Mobile login | [390px phone](docs/screenshots/hours-login-fix/login-390.png) |
+| New-school User Management | [Empty-school page](docs/screenshots/new-school-user-management/user-management-loaded.png) |
+| Payments empty state | [Payments page](docs/screenshots/new-school-audit/payments.index.png) |
+| Five inactive users in one school | [Matching card and roster](docs/screenshots/inactive-roster-fix/inactive-card-five-users.png) |
+| Users in separate schools | [Four archived users](docs/screenshots/inactive-roster-fix/qa-inactive-roster-school-scoped.png), [one deactivated instructor](docs/screenshots/inactive-roster-fix/qa-inactive-roster-other-school-scoped.png) |
+| Home branding | [DriveED Hub home](docs/screenshots/home-branding/driveed-hub-home.png) |
+
+### Verification
+
+The local regression run passed: 22 admin GET routes loaded directly and through AJAX, six creation dialogs opened, 16 export/statistics endpoints succeeded, and 65 additional backend assertions passed. Tests also covered hour persistence, five login viewport sizes, new/existing schools, inactive-user filters, and school isolation. Temporary test data was removed.
+
+[Full verification report and 49 screenshots](docs/screenshots/full-regression/README.md).
+
+These results describe local testing; they do not certify the deployed site or every possible workflow.
+
+### Database Update and Regression Command
+
+Apply the migration that changes package total hours from an integer to a decimal before using fractional hours:
+
+```sh
+php artisan migrate --force
+```
+
+For the bundled local regression scripts, start the Docker app at http://localhost:8004 with the seeded demo accounts, install puppeteer-core in the local Node environment, and make Google Chrome available at the executable path configured in the scripts. The scripts use the driveed_hub_app container and create isolated test schools.
+
+```sh
+node tests/run-chat-regression.mjs
+```
+
 ## TDC to PDC Enrollment
 
 **Before:** students who already passed TDC were still blocked from applying for PDC.

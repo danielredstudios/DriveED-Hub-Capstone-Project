@@ -13,6 +13,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     @include('partials.school-auth-header')
 
     <style>
@@ -29,8 +30,8 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100dvh;
+            overflow-x: hidden;
             position: relative;
         }
 
@@ -266,7 +267,7 @@
 
             .main-content {
                 padding: 15px;
-                height: calc(100vh - {{ max(50, $headerHeight - 10) }}px);
+                min-height: calc(100dvh - {{ max(50, $headerHeight - 10) }}px);
                 margin-top: {{ max(50, $headerHeight - 10) }}px;
             }
 
@@ -327,14 +328,14 @@
 
             .main-content {
                 padding: 10px;
-                height: calc(100vh - {{ max(45, $headerHeight - 15) }}px);
+                min-height: calc(100dvh - {{ max(45, $headerHeight - 15) }}px);
                 margin-top: {{ max(45, $headerHeight - 15) }}px;
             }
 
             .login-container {
                 padding: 14px 18px;
-                width: 230px;
-                max-width: 90%;
+                width: 100%;
+                max-width: 400px;
                 border-radius: 8px;
             }
 
@@ -361,8 +362,9 @@
             input[type="email"],
             input[type="password"],
             .password-input-wrap input {
-                padding: 7px 9px;
-                font-size: 12px;
+                padding: 12px;
+                min-height: 48px;
+                font-size: 16px;
                 border: 1px solid #d1d5db;
                 border-radius: 5px;
             }
@@ -401,8 +403,9 @@
             }
 
             .login-button {
-                padding: 8px;
-                font-size: 12px;
+                padding: 12px;
+                min-height: 48px;
+                font-size: 16px;
                 border-radius: 5px;
                 box-shadow: 0 1px 4px rgba(59, 130, 246, 0.2);
             }
@@ -459,6 +462,12 @@
             .login-title {
                 font-size: 20px;
             }
+        }
+        .login-container { flex-shrink: 0; }
+        @media (max-width: 768px) {
+            .main-content { height: auto; padding: 24px 16px; }
+            .form-group label { font-size: 14px; }
+            .password-toggle-btn { width: 44px; height: 44px; right: 2px; }
         }
     </style>
 </head>

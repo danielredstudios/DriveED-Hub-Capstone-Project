@@ -295,6 +295,8 @@
         }
     }
     
+    .payment-mobile-list { display: none; }
+
     /* Mobile card layout */
     .payment-mobile-card {
         display: none;
@@ -320,7 +322,7 @@
     
     @media (max-width: 768px) {
         .content-card .table-scroll { display: none; }
-        .payment-mobile-card { display: block; }
+        .payment-mobile-list, .payment-mobile-card { display: block; }
     }
 </style>
 
@@ -492,6 +494,7 @@
         </div>
         
         {{-- Mobile card view --}}
+        <div class="payment-mobile-list">
         @forelse($payments as $payment)
         <div class="payment-mobile-card" data-status="{{ $payment->status }}">
             <div class="mobile-card-header">
@@ -526,6 +529,7 @@
             <p class="empty-state-text">Payment records will appear here</p>
         </div>
         @endforelse
+        </div>
     </div>
     <div class="mt-4">
         {{ $payments->links() }}
@@ -563,3 +567,4 @@ function closeQrModal() {
     }
 }
 </script>
+@endsection

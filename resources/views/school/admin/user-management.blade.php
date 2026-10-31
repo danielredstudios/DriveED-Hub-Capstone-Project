@@ -465,7 +465,8 @@
             color: #155724;
         }
 
-        .status-inactive {
+        .status-inactive,
+        .status-archived {
             background: #f8d7da;
             color: #721c24;
         }
@@ -2512,7 +2513,7 @@
                         <div class="alert alert-warning" style="margin-bottom: 20px; font-size: 0.9rem;">
                             <i class="bi bi-exclamation-triangle me-2"></i>
                             <strong>No active courses available.</strong> Please <a
-                                href="{{ school_route('admin.courses.index') }}" class="fw-bold">create a course</a> first to
+                                href="{{ school_route('admin.courses', [], $school) }}" class="fw-bold">create a course</a> first to
                             add students.
                         </div>
                     @endif
@@ -2719,7 +2720,7 @@
                         <div class="alert alert-warning" style="margin-bottom: 20px; font-size: 0.9rem;">
                             <i class="bi bi-exclamation-triangle me-2"></i>
                             <strong>No active courses available.</strong> Please <a
-                                href="{{ school_route('admin.courses.index') }}" class="fw-bold">create a course</a> first to
+                                href="{{ school_route('admin.courses', [], $school) }}" class="fw-bold">create a course</a> first to
                             assign specializations.
                         </div>
                     @endif

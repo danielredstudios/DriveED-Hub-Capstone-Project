@@ -1,0 +1,2 @@
+PASS: New school with zero courses: User Management HTTP 200, both empty-state links use the correct school route, student modal opens, course link HTTP 200, no browser errors.
+PASS: Existing school User Management HTTP 200.

@@ -81,3 +81,17 @@ Thumbs.db
 /.agents
 
 
+
+!/tests/new-school-user-management-fixture.php
+!/tests/verify-new-school-user-management.mjs
+!/tests/audit-new-school-pages.mjs
+
+!/tests/inactive-roster-fixture.php
+!/tests/verify-inactive-roster.mjs
+!/tests/verify-inactive-roster-schools.mjs
+
+!/tests/verify-hours-login-fix.mjs
+!/tests/verify-home-branding.mjs
+!/tests/run-chat-regression.mjs
+
+!/docs/screenshots/full-regression/*.log

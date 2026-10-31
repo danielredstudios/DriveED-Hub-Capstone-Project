@@ -1,0 +1,72 @@
+[
+  {
+    "name": "home-branding",
+    "code": 0,
+    "seconds": 2
+  },
+  {
+    "name": "hours-and-responsive-login",
+    "code": 0,
+    "seconds": 13
+  },
+  {
+    "name": "prepare-new-school",
+    "code": 0,
+    "seconds": 1
+  },
+  {
+    "name": "new-school-pages-dialogs-exports",
+    "code": 0,
+    "seconds": 32
+  },
+  {
+    "name": "new-and-existing-user-management",
+    "code": 0,
+    "seconds": 9
+  },
+  {
+    "name": "prepare-inactive-users",
+    "code": 0,
+    "seconds": 2
+  },
+  {
+    "name": "five-inactive-users",
+    "code": 0,
+    "seconds": 11
+  },
+  {
+    "name": "split-school-counts",
+    "code": 0,
+    "seconds": 1
+  },
+  {
+    "name": "school-isolation",
+    "code": 0,
+    "seconds": 9
+  },
+  {
+    "name": "existing-bug-report",
+    "code": 0,
+    "seconds": 1
+  },
+  {
+    "name": "existing-edge-cases",
+    "code": 0,
+    "seconds": 2
+  },
+  {
+    "name": "existing-oct31-findings",
+    "code": 0,
+    "seconds": 1
+  },
+  {
+    "name": "cleanup-new-school",
+    "code": 0,
+    "seconds": 1
+  },
+  {
+    "name": "cleanup-inactive-users",
+    "code": 0,
+    "seconds": 1
+  }
+]

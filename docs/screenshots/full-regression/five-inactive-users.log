@@ -1,0 +1,6 @@
+PASS: Inactive card click displays all 5 users: 2 archived students, 2 archived instructors, 1 deactivated instructor.
+PASS: students: 2 correct users
+PASS: instructors: 3 correct users
+PASS: deactivated-instructor: 1 correct users
+PASS: active-users: 2 correct users
+PASS: all-users: 7 correct users

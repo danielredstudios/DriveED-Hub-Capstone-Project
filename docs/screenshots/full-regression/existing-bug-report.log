@@ -1,0 +1,22 @@
+PASS: Schedule session log saves attendance, zero grade, and notes.
+PASS: Shared session record preserves all fields.
+PASS: Repeated schedule saves do not duplicate hours.
+PASS: Admin verification reuses the same session record.
+PASS: Logged-by key remains an instructor key.
+PASS: Admin cancellation also cancels the linked training log.
+PASS: Another instructor cannot log this booking.
+PASS: Manual enrollment list contains only connected students.
+PASS: Manual log creates an admin-visible booking with the same enrollment key.
+PASS: Manual log grade is available to admin verification.
+PASS: Manual and schedule logging share one record and preserve manual hours.
+PASS: Manual edits synchronize notes and grade back to the same booking.
+PASS: Manual edits preserve the unique session-to-booking link.
+PASS: Legacy linking preserves previously recorded booking grades and feedback.
+PASS: Hidden school name and removed logo disappear from the authenticated header.
+PASS: Configured header color reaches the authenticated layout.
+PASS: Login header honors hidden name and removed logo.
+PASS: Logo-only layout does not resurrect a hidden school name.
+PASS: Resend renews the pending email and uses a fake mail transport.
+PASS: Remove deletes the pending setup without creating a user.
+PASS: Configured school name appears exactly once.
+PASS: 21 bug report regression checks. All test data rolled back.

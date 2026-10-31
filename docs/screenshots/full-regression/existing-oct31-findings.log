@@ -1,0 +1,18 @@
+PASS: theoretical: fixture has TDC hours available
+PASS: theoretical: full TDC hours detected
+PASS: theoretical: additional TDC session rejected with explanation
+PASS: theoretical: PDC allowance remains independent
+PASS: theoretical: editing existing session excludes its own hours
+PASS: theoretical: cancelled logs do not consume training hours
+PASS: theoretical: sessions exceeding remaining hours rejected
+PASS: combo: fixture has TDC hours available
+PASS: combo: full TDC hours detected
+PASS: combo: additional TDC session rejected with explanation
+PASS: combo: PDC allowance remains independent
+PASS: combo: editing existing session excludes its own hours
+PASS: combo: cancelled logs do not consume training hours
+PASS: combo: sessions exceeding remaining hours rejected
+PASS: admin: header colors saved through settings controller
+PASS: instructor: header colors saved through settings controller
+PASS: student: header colors saved through settings controller
+PASS: 17 backend checks; test changes rolled back.

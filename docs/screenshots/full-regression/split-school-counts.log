@@ -1,0 +1,2 @@
+PASS: qa-inactive-roster: 2 inactive students, 2 inactive instructors; roster matches card.
+PASS: qa-inactive-roster-other: 0 inactive students, 1 inactive instructors; roster matches card.
