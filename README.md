@@ -2,7 +2,9 @@
 
 A school portal for managing students, instructors, courses, schedules, payments, and training records.
 
-## Latest Fixes
+[Latest fixes](#latest-fixes-october-31-2026) · [October 30](#fixes-october-30-2026) · [October 29](#fixes-october-29-2026) · [October 27](#fixes-october-27-2026) · [Earlier fixes](#earlier-fixes-october-20-to-26-2026)
+
+## Latest Fixes October 31 2026
 
 - Students who pass TDC can apply for PDC without cancelling their finished TDC course.
 - Previous training records and Combo courses are kept unchanged.
@@ -185,5 +187,346 @@ When a student has completed the required hours, the form explains why another s
 | Before | After |
 | --- | --- |
 | ![Extra session could be added before](docs/screenshots/oct31-findings/review/before/image15.png) | ![Completed training hours explanation after](docs/screenshots/oct31-findings/training-hours-completed.png) |
+
+</details>
+
+## Fixes October 30 2026
+
+These earlier pictures show the fixes when they were added. Expand a fix to see its screenshot.
+
+<details>
+<summary>1. Pending account emails are visible</summary>
+
+Admins can see who still needs to finish setting up an account, when the invitation expires, and whether to resend or remove it.
+
+![Pending account emails](docs/screenshots/bug-report-2026-10-30/admin-user-management.png)
+
+</details>
+
+<details>
+<summary>2. The Add Student window has a clear title</summary>
+
+The window now says Add New Student, matching the other account forms.
+
+![Add New Student window](docs/screenshots/bug-report-2026-10-30/admin-add-student.png)
+
+</details>
+
+<details>
+<summary>3. Report downloads are in one menu</summary>
+
+Users can download all records or just the selected records, as PDF or Excel files.
+
+![Report download menu](docs/screenshots/bug-report-2026-10-30/admin-verify-session-completion.png)
+
+</details>
+
+<details>
+<summary>4. Student training details open correctly</summary>
+
+The View button opens the student's training record. If no training information is available, a clear message is shown.
+
+![Student training details](docs/screenshots/bug-report-2026-10-30/admin-student-training.png)
+
+</details>
+
+<details>
+<summary>5. Instructors can open calendar day details</summary>
+
+Selecting a day shows its lessons and the available session actions.
+
+![Instructor calendar day details](docs/screenshots/bug-report-2026-10-30/instructor-calendar-day.png)
+
+</details>
+
+<details>
+<summary>6. Attendance, grades, and notes can be recorded together</summary>
+
+Instructors can record lesson details directly from their schedule. The student list shows students assigned to them or students they have previously taught.
+
+![Record a lesson from the schedule](docs/screenshots/bug-report-2026-10-30/instructor-session-log.png)
+
+</details>
+
+<details>
+<summary>7. Recorded lessons appear for school approval</summary>
+
+Admins can review the same lesson with its attendance, grade, training hours, and instructor notes.
+
+![Recorded lesson ready for school approval](docs/screenshots/bug-report-2026-10-30/admin-logged-session-visible.png)
+
+</details>
+
+<details>
+<summary>8. Instructors can view past schedules</summary>
+
+Show Past Schedules reveals earlier lessons and their available actions.
+
+![Past instructor schedules](docs/screenshots/bug-report-2026-10-30/instructor-past-schedules.png)
+
+</details>
+
+<details>
+<summary>9. The session form includes attendance and grades</summary>
+
+Lessons entered through the session form stay connected to the same training record used on the schedule.
+
+![Session form with attendance and grades](docs/screenshots/bug-report-2026-10-30/instructor-manual-session.png)
+
+</details>
+
+<details>
+<summary>10. Students can open calendar day details</summary>
+
+Students can select a day to see their lessons, instructors, and lesson status.
+
+![Student calendar day details](docs/screenshots/bug-report-2026-10-30/student-calendar-day.png)
+
+</details>
+
+<details>
+<summary>11. The student calendar works on phones</summary>
+
+The calendar and lesson window fit smaller screens.
+
+![Student calendar on a phone](docs/screenshots/bug-report-2026-10-30/student-calendar-mobile.png)
+
+</details>
+
+<details>
+<summary>12. School name and logo choices are respected</summary>
+
+The header follows the school's chosen name, colors, and logo. Hidden names and removed logos stay hidden.
+
+![School name and logo hidden](docs/screenshots/bug-report-2026-10-30/branding-name-and-logo-hidden.png)
+
+</details>
+
+## Fixes October 29 2026
+
+<details>
+<summary>1. Enrollment, payment, and receipt numbers are easier to follow</summary>
+
+Each enrollment, payment, and receipt has a clear tracking number so staff can find the right record.
+
+![Enrollment tracking numbers](docs/screenshots/capstone_01_enrollment_uids.png)
+
+![Payment and receipt tracking numbers](docs/screenshots/capstone_02_payments_uids.png)
+
+</details>
+
+<details>
+<summary>2. User groups have different colors</summary>
+
+Admins, branch secretaries, instructors, students, and guests are easier to recognize in account lists.
+
+![Different colors for user groups](docs/screenshots/capstone_03_role_badges_unique_colors.png)
+
+</details>
+
+<details>
+<summary>3. Training logs can be archived and restored</summary>
+
+Staff can move a log out of the active list without permanently deleting it, then restore it when needed.
+
+![Active and archived training logs](docs/screenshots/capstone_04_session_logs_archive.png)
+
+</details>
+
+<details>
+<summary>4. Inactive accounts can be archived and restored</summary>
+
+System admins can archive unused accounts while keeping their history. Archived students and instructors can be restored to active status. Staff can also choose how long an account must be inactive before archiving it.
+
+![Account archiving options](docs/screenshots/capstone_05_system_admin_user_archive.png)
+
+![Archived accounts with restore buttons](docs/screenshots/capstone_05_system_admin_archived_tab.png)
+
+</details>
+
+<details>
+<summary>5. Instructors and students have calendar views</summary>
+
+Users can browse lessons by month and see their dates, course types, and booking status.
+
+![Instructor calendar view](docs/screenshots/capstone_06_instructor_calendar_view.png)
+
+![Student calendar view](docs/screenshots/capstone_07_student_calendar_view.png)
+
+</details>
+
+## Fixes October 27 2026
+
+<details>
+<summary>1. Payment codes and document pictures are easier to view</summary>
+
+Payment codes open in a larger window for scanning. Users can enlarge or download the code and copy the payment number. Receipts and license pictures can also be enlarged, moved, rotated, or downloaded.
+
+![Student payment page](docs/screenshots/12_actual_payment_checkout_page.png)
+
+![Larger payment code window](docs/screenshots/12_qr_scan_modal_popup_opened.png)
+
+![Copying the payment number](docs/screenshots/13_qr_scan_modal_copied_number.png)
+
+![Payment code opened above the receipt form](docs/screenshots/17_qr_scan_modal_stacked_on_enrollment_modal.png)
+
+</details>
+
+<details>
+<summary>2. Table action buttons stay within reach</summary>
+
+On smaller screens, users can scroll across wide tables while keeping the action buttons visible.
+
+![Table actions on a smaller screen](docs/screenshots/07_admin_table_narrow_screen_sticky_actions.png)
+
+![Edit window opened from the table](docs/screenshots/08_admin_edit_modal_interacted.png)
+
+</details>
+
+<details>
+<summary>3. User search and filters work together</summary>
+
+Admins can search by name, email, or phone number and narrow the list by user group, account status, branch, or license expiry. Clear removes the selections when users want to start again.
+
+![User search and filters](docs/screenshots/22_admin_user_management_search_and_filters.png)
+
+![Users with expiring licenses](docs/screenshots/23_admin_user_management_license_filter_results.png)
+
+![Empty search results with a Clear option](docs/screenshots/24_admin_user_management_empty_state_clear_filters.png)
+
+</details>
+
+<details>
+<summary>4. Schedule downloads can be narrowed down</summary>
+
+Users can choose dates and lesson status before downloading. School staff can also choose a student or instructor. Students receive their own records, and instructors receive records for their assigned lessons.
+
+![Schedule download choices](docs/screenshots/03_admin_schedules_session_exports.png)
+
+![Student schedule downloads](docs/screenshots/06_student_schedule_export.png)
+
+</details>
+
+## Earlier Fixes October 20 to 26 2026
+
+<details>
+<summary>1. Payment receipts open correctly</summary>
+
+View Receipt opens the uploaded receipt instead of showing a missing-page error.
+
+![Payment records with View Receipt](docs/screenshots/01_admin_payments_table.png)
+
+![Opened payment receipt](docs/screenshots/02_payment_receipt_image_stream.png)
+
+</details>
+
+<details>
+<summary>2. Instructors can download training logs</summary>
+
+Instructors can download their full session history or one selected lesson as a PDF or Excel file.
+
+![Training log download buttons](docs/screenshots/08_instructor_sessions_list_exports.png)
+
+![Single lesson download buttons](docs/screenshots/09_instructor_session_detail_export.png)
+
+</details>
+
+<details>
+<summary>3. License expiry reminders are easier to find</summary>
+
+Students and instructors can see when their licenses are close to expiring, along with renewal guidance. Admins can find affected users and send a reminder.
+
+![Student license reminder and renewal guide](docs/screenshots/12_student_license_expiration_alert.png)
+
+![School license expiry overview](docs/screenshots/13_admin_license_expiration_monitoring_widget.png)
+
+![License reminder actions in the user list](docs/screenshots/14_admin_user_management_license_filter.png)
+
+![Instructor license reminder](docs/screenshots/15_instructor_license_expiration_alert.png)
+
+</details>
+
+<details>
+<summary>4. Course transitions and certificate notices are easier to manage</summary>
+
+Combo students can request their move from TDC to PDC from their dashboard for school review. Staff can also tell students when their certificate or claim stub is ready for pickup.
+
+![Student training and pickup notice options](docs/screenshots/04_admin_student_training_claim_notice.png)
+
+</details>
+
+<details>
+<summary>5. Schedule records can be downloaded</summary>
+
+School staff and students can download schedule and attendance records. Schedule pages are also easier to read on computers and phones.
+
+![School schedule download options](docs/screenshots/03_admin_schedules_session_exports.png)
+
+![Student schedule download options](docs/screenshots/06_student_schedule_export.png)
+
+</details>
+
+<details>
+<summary>6. Licenses and receipts can be uploaded without leaving the page</summary>
+
+Users can replace a rejected license or submit a receipt in a pop-up window. The payment window also shows the school payment details and a scannable payment code.
+
+![Receipt upload window](docs/screenshots/10_reupload_receipt_popup_modal.png)
+
+![License upload window](docs/screenshots/11_reupload_license_popup_modal.png)
+
+</details>
+
+<details>
+<summary>7. School admins can sign in and reach the dashboard</summary>
+
+Sign-in problems that repeatedly sent school admins away from the dashboard were fixed. Missing information in a dashboard section no longer stops the rest of the page from opening.
+
+![School admin dashboard](docs/screenshots/16_school_admin_dashboard_login_verified.png)
+
+</details>
+
+<details>
+<summary>8. Progress pages handle missing lesson dates</summary>
+
+Student progress and instructor reports can still open when a lesson does not yet have a scheduled date.
+
+![Student progress page](docs/screenshots/17_instructor_student_progress_verified.png)
+
+</details>
+
+<details>
+<summary>9. Students can enroll again after finishing a course</summary>
+
+Completed courses stay in the student's history. Students can apply for another course or choose Enroll Again on a course they previously completed.
+
+![Completed course with Enroll Again](docs/screenshots/18_course_completed_reenroll.png)
+
+</details>
+
+<details>
+<summary>10. School pictures and branding can be changed</summary>
+
+Users can update their profile pictures. School staff can change course pictures, the school logo, and header appearance. Removed or replaced pictures follow the user's choices.
+
+![School appearance settings](docs/screenshots/20_admin_settings_smart_logo.png)
+
+![Updated school logo in the header](docs/screenshots/21_admin_header_smart_logo.png)
+
+</details>
+
+<details>
+<summary>11. Training downloads are available with session review</summary>
+
+School staff can download training records from Verify Session Completion and narrow them by student, instructor, or dates. Reports include the selected names and dates.
+
+![Training download choices beside session review](docs/screenshots/19_verify_session_completion_export_section.png)
+
+</details>
+
+<details>
+<summary>12. School walkthrough guides are available</summary>
+
+The [presentation guide](docs/CAPSTONE_DEFENSE_MASTER_GUIDE.md) and [school process walkthroughs](docs/SYSTEM_PROCESS_FLOWS_PRESENTATION.md) explain enrollment, payments, training, and common problems step by step.
 
 </details>
