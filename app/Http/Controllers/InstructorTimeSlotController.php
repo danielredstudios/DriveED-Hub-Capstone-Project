@@ -601,6 +601,9 @@ class InstructorTimeSlotController extends Controller
 
         try {
             \Illuminate\Support\Facades\DB::transaction(function () use ($booking, $request) {
+                if ($booking->enrollment_request_id) {
+                    \App\Models\EnrollmentRequest::whereKey($booking->enrollment_request_id)->lockForUpdate()->firstOrFail();
+                }
                 $booking->update([
                     'attendance_status' => $request->attendance_status,
                     'attendance_marked_at' => now()
@@ -641,6 +644,9 @@ class InstructorTimeSlotController extends Controller
 
         try {
             \Illuminate\Support\Facades\DB::transaction(function () use ($booking, $request) {
+                if ($booking->enrollment_request_id) {
+                    \App\Models\EnrollmentRequest::whereKey($booking->enrollment_request_id)->lockForUpdate()->firstOrFail();
+                }
                 $booking->update(['instructor_feedback' => $request->instructor_feedback]);
                 if ($booking->sessionCompletion()->exists()) {
                     app(\App\Services\SessionLoggingService::class)->syncBooking($booking);
@@ -759,6 +765,9 @@ class InstructorTimeSlotController extends Controller
             }
 
             \Illuminate\Support\Facades\DB::transaction(function () use ($booking, $updateData) {
+                if ($booking->enrollment_request_id) {
+                    \App\Models\EnrollmentRequest::whereKey($booking->enrollment_request_id)->lockForUpdate()->firstOrFail();
+                }
                 $booking->update($updateData);
                 if (in_array($booking->session_status, ['done', 'completed', 'no-show'], true)) {
                     app(\App\Services\SessionLoggingService::class)->syncBooking($booking);
@@ -779,6 +788,9 @@ class InstructorTimeSlotController extends Controller
         }
         catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Failed to update lesson details', ['error' => $e->getMessage()]);
+            if ($e instanceof \Illuminate\Validation\ValidationException) {
+                return response()->json(['success' => false, 'message' => $e->getMessage(), 'errors' => $e->errors()], 422);
+            }
             return response()->json(['success' => false, 'message' => 'An error occurred updating lesson details.'], 500);
         }
     }

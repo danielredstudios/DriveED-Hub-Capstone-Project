@@ -1,13 +1,13 @@
 <details class="table-card" style="margin:20px 0;padding:20px;background:#fff;border:1px solid #e5e7eb;border-radius:12px;">
-    <summary style="cursor:pointer;font-weight:600;">Pending Emails ({{ $pendingInvitations->count() }})</summary>
-    <p>Student and instructor account setup emails awaiting completion.</p>
+    <summary style="cursor:pointer;font-weight:600;padding:8px 0;">Pending Emails ({{ $pendingInvitations->count() }})</summary>
+    <p style="margin:16px 0 20px;line-height:1.7;max-width:70ch;">Student and instructor account setup emails awaiting completion.</p>
     <div style="overflow-x:auto;">
         <table class="table">
             <thead><tr><th>Recipient</th><th>Role</th><th>Status</th><th>Sent</th><th>Expires</th><th>Actions</th></tr></thead>
             <tbody>
             @forelse($pendingInvitations as $invitation)
                 <tr>
-                    <td>{{ $invitation->payload['name'] ?? 'Account setup' }}<br>{{ $invitation->email }}</td>
+                    <td style="padding:16px;line-height:1.7;"><strong style="display:block;">{{ $invitation->payload['name'] ?? 'Account setup' }}</strong><span style="display:block;overflow-wrap:anywhere;color:#475569;">{{ $invitation->email }}</span></td>
                     <td>{{ ucfirst($invitation->role) }}</td>
                     <td>{{ $invitation->isExpired() ? 'Expired' : 'Pending' }}</td>
                     <td>{{ $invitation->created_at->format('M d, Y H:i') }}</td>

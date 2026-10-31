@@ -36,6 +36,12 @@
 
         // Header background (solid primary color)
         $headerBg = $settings?->getLoginHeaderBackground() ?? $primaryColor;
+        $headerRole = explode('.', request()->route()?->getName() ?? '')[1] ?? '';
+        $headerText = $settings?->login_header_text_color ?? '#ffffff';
+        if (in_array($headerRole, ['admin', 'instructor', 'student'], true)) {
+            $headerBg = $settings?->{$headerRole.'_header_bg'} ?: $headerBg;
+            $headerText = $settings?->{$headerRole.'_header_text'} ?: $headerText;
+        }
 
         // Generate body background
         if ($backgroundType === 'image' && $backgroundImage) {
@@ -301,7 +307,7 @@
             ;
             background-size: cover;
             background-position: center;
-            color: {{ $settings?->login_header_text_color ?? '#ffffff' }};
+            color: {{ $headerText }};
             display: flex;
             align-items: center;
             justify-content: space-between;

@@ -1,0 +1,15 @@
+{
+    "mode": "after",
+    "student_role": "student",
+    "student_passed_tdc": true,
+    "tdc_id": 86,
+    "tdc_status": "completed",
+    "is_course_locked": false,
+    "active_enrollment_id": null,
+    "tdc_sessions": 3,
+    "tdc_hours": 15,
+    "training_hash_unchanged": true,
+    "pdc_id": 87,
+    "pdc_status": "pending",
+    "mail_driver": "array"
+}

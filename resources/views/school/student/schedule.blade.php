@@ -1563,7 +1563,7 @@
             
             <!-- Cancelled Schedules Section -->
             @if($groupedCancelledBookings->count() > 0)
-            <h3 class="schedule-cancelled-title">Cancelled Schedules</h3>
+            <details class="cancelled-schedules-panel"><summary class="schedule-cancelled-title" style="cursor:pointer;">Cancelled Schedules</summary>
             @foreach($groupedCancelledBookings as $date => $dateCancelledBookings)
                 @php
                     $isPast = \Carbon\Carbon::parse($date)->lt(now()->startOfDay());
@@ -1624,6 +1624,7 @@
                     </div>
                 </div>
             @endforeach
+            </details>
             @endif
         </div>
         
@@ -2996,5 +2997,6 @@ function closeConfirmModal(confirmed = false) {
 </script>
 
 @include('partials.calendar-day-dialog')
+@include('partials.schedule-layout')
 @endsection
 

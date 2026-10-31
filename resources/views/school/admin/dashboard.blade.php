@@ -248,7 +248,7 @@
         </div>
     @endif
     <div class="stats-grid">
-        <a href="{{ school_route('admin.userManagement') }}" class="stat-card students stat-card-link" onclick="loadContent(this.href); return false;">
+        <a href="{{ school_route('admin.userManagement', ['role' => 'student', 'filtered' => 1]) }}" class="stat-card students stat-card-link" onclick="loadContent(this.href); return false;">
             <div class="stat-content">
                 <div class="stat-header">
                     <div>
@@ -267,7 +267,7 @@
             </div>
         </a>
         
-        <a href="{{ school_route('admin.userManagement') }}" class="stat-card instructors stat-card-link" onclick="loadContent(this.href); return false;">
+        <a href="{{ school_route('admin.userManagement', ['role' => 'instructor', 'filtered' => 1]) }}" class="stat-card instructors stat-card-link" onclick="loadContent(this.href); return false;">
             <div class="stat-content">
                 <div class="stat-header">
                     <div>
@@ -286,7 +286,7 @@
             </div>
         </a>
         
-        <a href="{{ school_route('admin.enrollments.index') }}" class="stat-card growth stat-card-link" onclick="loadContent(this.href); return false;">
+        <a href="{{ school_route('admin.userManagement', ['role' => 'student', 'registered' => 'month', 'filtered' => 1]) }}" class="stat-card growth stat-card-link" onclick="loadContent(this.href); return false;">
             <div class="stat-content">
                 <div class="stat-header">
                     <div>
@@ -303,7 +303,7 @@
             </div>
         </a>
         
-        <a href="{{ school_route('admin.reports.index') }}" class="stat-card active stat-card-link" onclick="loadContent(this.href); return false;">
+        <a href="{{ school_route('admin.userManagement', ['status' => 'active', 'filtered' => 1]) }}" class="stat-card active stat-card-link" onclick="loadContent(this.href); return false;">
             <div class="stat-content">
                 <div class="stat-header">
                     <div>
@@ -320,7 +320,7 @@
             </div>
         </a>
 
-        <a href="{{ school_route('admin.enrollments.index') }}" class="stat-card info stat-card-link" onclick="loadContent(this.href); return false;">
+        <a href="{{ school_route('admin.enrollments.index', ['status' => 'approved']) }}" class="stat-card info stat-card-link" onclick="loadContent(this.href); return false;">
             <div class="stat-content">
                 <div class="stat-header">
                     <div>

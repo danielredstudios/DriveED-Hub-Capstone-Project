@@ -1,0 +1,60 @@
+{
+    "mode": "enrolled",
+    "migration_applied": true,
+    "unchanged": {
+        "enrollments": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "session_completions": {
+            "count": 17,
+            "sha256": "75b9436a26a2b0b88f3cb2f81587fbcaaab8942485ca23092670e1d033fe7c0c"
+        },
+        "student_lesson_completions": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "progresses": {
+            "count": 4,
+            "sha256": "be79a2cc020df12c2e6529a51db6611aba635bb6b250e492271a94b7c4294f5f"
+        },
+        "bookings": {
+            "count": 62,
+            "sha256": "1b6632d3e4c82976e2697e817a83198405121788b185a810825530a3d10eeb06"
+        },
+        "logs": {
+            "count": 0,
+            "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "phase_progression_requests": {
+            "count": 2,
+            "sha256": "c7ee5cbe2c26a24a5a25ab0bda33bfaf971b809eed2720d8f47d504d1a2117ee"
+        },
+        "combo_enrollments": {
+            "count": 9,
+            "sha256": "4cc6c515ad7e2deaac7abd776c9592badb0c4eb036d6620036980f46c7d7d81d"
+        },
+        "combo_student_locks": {
+            "count": 9,
+            "sha256": "bea42e1a576fd70f2f2d16aad384cfa31021f6400dc974916ee2a04e2f4b1f56"
+        }
+    },
+    "student": {
+        "id": 10,
+        "name": "Luna Marie Martinez",
+        "has_passed_theoretical": true,
+        "is_course_locked": false,
+        "active_enrollment_id": null
+    },
+    "tdc": {
+        "id": 10,
+        "status": "completed",
+        "theoretical_passed": true,
+        "session_count": 2
+    },
+    "pdc": {
+        "id": 74,
+        "status": "pending",
+        "course_id": 2
+    }
+}

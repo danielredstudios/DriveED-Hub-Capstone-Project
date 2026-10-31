@@ -2014,6 +2014,22 @@
             </div>
 
             <!-- Role Branding -->
+            <div class="form-section" id="section-role-headers" data-nav-section>
+                <div class="section-header" onclick="toggleSection(this)"><h3 class="section-title">Role Header Colors</h3></div>
+                <div class="section-inputs">
+                    <p style="line-height:1.6;margin-bottom:20px;">Choose the signed-in header colors for each role. These settings apply independently of the login page.</p>
+                    @foreach(['admin' => 'Admin', 'instructor' => 'Instructor', 'student' => 'Student'] as $headerRole => $headerLabel)
+                        <div class="form-group">
+                            <label class="form-label" for="{{ $headerRole }}_header_bg">{{ $headerLabel }} Header Background</label>
+                            <input type="color" class="color-picker" id="{{ $headerRole }}_header_bg" name="{{ $headerRole }}_header_bg" value="{{ old($headerRole.'_header_bg', $settings->{$headerRole.'_header_bg'} ?: ($settings->login_header_bg_color ?? $settings->primary_color ?? '#2563eb')) }}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="{{ $headerRole }}_header_text">{{ $headerLabel }} Header Text</label>
+                            <input type="color" class="color-picker" id="{{ $headerRole }}_header_text" name="{{ $headerRole }}_header_text" value="{{ old($headerRole.'_header_text', $settings->{$headerRole.'_header_text'} ?: ($settings->login_header_text_color ?? '#ffffff')) }}">
+                        </div>
+                    @endforeach
+                </div>
+            </div>
             <div class="form-section" id="section-roles" data-nav-section>
                 <div class="section-header" onclick="toggleSection(this)">
                     <h3 class="section-title">Role Branding</h3>

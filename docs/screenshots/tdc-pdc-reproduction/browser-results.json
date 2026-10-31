@@ -1,0 +1,36 @@
+{
+  "before_error": "You already have an active course in this school. Complete or cancel it before enrolling in another course.",
+  "before": {
+    "mode": "before",
+    "student_role": "student",
+    "student_passed_tdc": true,
+    "tdc_id": 86,
+    "tdc_status": "approved",
+    "is_course_locked": true,
+    "active_enrollment_id": 86,
+    "tdc_sessions": 3,
+    "tdc_hours": 15,
+    "training_hash_unchanged": true,
+    "pdc_id": null,
+    "pdc_status": null,
+    "mail_driver": "array"
+  },
+  "after": {
+    "mode": "after",
+    "student_role": "student",
+    "student_passed_tdc": true,
+    "tdc_id": 86,
+    "tdc_status": "completed",
+    "is_course_locked": false,
+    "active_enrollment_id": null,
+    "tdc_sessions": 3,
+    "tdc_hours": 15,
+    "training_hash_unchanged": true,
+    "pdc_id": 87,
+    "pdc_status": "pending",
+    "mail_driver": "array"
+  },
+  "real_application_requests": true,
+  "payment_submitted": false,
+  "email_delivery_disabled": true
+}

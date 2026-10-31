@@ -13,9 +13,45 @@ use Illuminate\Support\Facades\Log as LogFacade;
 
 class TheoreticalCompletionController extends Controller
 {
-    /**
-     * Get the authenticated school and guard info
-     */
+    public function export(School $school, $enrollment)
+    {
+        $query = $school->enrollmentRequests()->with(['learner', 'course', 'package', 'sessionCompletions.instructor']);
+        $admin = Auth::guard('admin')->user();
+        $instructor = Auth::guard('instructor')->user();
+        if ($admin) {
+            abort_unless($admin->school_id === $school->id, 403);
+            $admin->scopeToBranch($query);
+        } elseif ($instructor) {
+            abort_unless($instructor->school_id === $school->id, 403);
+            $query->forInstructor($instructor);
+        } else {
+            abort(403);
+        }
+        $enrollment = $query->findOrFail($enrollment);
+        return \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.student-training-pdf', compact('school', 'enrollment'))
+            ->download('student-training-'.$enrollment->id.'.pdf');
+    }
+
+    public function exportList(School $school)
+    {
+        $query = $school->enrollmentRequests()->with(['learner', 'course', 'package'])
+            ->whereHas('course', fn ($course) => $course->whereIn('course_type', ['theoretical', 'combo']));
+        $admin = Auth::guard('admin')->user();
+        $instructor = Auth::guard('instructor')->user();
+        if ($admin) {
+            abort_unless($admin->school_id === $school->id, 403);
+            $admin->scopeToBranch($query);
+        } elseif ($instructor) {
+            abort_unless($instructor->school_id === $school->id, 403);
+            $query->forInstructor($instructor);
+        } else {
+            abort(403);
+        }
+        $enrollments = $query->orderBy('id')->get();
+        return \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.student-training-list-pdf', compact('school', 'enrollments'))
+            ->setPaper('a4', 'landscape')->download('student-training-list.pdf');
+    }
+
     private function getSchoolAndGuard(): array
     {
         $admin = Auth::guard('admin')->user();
@@ -202,11 +238,6 @@ class TheoreticalCompletionController extends Controller
 
             // If it is ONLY a theoretical course, we can complete the enrollment now
             if ($enrollment->course->course_type === 'theoretical') {
-                $enrollment->update([
-                    'status' => 'completed',
-                    'completed_at' => now(),
-                ]);
-                $enrollment->learner->unlockFromCourse();
                 $message = 'Student marked as passed theoretical and enrollment completed!';
             } else {
                 // For Combo/Practical, we just mark TDC as passed, they stay "Enrolled" for PDC

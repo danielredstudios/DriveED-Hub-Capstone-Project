@@ -1,0 +1,11 @@
+{
+  "status": 422,
+  "body": {
+    "message": "This student has already completed the required TDC training hours. No additional session can be logged.",
+    "errors": {
+      "hours_completed": [
+        "This student has already completed the required TDC training hours. No additional session can be logged."
+      ]
+    }
+  }
+}

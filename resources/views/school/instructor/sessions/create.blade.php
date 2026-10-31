@@ -385,15 +385,18 @@
                             @foreach($enrollments as $enrollment)
                                 <option value="{{ $enrollment->id }}" 
                                         data-course-type="{{ $enrollment->course->course_type }}"
-                                        data-hours-required="{{ $enrollment->course->hours_required }}"
-                                        data-hours-completed="{{ $enrollment->total_hours }}"
+                                        data-hours-required="{{ $enrollment->tdc_hours_limit + $enrollment->pdc_hours_limit }}"
+                                        data-hours-completed="{{ $enrollment->used_tdc_hours + $enrollment->used_pdc_hours }}"
+                                        data-tdc-remaining="{{ \App\Support\TrainingHours::remaining($enrollment, 'theoretical') }}"
+                                        data-pdc-remaining="{{ \App\Support\TrainingHours::remaining($enrollment, 'practical') }}"
                                         {{ old('enrollment_id') == $enrollment->id || (isset($selectedEnrollment) && $selectedEnrollment->id == $enrollment->id) ? 'selected' : '' }}>
                                     {{ $enrollment->learner->name ?? $enrollment->student->name ?? 'N/A' }} — {{ $enrollment->course->title }}
-                                    ({{ number_format($enrollment->total_hours, 1) }}/{{ number_format($enrollment->course->hours_required, 1) }} hrs)
+                                    ({{ number_format($enrollment->used_tdc_hours + $enrollment->used_pdc_hours, 1) }}/{{ number_format($enrollment->tdc_hours_limit + $enrollment->pdc_hours_limit, 1) }} hrs)
                                 </option>
                             @endforeach
                         </select>
                         <div class="form-hint">Select the student and course for this session</div>
+                        <p id="trainingHoursNotice" role="status" style="margin-top:12px;color:#92400e;line-height:1.6;"></p>
                     </div>
 
                     <!-- Enrollment Info Display -->
@@ -553,7 +556,7 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+(function() {
     const enrollmentSelect = document.getElementById('enrollment_id');
     const enrollmentInfo = document.getElementById('enrollmentInfo');
     const sessionTypeSelect = document.getElementById('session_type');
@@ -574,6 +577,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const selectedSessionType = sessionTypeSelect.value;
+        if (courseType === 'combo') {
+            sessionTypeHint.textContent = 'Choose TDC or PDC. Each phase has its own training-hour allowance.';
+            return;
+        }
         const readableType = formatCourseType(courseType);
         const enrollmentLabel = selectedLabel ? selectedLabel.split(' - ')[0].trim() : 'selected enrollment';
 
@@ -599,13 +606,16 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('hoursRemaining').textContent = hoursRemaining.toFixed(1) + ' hrs';
             
             // Auto-select matching session type
-            if (courseType) {
+            if (courseType && courseType !== 'combo') {
                 sessionTypeSelect.value = courseType;
+            } else if (courseType === 'combo' && !sessionTypeSelect.value) {
+                sessionTypeSelect.value = parseFloat(selected.dataset.tdcRemaining) > 0 ? 'theoretical' : 'practical';
             }
 
             updateSessionTypeHint(courseType, selected.textContent);
             
             enrollmentInfo.classList.add('visible');
+            updateHoursGuard();
         } else {
             enrollmentInfo.classList.remove('visible');
             sessionTypeSelect.value = '';
@@ -614,7 +624,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     enrollmentSelect.addEventListener('change', updateEnrollmentInfo);
+    function updateHoursGuard() {
+        const selected = enrollmentSelect.selectedOptions[0];
+        const type = sessionTypeSelect.value;
+        const notice = document.getElementById('trainingHoursNotice');
+        const submit = document.querySelector('#sessionForm button[type="submit"]');
+        const hoursInput = document.querySelector('#sessionForm [name="hours_completed"]');
+        const remaining = selected?.value && type ? parseFloat(type === 'theoretical' ? selected.dataset.tdcRemaining : selected.dataset.pdcRemaining) : null;
+        submit.disabled = remaining !== null && remaining <= 0;
+        hoursInput.max = remaining === null ? 8 : Math.min(8, remaining);
+        notice.textContent = remaining === null ? '' : remaining <= 0
+            ? 'This student has already completed the required ' + (type === 'theoretical' ? 'TDC' : 'PDC') + ' training hours. No additional session can be logged.'
+            : remaining.toFixed(1) + ' training hour(s) remaining for this phase.';
+    }
     sessionTypeSelect.addEventListener('change', function() {
+        updateHoursGuard();
         const selected = enrollmentSelect.selectedOptions[0];
         const courseType = selected ? selected.getAttribute('data-course-type') : '';
         const selectedLabel = selected ? selected.textContent : '';
@@ -627,6 +651,6 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
         updateSessionTypeHint('', '');
     }
-});
+})();
 </script>
 @endsection

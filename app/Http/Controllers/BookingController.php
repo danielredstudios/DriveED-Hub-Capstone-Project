@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Booking;
+use App\Models\EnrollmentRequest;
 use App\Models\Course;
 use App\Models\Instructor;
 use App\Models\School;
@@ -1002,6 +1003,9 @@ class BookingController extends Controller
         DB::beginTransaction();
         try {
             $oldStatus = $booking->status;
+            if ($booking->enrollment_request_id) {
+                EnrollmentRequest::whereKey($booking->enrollment_request_id)->lockForUpdate()->firstOrFail();
+            }
             $booking->update($validated);
 
             // [AUTO-LOGGING LOGIC]
@@ -1028,6 +1032,13 @@ class BookingController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Failed to update booking status: ' . $e->getMessage());
+
+            if ($e instanceof \Illuminate\Validation\ValidationException) {
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json(['success' => false, 'message' => $e->getMessage(), 'errors' => $e->errors()], 422);
+                }
+                return back()->withErrors($e->errors())->withInput();
+            }
 
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json(['success' => false, 'message' => 'Failed to update status: ' . $e->getMessage()], 500);

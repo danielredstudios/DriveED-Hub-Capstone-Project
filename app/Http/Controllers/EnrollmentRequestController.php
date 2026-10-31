@@ -44,6 +44,18 @@ class EnrollmentRequestController extends Controller
         $rejectedRequestsCount = (clone $baseQuery)->where('status', 'rejected')->count();
 
         // Server-side filtering
+        $search = trim((string) $request->input('search', ''));
+        if ($search !== '') {
+            $baseQuery->where(function ($query) use ($search) {
+                $query->whereHas('learner', fn ($learner) => $learner
+                    ->where('name', 'like', '%'.$search.'%')
+                    ->orWhere('email', 'like', '%'.$search.'%'))
+                    ->orWhereHas('course', fn ($course) => $course->where('title', 'like', '%'.$search.'%'));
+                if (preg_match('/^(?:ENR-\d{4}-)?0*(\d+)$/i', $search, $matches)) {
+                    $query->orWhere('id', (int) $matches[1]);
+                }
+            });
+        }
         if ($request->filled('status') && $request->status !== 'all') {
             $baseQuery->where('status', $request->status);
         }
@@ -742,16 +754,13 @@ class EnrollmentRequestController extends Controller
                 ->with('error', 'Only active enrollments can have theoretical status updated.');
         }
 
+        $validation = \App\Support\EnrollmentValidator::canMarkTheoreticalPassed($enrollmentRequest);
+        if (!$validation['allowed']) {
+            return redirect()->back()->with('error', $validation['message']);
+        }
+
         DB::beginTransaction();
         try {
-            // Validate LTO requirements (15h/3d rule)
-            $validation = \App\Support\EnrollmentValidator::canMarkTheoreticalPassed($enrollmentRequest);
-            if (!$validation['allowed']) {
-                return redirect()
-                    ->back()
-                    ->with('error', $validation['message']);
-            }
-
             $enrollmentRequest->markTheoreticalPassed($admin->id, $validated['notes'] ?? null);
 
             // Notify student about theoretical completion

@@ -287,6 +287,7 @@
             <h1 class="page-title">Student Training List</h1>
             <p class="page-subtitle">Track student progress, mark completions, and view passed students</p>
         </div>
+        <a class="btn btn-primary" data-no-ajax="1" href="{{ school_route('admin.theoretical.exportList') }}">Export PDF</a>
     </div>
 
 

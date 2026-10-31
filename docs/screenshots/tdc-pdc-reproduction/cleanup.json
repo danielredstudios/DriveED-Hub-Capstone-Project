@@ -1,0 +1,17 @@
+{
+    "fixture_removed": true,
+    "original_tables_unchanged": {
+        "students": 29,
+        "enrollment_requests": 32,
+        "session_completions": 17,
+        "enrollments": 0,
+        "bookings": 62,
+        "progresses": 4,
+        "student_lesson_completions": 0,
+        "phase_progression_requests": 2,
+        "notifications": 441,
+        "system_logs": 1062,
+        "combo_enrollments": 9
+    },
+    "mail_driver": "array"
+}

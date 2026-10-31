@@ -285,6 +285,7 @@
     <div class="page-header">
         <div>
             <h1 class="page-title">Theoretical Training</h1>
+            <a class="btn btn-primary" data-no-ajax="1" href="{{ school_route('instructor.theoretical.exportList') }}">Export PDF</a>
             <p class="page-subtitle">Track student progress, mark completions, and view passed students</p>
         </div>
     </div>

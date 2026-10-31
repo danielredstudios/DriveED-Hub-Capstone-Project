@@ -1,0 +1,15 @@
+{
+  "passed": [
+    "All five dashboard cards link to the corresponding filtered roster or enrollment list",
+    "Pending Emails collapses and opens; dashboard student filter loads the roster",
+    "Enrollment search filters results by learner name",
+    "Verification dialog keeps keyboard focus inside and closes with Escape",
+    "Verification modal has correct structure, fits desktop/mobile, and closes",
+    "Settings exposes independent admin, instructor, and student header background/text controls",
+    "Student training record and training list export valid PDFs",
+    "instructor schedule panels and exports collapse; calendar fits desktop/mobile; modal closes without network errors",
+    "student schedule panels and exports collapse; calendar fits desktop/mobile; modal closes without network errors",
+    "No browser JavaScript errors across admin, instructor, and student pages"
+  ],
+  "errors": []
+}

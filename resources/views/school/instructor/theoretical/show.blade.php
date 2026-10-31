@@ -387,10 +387,13 @@
             <p class="page-subtitle">{{ $enrollment->student->name }} — {{ $enrollment->course->title ?? 'N/A' }}</p>
         </div>
         <a href="{{ school_route('instructor.theoretical.index') }}" class="back-link">
+            <span>Back to Theoretical</span>
+        </a>
+        <a href="{{ school_route('instructor.theoretical.export', ['enrollment' => $enrollment->id]) }}" class="back-link" data-no-ajax="1">
             <svg class="icon-size-16" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Back to Theoretical
+            Export PDF
         </a>
     </div>
 

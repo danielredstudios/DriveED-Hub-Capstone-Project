@@ -416,6 +416,7 @@
             <p class="page-subtitle">{{ $enrollment->student->name }} — Tracking full training lifecycle</p>
         </div>
         <div style="display: flex; gap: 10px;">
+            <a class="back-link" data-no-ajax="1" href="{{ route('schools.admin.theoretical.export', ['school' => $school->slug, 'enrollment' => $enrollment->id]) }}">Export PDF</a>
             @if($liveSession)
                 <div class="alert-box success" style="margin-bottom: 0; padding: 8px 12px; font-size: 0.8rem;">
                     <svg class="icon-size-16" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">

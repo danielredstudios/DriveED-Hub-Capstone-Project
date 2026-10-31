@@ -43,6 +43,20 @@ Thumbs.db
 /tests/Browser/screenshots/**/*.webp
 
 /tests/*
+!/tests/verify-tdc-completion.php
+!/tests/verify-tdc-repair.php
+!/tests/capture-tdc-repair.mjs
+!/tests/verify-local-tdc.php
+!/tests/capture-oct31-findings.mjs
+!/tests/verify-oct31-findings.php
+!/tests/oct31-hours-fixture.php
+!/tests/capture-training-hours.mjs
+!/tests/tdc-pdc-reproduction-fixture.php
+!/tests/capture-tdc-pdc-reproduction.mjs
+!/tests/verify-recheck-edge-cases.php
+!/tests/concurrent-session-fixture.php
+!/tests/verify-concurrent-session-logging.mjs
+!/tests/verify-deployment-startup.sh
 !/tests/verify-bug-report.php
 !/tests/verify-session-report-export.php
 !/tests/verify-session-features.php

@@ -296,7 +296,8 @@
     }
 </style>
 
-<div class="schedule-log-export">
+<details class="schedule-log-export">
+    <summary style="cursor:pointer;font-weight:600;padding:4px 0;">Schedule Logs and Exports</summary>
     <div class="schedule-log-export__header">
         <div class="schedule-log-export__title-wrap">
             <div class="schedule-log-export__icon">
@@ -406,7 +407,7 @@
             </div>
         </div>
     </form>
-</div>
+</details>
 
 <script>
     (function () {

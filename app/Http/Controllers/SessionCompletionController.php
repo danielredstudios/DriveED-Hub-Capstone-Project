@@ -221,6 +221,8 @@ class SessionCompletionController extends Controller
 
         DB::beginTransaction();
         try {
+            $enrollment = EnrollmentRequest::whereKey($enrollment->id)->lockForUpdate()->firstOrFail();
+            \App\Support\TrainingHours::ensureCanLog($enrollment, $request->session_type, (float) $request->hours_completed);
             $sessionCompletion = SessionCompletion::create([
                 'school_id' => $school->id,
                 'enrollment_id' => $request->enrollment_id,
@@ -407,6 +409,11 @@ class SessionCompletionController extends Controller
         }
 
         DB::transaction(function () use ($sessionCompletion, $request, $startTime, $endTime) {
+            $enrollment = EnrollmentRequest::whereKey($sessionCompletion->enrollment_id)->lockForUpdate()->firstOrFail();
+            if ($request->attendance_status !== 'absent' && ($request->status ?? $sessionCompletion->status) === 'completed'
+                && ($sessionCompletion->status !== 'completed' || (float) $request->hours_completed > (float) $sessionCompletion->hours_completed)) {
+                \App\Support\TrainingHours::ensureCanLog($enrollment, $sessionCompletion->session_type, (float) $request->hours_completed, $sessionCompletion->id);
+            }
             $sessionCompletion->update([
                 'hours_completed' => $request->hours_completed,
                 'session_date' => $request->session_date,

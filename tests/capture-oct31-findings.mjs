@@ -1,0 +1,126 @@
+import puppeteer from 'puppeteer-core';
+import fs from 'node:fs/promises';
+import {fileURLToPath} from 'node:url';
+import assert from 'node:assert/strict';
+
+const output = new URL('../docs/screenshots/oct31-findings/', import.meta.url);
+await fs.mkdir(output,{recursive:true});
+const results = [];
+const record = message => {results.push(message);console.log('PASS: '+message);};
+const browser = await puppeteer.launch({executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe',headless:true,args:['--no-sandbox'],defaultViewport:{width:1440,height:1000}});
+const errors=[];
+try {
+ const login = async role => {
+  const context = await browser.createBrowserContext();
+  const page = await context.newPage();
+  page.on('pageerror',error=>errors.push(role+': '+error.message));
+  page.on('response',response=>{if(response.status()>=500 && response.url().startsWith('http://localhost:8004/'))errors.push(role+': HTTP '+response.status()+' '+response.url());});
+  await page.goto('http://localhost:8004/drived-hub/login',{waitUntil:'networkidle2'});
+  await page.type('[name="email"]',role+'1@driveedhub.test');
+  await page.type('[name="password"]','DriveDemo123');
+  await Promise.all([page.waitForNavigation({waitUntil:'networkidle2'}),page.click('button[type="submit"]')]);
+  assert(page.url().includes('/'+role));
+  return page;
+ };
+ const visit=async(page,role,path)=>{
+  const response=await page.goto('http://localhost:8004/drived-hub/'+role+'/'+path,{waitUntil:'networkidle2'});
+  assert.equal(response.status(),200,role+'/'+path);
+ };
+ const shot=async(page,name)=>page.screenshot({path:fileURLToPath(new URL(name+'.png',output)),fullPage:true});
+ const admin=await login('admin');
+ const links=await admin.$$eval('.stats-grid a.stat-card',els=>els.map(el=>({label:el.innerText,url:el.href})));
+ for (const [label,param] of [['Total Students','role=student'],['Total Instructors','role=instructor'],['New Students','registered=month'],['Active Users','status=active'],['Active Enrollments','status=approved']]) {
+  assert(links.find(link=>link.label.toLowerCase().includes(label.toLowerCase()))?.url.includes(param), label+': '+JSON.stringify(links));
+ }
+ record('All five dashboard cards link to the corresponding filtered roster or enrollment list');
+ await shot(admin,'admin-dashboard');
+ await visit(admin,'admin','user-management?role=student&filtered=1');
+ assert.equal(await admin.$eval('#userRoleFilter',el=>el.value),'student');
+ assert(await admin.$('table tbody tr'));
+ assert.equal(await admin.$eval('details.table-card',el=>el.open),false);
+ await admin.click('details.table-card > summary');
+ assert.equal(await admin.$eval('details.table-card',el=>el.open),true);
+ record('Pending Emails collapses and opens; dashboard student filter loads the roster');
+ await shot(admin,'pending-emails');
+ await visit(admin,'admin','enrollments?search=Luna');
+ assert(await admin.$eval('.requests-table',el=>el.innerText.includes('Luna')));
+ const unrelated=await admin.$$eval('.requests-table tbody tr',els=>els.filter(el=>!el.innerText.includes('Luna')).length);
+ assert.equal(unrelated,0);
+ record('Enrollment search filters results by learner name');
+ await shot(admin,'enrollment-search');
+ const verifyButton=await admin.$('[onclick^="openVerificationModal"]');
+ assert(verifyButton);
+ await verifyButton.click();
+ await admin.waitForFunction(()=>document.getElementById('v-modal-content').style.visibility==='visible');
+ await admin.waitForFunction(()=>[...document.querySelectorAll('#v-modal-content img')].every(image=>image.complete));
+ assert(await admin.$eval('.v-modal-sidebar',el=>el.parentElement.id==='v-modal-content'));
+ assert(await admin.$eval('.v-modal-content',el=>el.parentElement.id==='v-modal-content'));
+ const modal=await admin.$eval('.verification-modal-card',el=>({height:el.getBoundingClientRect().height,view:innerHeight}));
+ assert(modal.height<=modal.view*.91);
+ await shot(admin,'enrollment-verification-desktop');
+ await admin.keyboard.down('Shift');
+ await admin.keyboard.press('Tab');
+ await admin.keyboard.up('Shift');
+ assert(await admin.evaluate(()=>document.getElementById('unifiedVerificationModal').contains(document.activeElement)));
+ await admin.keyboard.press('Escape');
+ assert.equal(await admin.$eval('#unifiedVerificationModal',el=>el.style.display),'none');
+ await verifyButton.click();
+ await admin.waitForFunction(()=>document.getElementById('v-modal-content').style.visibility==='visible');
+ record('Verification dialog keeps keyboard focus inside and closes with Escape');
+ await admin.setViewport({width:390,height:844});
+ await shot(admin,'enrollment-verification-mobile');
+ assert(await admin.$eval('.verification-modal-card',el=>el.getBoundingClientRect().right<=innerWidth));
+ await admin.click('#unifiedVerificationModal .btn-close');
+ assert.equal(await admin.$eval('#unifiedVerificationModal',el=>el.style.display),'none');
+ record('Verification modal has correct structure, fits desktop/mobile, and closes');
+ await admin.setViewport({width:1440,height:1000});
+ await visit(admin,'admin','settings');
+ assert.equal(await admin.$$eval('#section-role-headers input[type="color"]',els=>els.length),6);
+ await (await admin.$('#section-role-headers')).screenshot({path:fileURLToPath(new URL('role-header-settings.png',output))});
+ record('Settings exposes independent admin, instructor, and student header background/text controls');
+ await visit(admin,'admin','theoretical/10');
+ const pdf=await admin.evaluate(async()=>{
+  const response=await fetch('/drived-hub/admin/theoretical/10/export/pdf');
+  const data=new Uint8Array(await response.arrayBuffer());
+  return {status:response.status,type:response.headers.get('content-type'),magic:String.fromCharCode(...data.slice(0,5)),bytes:data.length};
+ });
+ assert.equal(pdf.status,200);assert.equal(pdf.magic,'%PDF-');assert(pdf.bytes>1000);
+ await shot(admin,'student-training-pdf-export');
+ const listPdf=await admin.evaluate(async()=>{const r=await fetch('/drived-hub/admin/theoretical/export/pdf');return {status:r.status,type:r.headers.get('content-type')};});
+ assert.equal(listPdf.status,200);assert(listPdf.type.includes('pdf'));
+ record('Student training record and training list export valid PDFs');
+
+ for(const role of ['instructor','student']) {
+  const page=await login(role);
+  await visit(page,role,role==='instructor'?'my-schedule':'schedule');
+  assert.equal(await page.$eval('.schedule-log-export',el=>el.tagName),'DETAILS');
+  assert.equal(await page.$eval('.schedule-log-export',el=>el.open),false);
+  await page.click('.schedule-log-export > summary');
+  assert.equal(await page.$eval('.schedule-log-export',el=>el.open),true);
+  await page.click('.schedule-log-export > summary');
+  const count=await page.$$eval('details.sidebar-section',els=>els.length);
+  assert(count>=2, role+' collapsible schedule panels');
+  await shot(page,role+'-schedule-panels');
+  await page.click('[onclick="switchMainView(\'calendar\')"]');
+  const bounds=await page.$eval('.calendar-container',el=>({left:el.getBoundingClientRect().left,right:el.getBoundingClientRect().right,width:innerWidth}));
+  assert(bounds.left>=0 && bounds.right<=bounds.width+1,role+' calendar fits desktop');
+  await shot(page,role+'-calendar-desktop');
+  let requestCount=0;
+  page.on('request',()=>requestCount++);
+  await page.click('[data-calendar-date]');
+  assert(await page.$eval('#calendarDayDialog',el=>el.open));
+  await shot(page,role+'-calendar-modal');
+  const beforeClose=requestCount;
+  await page.click('#calendarDayDialog > button');
+  assert.equal(await page.$eval('#calendarDayDialog',el=>el.open),false);
+  assert.equal(requestCount,beforeClose,role+' closing must not issue a request');
+  await page.setViewport({width:390,height:844});
+  const mobile=await page.$eval('.calendar-container',el=>({right:el.getBoundingClientRect().right,width:innerWidth}));
+  assert(mobile.right<=mobile.width+1,role+' calendar fits mobile');
+  await shot(page,role+'-calendar-mobile');
+  record(role+' schedule panels and exports collapse; calendar fits desktop/mobile; modal closes without network errors');
+ }
+ assert.deepEqual(errors,[],'No browser JavaScript errors');
+ record('No browser JavaScript errors across admin, instructor, and student pages');
+ await fs.writeFile(new URL('results.json',output),JSON.stringify({passed:results,errors},null,2));
+} finally {await browser.close();}

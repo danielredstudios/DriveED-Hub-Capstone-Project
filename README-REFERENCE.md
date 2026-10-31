@@ -1,0 +1,658 @@
+# DriveED Hub — Driving School Management System
+**LPU Cavite | Senior Capstone Project**
+
+DriveED Hub is a multi-tenant web application built for driving schools to manage student admissions, theoretical/practical courses, scheduling, instructor evaluations, payments, and student progress tracking.
+
+---
+
+## Recent Updates & Advisory Fixes (October 2026)
+
+### Latest Recheck Results October 31 2026
+
+The changed enrollment, session logging, exports, settings, dashboard, calendar, and deployment startup flows passed local verification after the additional fixes below.
+
+#### Additional fixes
+
+- Completing an old standalone TDC enrollment preserves a lock belonging to a newer course, including a Combo enrollment.
+- TDC passing notes are saved, and repeating the passing action without new notes preserves the existing notes.
+- Rejecting an incomplete TDC pass no longer leaves a database transaction open.
+- Session logging reads training totals after locking the enrollment allocation. Manual logs, instructor updates, and admin verification use a consistent locking order to prevent concurrent submissions from exceeding the remaining hours.
+- Excess-hour failures return clear validation feedback. Existing grades, feedback, and admin verification remain available even when legacy records already exceed the hour limit; these actions do not duplicate session logs.
+- Role-header color inputs retain valid hex values when the login header uses an image. Admin, instructor, and student layouts render their independently configured colors.
+- The enrollment verification dialog closes with Escape and keeps keyboard focus inside while open.
+- Deployment startup clears cached configuration before migrations and stops if a migration fails.
+
+#### Verification results
+
+| Check | Result |
+| --- | --- |
+| TDC completion regressions | 38 assertions passed |
+| October 31 backend regressions | 17 assertions passed |
+| Additional edge cases | 27 assertions passed |
+| PDF/Excel session exports and claim notifications | 30 assertions passed |
+| **Backend assertion total** | **112 passed** |
+| Repair command and data migration | Dry-run, school scope, repeat runs, Combo protection, and history preservation passed in isolated SQLite |
+| Concurrent logging | Two simultaneous requests with one hour remaining produced one success and one HTTP 422; exactly one session was created |
+| Deployment startup | Configuration cleared before migration; successful migrations start the app; failed migrations prevent startup |
+| Browser checks | Admin, instructor, and student flows passed on desktop and at a 390px mobile width, including keyboard modal controls |
+| Browser errors | No JavaScript exceptions or HTTP 5xx responses in the exercised flows |
+| TDC-to-PDC reproduction | Actual blocked submission captured before correction and accepted separate PDC request captured afterward |
+| Completed-hours form | Completion explanation and disabled submission verified; tampered POST rejected with HTTP 422 |
+| Compilation and syntax | Blade views and routes compiled; 23 PHP files, deployment shell syntax, and `git diff --check` passed |
+
+**Data preservation:** saved-baseline comparisons confirmed that the original 17 training session records, 62 bookings, 4 progress records, 2 phase transitions, all 9 Combo enrollments, and their students' course-lock references remained unchanged. Luna's completed TDC enrollment #10 and separate pending PDC enrollment #74 remain intact.
+
+Backend test changes were rolled back or used isolated databases. Temporary browser fixtures were removed, and the mail-disabled TDC reproduction instance was stopped. No payment was submitted.
+
+These results cover the changed paths and selected regression cases; they do not guarantee that every application scenario is bug-free. Production deployment and real email delivery were not tested. Missing local placeholder license files display an unavailable-document explanation.
+
+See the [complete recheck report and commands](docs/RECHECK_REPORT_2026-10-31.md), [browser results](docs/screenshots/oct31-findings/results.json), and [TDC-to-PDC reproduction results](docs/screenshots/tdc-pdc-reproduction/browser-results.json).
+
+### Passed TDC Student Blocked from PDC Enrollment
+
+This before-and-after comparison reproduces the original data problem with a temporary test student and real browser submissions. The application code was not reverted, and no existing student's enrollment was changed for this test.
+
+| Check | Before correction | After correction |
+| --- | --- | --- |
+| Student role | Student | Student |
+| TDC passing flag | Passed | Passed |
+| Original TDC enrollment | Approved | Completed |
+| Course lock | Locked to the old TDC enrollment | Unlocked; active enrollment reference cleared |
+| PDC submission | Blocked by the existing active enrollment | Accepted as a separate pending request |
+| Original TDC training history | 3 sessions, 15 hours | Same sessions and hours; hashes unchanged |
+
+**Before:** the actual submission displays “You already have an active course in this school. Complete or cancel it before enrolling in another course.” **After:** the same student can submit a PDC application and reaches the payment step. Payment and admin approval are still required.
+
+![Passed TDC student enrolling in PDC before and after](docs/screenshots/tdc-pdc-reproduction/before-after-comparison.png)
+
+View the full-resolution [blocked submission](docs/screenshots/tdc-pdc-reproduction/before-blocked.png), [accepted submission](docs/screenshots/tdc-pdc-reproduction/after-submitted.png), or [standalone comparison](docs/screenshots/tdc-pdc-reproduction/comparison.html).
+
+**Safety and verification:** outgoing email was disabled in a temporary localhost-only instance. No payment was submitted. The temporary student, TDC/PDC enrollments, training logs, notifications, and authentication log were removed afterward. Hash comparisons confirmed all original records, including 17 session logs and all 9 Combo enrollments, were unchanged. The temporary web instance was then stopped.
+
+See the [reproduction details](docs/screenshots/tdc-pdc-reproduction/README.md), [browser assertions](docs/screenshots/tdc-pdc-reproduction/browser-results.json), and [cleanup verification](docs/screenshots/tdc-pdc-reproduction/cleanup.json). Screenshot IDs belong to removed test records, not live enrollments.
+
+### Before and After Review October 31 2026
+
+The 15 screenshots in the October 31 findings report are covered by the 14 comparisons below. Original report screenshots appear on the left; local application screenshots appear on the right. Expand a finding and click its comparison image to inspect it.
+
+See the [complete screenshot review](docs/screenshots/oct31-findings/review/REVIEW.md), [interactive gallery](docs/screenshots/oct31-findings/review/index.html), and [fix and verification checklist](docs/screenshots/oct31-findings/README.md). Download and open the gallery HTML file in a browser for full-resolution image viewing.
+
+**Verification:** 17 backend checks, Chrome desktop/mobile browser checks, and the existing TDC regression checks passed. Original training records and all 9 Combo enrollments and their students' course locks remained unchanged. The changes and role-header migration were applied locally; production was not deployed.
+
+The role-header finding had no original screenshot. Temporary example records used for the pending-email and completed-hours screenshots were removed after capture; no invitation email was sent. Accounts and records differ between the original report and the local application.
+
+<details>
+<summary>1. Pending email spacing and collapse</summary>
+
+The panel stays collapsed until opened. Recipient names, email addresses, and explanatory text have separate spacing.
+
+![Pending emails before and after](docs/screenshots/oct31-findings/review/01-comparison.png)
+
+</details>
+
+<details>
+<summary>2. Collapsible schedule panels</summary>
+
+Today's Lessons, Upcoming This Week, and Cancelled Schedules can be expanded independently.
+
+![Schedule panels before and after](docs/screenshots/oct31-findings/review/02-comparison.png)
+
+</details>
+
+<details>
+<summary>3. Instructor calendar modal closes correctly</summary>
+
+Close dismisses the dialog without submitting a request. The comparison includes open and closed states.
+
+![Instructor modal close before and after](docs/screenshots/oct31-findings/review/03-comparison.png)
+
+</details>
+
+<details>
+<summary>4. Student calendar modal closes correctly</summary>
+
+The student dialog also closes without a network request or error notification.
+
+![Student modal close before and after](docs/screenshots/oct31-findings/review/04-comparison.png)
+
+</details>
+
+<details>
+<summary>5. Calendar fits the page</summary>
+
+The calendar uses a bounded container and shrinkable columns, verified on desktop and at a 390px mobile width.
+
+![Calendar sizing before and after](docs/screenshots/oct31-findings/review/05-comparison.png)
+
+</details>
+
+<details>
+<summary>6. Instructor calendar modal styling</summary>
+
+The dialog has a backdrop, border, readable headings, spacing, and bounded scrolling. Cancelled lessons no longer offer Log Session in this dialog.
+
+![Instructor modal styling before and after](docs/screenshots/oct31-findings/review/06-comparison.png)
+
+</details>
+
+<details>
+<summary>7. Collapsible schedule exports</summary>
+
+Export filters and PDF/Excel controls are available inside a panel that starts collapsed.
+
+![Schedule exports before and after](docs/screenshots/oct31-findings/review/07-comparison.png)
+
+</details>
+
+<details>
+<summary>8. Separate role header colors</summary>
+
+Admin, instructor, and student headers have independent background and text color settings. The report supplied this finding as text without a before screenshot.
+
+![Role header color settings comparison](docs/screenshots/oct31-findings/review/08-comparison.png)
+
+</details>
+
+<details>
+<summary>9. Past schedules are distinct</summary>
+
+Past groups display a Past schedule label and a different date-header color.
+
+![Past schedules before and after](docs/screenshots/oct31-findings/review/09-comparison.png)
+
+</details>
+
+<details>
+<summary>10. Student training PDF export</summary>
+
+PDF exports are available for the training list and individual training records, including recorded sessions.
+
+![Training PDF export before and after](docs/screenshots/oct31-findings/review/10-comparison.png)
+
+</details>
+
+<details>
+<summary>11. Enrollment verification layout</summary>
+
+Enrollment details and documents share the correct layout on desktop and mobile. Unavailable document files show an explanation.
+
+![Enrollment verification before and after](docs/screenshots/oct31-findings/review/11-comparison.png)
+
+</details>
+
+<details>
+<summary>12. Enrollment search</summary>
+
+Search supports learner name, email, course, and enrollment ID while retaining branch, status, and sort filters.
+
+![Enrollment search before and after](docs/screenshots/oct31-findings/review/12-comparison.png)
+
+</details>
+
+<details>
+<summary>13. Dashboard cards open filtered lists</summary>
+
+Students, instructors, new students this month, and active users open the corresponding roster. Active Enrollments opens approved enrollments.
+
+![Dashboard filters before and after](docs/screenshots/oct31-findings/review/13-comparison.png)
+
+</details>
+
+<details>
+<summary>14. Prevent sessions beyond required hours</summary>
+
+The form explains that the required hours are complete and disables submission. The server also rejects excess hours; Combo TDC and PDC allowances remain separate.
+
+![Training hour limits before and after](docs/screenshots/oct31-findings/review/14-comparison.png)
+
+</details>
+
+### Bug Report Fixes and Screenshots October 30 2026
+
+Fixed branding settings, pending email visibility, report exports, student training reviews, instructor session logging, and interactive calendars. Manual logs and schedule logs now share a booking link so attendance, grades, notes, edits, verification, and cancellation stay synchronized. Seventeen existing manual logs were linked to the admin verification queue.
+
+**Verification: 96 checks passed** across backend regressions and admin, instructor, and student browser workflows. Changed PHP files passed syntax checks, and Blade templates compiled successfully. Screenshots below use temporary QA records and branding settings; those records were removed and the original settings restored after testing. Invitation email actions were tested with fake mail.
+
+See the [full fix and test report](docs/BUG_REPORT_FIXES_2026-10-30.md) and [browser test results](docs/screenshots/bug-report-2026-10-30/results.json).
+
+#### 1. Pending Emails in User Management
+
+Student and instructor setup emails appear with recipient, role, status, expiry, and resend/remove actions.
+
+![Pending emails in User Management](docs/screenshots/bug-report-2026-10-30/admin-user-management.png)
+
+#### 2. Add Student Label
+
+The student creation dialog uses Add New Student for consistency with instructor and admin creation.
+
+![Add Student dialog](docs/screenshots/bug-report-2026-10-30/admin-add-student.png)
+
+#### 3. Unified Export Report Menu
+
+One menu offers Export All Records and Export Filtered Records, with PDF and Excel formats.
+
+![Unified Export Report menu](docs/screenshots/bug-report-2026-10-30/admin-verify-session-completion.png)
+
+#### 4. Student Training Review
+
+The Student Training List View action opens the training review. If there is no enrollment information, it displays: "This student has no data/information."
+
+![Student training review](docs/screenshots/bug-report-2026-10-30/admin-student-training.png)
+
+#### 5. Instructor Calendar Day Details
+
+Clicking a calendar day opens its schedules and session logging actions. Keyboard interaction and Escape are supported.
+
+![Instructor calendar day details](docs/screenshots/bug-report-2026-10-30/instructor-calendar-day.png)
+
+#### 6. Session Logging from the Schedule
+
+Instructors can record attendance, grade, and notes together. Manual logging only offers students with a current or historical instructor connection.
+
+![Schedule session logging form](docs/screenshots/bug-report-2026-10-30/instructor-session-log.png)
+
+#### 7. Logged Session Visible to Admin
+
+The same booking appears for admin verification with its attendance, grade, logged hours, and instructor notes.
+
+![Saved session visible to admin](docs/screenshots/bug-report-2026-10-30/admin-logged-session-visible.png)
+
+#### 8. Past Instructor Schedules
+
+Show Past Schedules reveals historical sessions. Common management and session action buttons use shared styles and visible labels.
+
+![Past instructor schedules](docs/screenshots/bug-report-2026-10-30/instructor-past-schedules.png)
+
+#### 9. Manual Session Logging
+
+The manual form also supports grades and attendance and shares the session record used by schedule logging.
+
+![Manual session logging](docs/screenshots/bug-report-2026-10-30/instructor-manual-session.png)
+
+#### 10. Student Calendar Day Details
+
+Students can open a day to review schedules and instructor notes, including lessons awaiting admin verification.
+
+![Student calendar day details](docs/screenshots/bug-report-2026-10-30/student-calendar-day.png)
+
+#### 11. Mobile Calendar Dialog
+
+The calendar grid and day dialog fit a 390px mobile viewport.
+
+![Student calendar on mobile](docs/screenshots/bug-report-2026-10-30/student-calendar-mobile.png)
+
+#### 12. Hidden School Name and Removed Logo
+
+Headers use the configured school display name and colors. Disabling the school name hides it, and removing the logo renders no fallback image.
+
+![School name and logo hidden](docs/screenshots/bug-report-2026-10-30/branding-name-and-logo-hidden.png)
+
+For other installations, apply the new migration and link existing manual logs using the commands in the [fix report](docs/BUG_REPORT_FIXES_2026-10-30.md#running-the-checks).
+
+---
+
+The following changes address feedback from capstone advisory consultations and defense preparations:
+
+---
+
+### Capstone Advisory Revisions & System Enhancements — October 29, 2026
+
+The following features and improvements were implemented based on capstone review and defense feedback:
+
+#### 1. Human-Readable Unique Identifiers (UID) for Enrollments, Payments, and Receipts
+- **Enrollment Tracking UID**: Generated sequential tracking IDs formatted as `ENR-YYYY-XXXXX` (e.g. `ENR-2026-00002`) via accessor in `EnrollmentRequest`. Displayed in the Admin Enrollment Requests table under the student name, in the Unified Verification Dashboard modal, and on the student's My Course page.
+- **Payment & Receipt UIDs**: Implemented `PAY-YYYY-XXXXX` for transactions and `RCP-YYYY-XXXXX` (or manual `OR-XXXXX`) for receipts in the `Payment` model. Rendered across Admin Payments, Student Payment history tables, and mobile card layouts.
+- **API & Unified Verification**: The enrollment verification API endpoint (`/admin/enrollments/api/{id}`) returns `uid`, `payment_uid`, and `receipt_uid` for seamless client-side verification workflows.
+
+![Enrollment Tracking UIDs](docs/screenshots/capstone_01_enrollment_uids.png)
+*Admin Enrollment Requests table displaying human-readable Tracking UID `ENR-2026-00038` and student details.*
+
+![Payment and Receipt UIDs](docs/screenshots/capstone_02_payments_uids.png)
+*Admin Payments table displaying Payment UID (`PAY-2026-00005`) and Receipt UID (`RCP-2026-00005`).*
+
+---
+
+#### 2. Distinct & Unique Colors for Each User Role
+- Replaced ambiguous badge styling with distinct color combinations across all application views:
+  - **System Admin**: Royal Purple (`#6b21a8` on `#f3e8ff`, border `#d8b4fe`)
+  - **School Admin**: Deep Indigo (`#4338ca` on `#ede9fe`, border `#a5b4fc`)
+  - **Branch Secretary**: Emerald Teal (`#0f766e` on `#ccfbf1`, border `#5eead4`)
+  - **Instructor**: Forest Green (`#166534` on `#dcfce7`, border `#86efac`)
+  - **Student**: Slate Blue (`#1e40af` on `#dbeafe`, border `#93c5fd`)
+  - **Guest**: Warm Amber (`#92400e` on `#fef3c7`, border `#fcd34d`)
+- Integrated into `resources/views/layouts/app.blade.php` with custom CSS variables and applied to Admin Management and User Management tables.
+
+![Unique Role Badges](docs/screenshots/capstone_03_role_badges_unique_colors.png)
+*Admin Management table showcasing distinct color-coded badges for System Admin, School Admin, and Branch Secretary roles.*
+
+---
+
+#### 3. Session Log Archiving & Soft-Deletion
+- **Non-Destructive Archiving**: Replaced hard deletion (`destroy()`) of training session completions with soft-archiving by adding the `archived_at` timestamp column to `session_completions`.
+- **Active & Archived Tabs**: Implemented dual-tab navigation with live record badges on both Instructor and School Admin session completion management pages.
+- **Archive & Restore Controls**: Instructors and School Admins can archive logs with a confirmation dialog, view them in the Archived Sessions tab, and restore them back to active status at any time.
+
+![Session Log Archiving](docs/screenshots/capstone_04_session_logs_archive.png)
+*Instructor Session Completions page displaying Active Sessions / Archived Sessions tabs and non-destructive Archive action buttons.*
+
+---
+
+#### 4. User Account Archiving & Automated Inactivity Archiving
+- **Account Archiving**: Added `archived_at` column to `students`, `instructors`, and `admins` tables, allowing System Admins to archive accounts rather than permanently deleting historical training data.
+- **Archived Users Tab**: Added a dedicated Archived Users tab in System Admin User Management (`/system-admin/users`) with separate tables for Archived Students and Archived Instructors, complete with one-click **"Restore to Active"** buttons.
+- **Web Auto-Archive Control**: Added an interactive "Auto-Archive Inactive" tool in the System Admin filter bar allowing administrators to specify an inactivity threshold (e.g. 90 days) and archive dormant users with one click.
+- **CLI Artisan Command**: Created `users:archive-inactive` command supporting automated daily cron execution:
+  ```bash
+  php artisan users:archive-inactive --days=90
+  ```
+
+![System Admin User Archiving & Auto-Archive](docs/screenshots/capstone_05_system_admin_user_archive.png)
+*System Admin Users Management displaying the Archived Users counter, the Auto-Archive Inactive tool, and Archive action buttons.*
+
+![System Admin Archived Users Tab](docs/screenshots/capstone_05_system_admin_archived_tab.png)
+*System Admin Archived Users tab showing archived records with one-click Restore to Active actions.*
+
+---
+
+#### 5. Instructor and Student Schedule Calendar Views
+- **Admin Calendar Replication**: Modeled after the School Admin Calendar grid layout with month navigation, full day cells, and standard status indicators.
+- **Instructor Calendar View**: Accessible via the "Calendar" toggle on `/instructor/my-schedule?view=calendar`. Color-codes practical driving sessions (green badge) and theoretical classes (blue badge) with current booking capacity counts.
+- **Student Calendar View**: Accessible via the "Calendar" toggle on `/student/schedule?view=calendar`. Displays booked lessons with course codes, instructor names, and status indicators (confirmed, pending, completed).
+- **Persistent View & Navigation**: Supports full month navigation arrows (`changeCalendarMonth`) with query string persistence (`?view=calendar&month=YYYY-MM`).
+
+![Instructor Calendar View](docs/screenshots/capstone_06_instructor_calendar_view.png)
+*Instructor Session Schedule in Calendar view showing month grid, color-coded sessions, and legend.*
+
+![Student Calendar View](docs/screenshots/capstone_07_student_calendar_view.png)
+*Student Schedule in Calendar view showing month grid, confirmed bookings, and legend.*
+
+---
+
+### Dedicated QR Code Scan Modal Popup & Image Zoom Lightbox — October 27, 2026
+- **Dedicated QR Code Scan Modal Popup (`#driveedQrScanModal`)**: Resolved payment QR scanning difficulties where cameras could not scan small in-page images. Clicking any payment QR code opens a dedicated high-contrast white card dialog optimized specifically for phone cameras and GCash auto-exposure.
+- **Interactive Zoom Toolbar**: Direct `[ - ] [ 100% ] [ + ] [ ↺ ]` zoom controls directly under the QR code allowing up to 200% magnification so users can scan from across a desk or with lower-resolution camera lenses.
+- **Account Details & 1-Click Copy**: Cleanly displays the School's official GCash Account Name and Account Number with a 1-click **"Copy"** button that gives instant **"Copied!"** visual feedback.
+- **Direct "Download QR Code" Action**: Mobile users can download the high-resolution QR image directly to their gallery to use GCash's *"Upload QR from Photos"* feature.
+- **High Stacking Priority (`z-index: 1000005`)**: Cleanly stacks on top of `#enrollmentPaymentModal` (`z-index: 99999`) and all Bootstrap modals without losing typed form input or closing the parent modal.
+- **Universal Lightbox (`#driveedImageLightbox`)**: Added full-size preview, zoom (+/-), mouse wheel zoom, pan/drag, 90° rotation, and download for official receipts, student permits, and license photos across student checkout, dashboard, and admin views.
+
+![Actual Student Payment Checkout](docs/screenshots/12_actual_payment_checkout_page.png)
+*Student checkout interface (/student/payment/38) with interactive QR container, zoom indicator, and Step 2 proof upload.*
+
+![Dedicated QR Scan Modal Popup Opened](docs/screenshots/12_qr_scan_modal_popup_opened.png)
+*Dedicated QR Scan Modal Popup with high-contrast card, camera-ready indicator, GCash details, and download capability.*
+
+![QR Modal Copied Number and Zoom](docs/screenshots/13_qr_scan_modal_copied_number.png)
+*1-click copy action with instant green confirmation and direct zoom-in controls.*
+
+![QR Scan Modal Stacked on Enrollment Modal](docs/screenshots/17_qr_scan_modal_stacked_on_enrollment_modal.png)
+*Dedicated QR Scan Modal Popup seamlessly stacked on top of the Enrollment Payment Modal without form disruption.*
+
+---
+
+### Table Responsiveness & Sticky Action Columns for Narrow Screens — October 27, 2026
+- Fixed an issue where narrow screens or split windows cut off the `Actions` column on the right edge of data tables.
+- Implemented `overflow-x: auto` container protection and minimum width boundaries (`min-width: 1020px`) on Admin Management, Branches, and User Management tables.
+- Pinned `.col-actions` stickily to the right edge (`position: sticky; right: 0; z-index: 2;`) with a clean elevation drop shadow so Edit, Deactivate, and Delete buttons remain visible and clickable regardless of horizontal scroll position.
+- Added responsive horizontal scroll indicator notices and customized touch-friendly scrollbars across all table views.
+
+![Admin Table Narrow Screen Sticky Actions](docs/screenshots/07_admin_table_narrow_screen_sticky_actions.png)
+*Admin Management table on narrow screens with sticky right Actions column permanently accessible.*
+
+![Admin Edit Modal Interacted](docs/screenshots/08_admin_edit_modal_interacted.png)
+*Clicking the pinned Edit action immediately opens the modal without obstruction.*
+
+---
+
+### Admin User Management Search & Filters — October 27, 2026
+- Removed an orphaned JavaScript fragment that caused `SyntaxError: Unexpected token '}'` and prevented the entire User Management script from running, leaving search and every filter unresponsive.
+- Rebuilt the filter bar as a native `GET` form with explicit `Search` and `Clear` actions, preserving `role`, `status`, and `filtered` state in hidden fields and keeping a no-JS fallback.
+- Server-side search now matches **name, email, and contact** on Enter or Search, while typing filters the current page instantly and points to the full search when there are no page-level matches.
+- License, branch, and quick-stat-card filters (Total, Active, Inactive, Students, Instructors, Licenses Expiring) now compose correctly across AJAX navigation.
+- Added a `Clear filters` action to the zero-results state so users are never stranded on an empty result.
+
+![Admin User Management search and filters](docs/screenshots/22_admin_user_management_search_and_filters.png)
+*User Management with working search, license and branch filters, Clear action, and quick-stat-card filtering.*
+
+![License filter results](docs/screenshots/23_admin_user_management_license_filter_results.png)
+*License filter returning only credentials expiring within 60 days, with the expiring card highlighted and reminder actions intact.*
+
+![Zero results with Clear filters](docs/screenshots/24_admin_user_management_empty_state_clear_filters.png)
+*Searching for a non-existent user shows a helpful empty state with a one-click Clear filters recovery.*
+
+---
+
+### Schedule Logs Export (October 27, 2026)
+- Added schedule-log export with status filters: Cancelled, Completed, Incoming, and No-show.
+- Status filters apply to booked lessons and session completions; admins may also restrict by student or instructor.
+- Instructors see only their students in the Student selector; students see only their own sessions.
+- Date range filters control the included record window.
+- PDF and Excel downloads available; file names include status label, student/instructor, and date range.
+- Admin may select a specific instructor or student, or view all records across the school (or branch for branch secretaries).
+- Added the export card to the admin schedules page with a native GET form and no-JS fallback.
+
+ ![Admin schedules export card with status filters](docs/screenshots/25_admin_schedules_schedule_logs_export.png)
+*Admin schedules page with the new Schedule Logs export card — status checkboxes, date pickers, Student/Instructor selectors, and PDF/Excel download buttons.*
+
+ ![Schedule logs export with all statuses selected](docs/screenshots/26_schedule_logs_all_statuses.png)
+*All four status groups selected — Cancelled, Completed, Incoming, and No-show.*
+
+ ![Schedule logs export with Cancelled and Incoming selected](docs/screenshots/27_schedule_logs_cancelled_incoming.png)
+*Only Cancelled and Incoming statuses selected, filtering out Completed and No-show lessons.*
+
+ ![Schedule logs export with Instructor-selected students](docs/screenshots/28_schedule_logs_instructor_selected.png)
+*Instructor selected from the dropdown; the export is automatically scoped to that instructor's sessions and their enrolled students.*
+
+ ![Clear filters in export card](docs/screenshots/29_schedule_logs_clear_filters.png)
+*Clicking Clear filters on the export card resets all dropdowns and checkboxes to their defaults.*
+
+---
+
+### Payment Receipt Viewing (404 Fix) — October 24, 2026
+- Fixed an issue where clicking "View Receipt" under Admin Payments & Transactions produced an HTTP 404 error.
+- Corrected the route parameter resolution in `ReceiptStorageService` so school slugs resolve from active models and authenticated contexts rather than falling back to an unmapped default route.
+- Added a `proof_url` accessor on the `Payment` model that automatically checks both the payment record and linked enrollment request.
+- Updated `StorageController` to normalize path separators, whitelist legacy directories (`guest-data/`, `receipts/`, `screenshots/`), and search both `local` and `public` disks.
+
+![Admin Payments Table](docs/screenshots/01_admin_payments_table.png)
+*Admin Payments & Transactions table with working "View Receipt" action.*
+
+![Payment Receipt Modal Stream](docs/screenshots/02_payment_receipt_image_stream.png)
+*Inline receipt proof modal streaming verified image directly from secure storage.*
+
+---
+
+### Instructor Session Log Exports (Whole & Per-Session) — October 24, 2026
+- Updated `SessionReportController` to accept `session_id` or `booking_id` for exporting individual session logs in addition to date-range exports.
+- Added a whole-session export dropdown in the instructor session completions view (`instructor/sessions/index.blade.php`) supporting PDF and Excel (.xlsx).
+- Added 1-click PDF and Excel download buttons on each row of the instructor sessions table and mobile cards.
+- Added "Export Session (PDF)" and "Export Session (Excel)" action buttons to the single session detail view (`instructor/sessions/show.blade.php`).
+
+![Instructor Sessions Export Controls](docs/screenshots/08_instructor_sessions_list_exports.png)
+*Instructor session completions view with whole-history export dropdown and per-row PDF/Excel actions.*
+
+![Single Session Detail Export](docs/screenshots/09_instructor_session_detail_export.png)
+*Individual session log detail page with direct PDF and Excel export buttons.*
+
+---
+
+### Driver's License Expiration Notification & Advisory Hub (Competitive Advantage) — October 24–25, 2026
+Unlike traditional driving schools that lose touch with learners after course graduation, DriveED Hub features a comprehensive **Driver's License Expiration Notification & Advisory System** that gives the driving school a continuous competitive edge ("+"):
+- **Proactive Multi-Channel Alerts:** Automated daily scans (08:00 AM) detect driver's licenses expiring within 60, 30, and 7 days, as well as expired credentials, automatically dispatching in-app notification badges and responsive advisory emails (`LicenseExpirationReminderMail`).
+- **Official LTO LTMS 4-Step Renewal Checklist:** Seamlessly integrated into student and instructor dashboards with direct links to `portal.lto.gov.ph`, online CDE (Comprehensive Driver's Education) exam requirements, and accredited clinic guidelines.
+- **Driving School Retention & Refresher Perks:** Recommends refresher driving sessions and vehicle/motorcycle DL code upgrades (A/A1, B/B1/B2) for students renewing licenses.
+- **Instructor Legal Compliance:** Real-time instructor dashboard alerts preventing instructors from teaching behind the wheel with expired credentials.
+- **Admin License Tracker & 1-Click Reminders:** Dedicated monitoring widget on the Admin Dashboard with expiring/expired counters, quick filtering in User Management, and 1-click on-demand reminder dispatching with cooldown overrides.
+- **Strict Anti-Slop UI Standards:** Modern UI designed with vector icons, contextual Philippine placeholders, consistent elevation tokens, and zero AI filler slop.
+
+![Student License Expiration Alert & Renewal Guide](docs/screenshots/12_student_license_expiration_alert.png)
+*Student Dashboard showing remaining days alert, official LTO notice, and expanded 4-step renewal checklist.*
+
+![Admin License Expiration Monitoring Widget](docs/screenshots/13_admin_license_expiration_monitoring_widget.png)
+*Admin Dashboard featuring the Driver's License Expiration Monitoring widget and on-demand reminder scan action.*
+
+![Admin User Management License Filter](docs/screenshots/14_admin_user_management_license_filter.png)
+*User Management filtered by expiring licenses with instant "Remind" action buttons.*
+
+![Instructor License Expiration Alert](docs/screenshots/15_instructor_license_expiration_alert.png)
+*Instructor Dashboard with legal compliance notice for expiring professional credentials.*
+
+---
+
+### Phase Progression & Certificate Claim Notices — October 22, 2026
+- Removed the standalone Phase Progression page. Progression from TDC to PDC is now handled directly through the student dashboard modal and reviewed under Admin Enrollment Requests.
+- Added a "Send pickup notice" button in Admin Student Training list so admins can notify students when their certificate of completion is ready.
+- Added persistent claim stub notices to the student dashboard.
+
+![Admin Training Claim Notice](docs/screenshots/04_admin_student_training_claim_notice.png)
+*Admin Student Training management view with "Send Claim Notice" action.*
+
+---
+
+### Schedules & Session Management — October 20–22, 2026
+- Added session export capabilities for administrators and students across scheduled slots and attendance records.
+- Standardized UI contrast, removed gradient artifacts, and ensured responsive layout across desktop and mobile browsers.
+
+![Admin Schedules Export](docs/screenshots/03_admin_schedules_session_exports.png)
+*Admin schedules session view with PDF/Excel reporting controls.*
+
+![Student Schedule Export](docs/screenshots/06_student_schedule_export.png)
+*Student schedule portal with session history and export functionality.*
+
+---
+
+### In-Place Pop-up Modals for Enrollment License & Receipt Re-upload — October 24, 2026
+- Converted license and payment receipt re-uploads from multi-page redirects into streamlined in-place pop-up modals.
+- Re-uploading a rejected driver's license can now be completed directly from the Guest Enrollment Requests table, Student Course Details, Student Dashboard, or Student Profile without navigating to separate pages.
+- Submitting or re-uploading a payment receipt can be performed directly on the Guest Enrollment Requests page, Guest Dashboard, Student Course Details, or Courses Catalog via modal dialogs with instant GCash number copying, QR code scanning, and 13-digit reference number validation.
+- Initial enrollment submission seamlessly keeps the user on their active dashboard with the receipt upload modal automatically popped open, completing the full enrollment workflow on a single page.
+
+![Payment Receipt Pop-up Modal](docs/screenshots/10_reupload_receipt_popup_modal.png)
+*In-place payment receipt submission pop-up modal with GCash QR preview, account copy tool, and live validation.*
+
+![License Re-upload Pop-up Modal](docscreenshots/11_reupload_license_popup_modal.png)
+*In-place driver's license re-upload pop-up modal with LTO regulatory notice and direct file dropzone.*
+
+---
+
+### School Admin Authentication & Resilient Dashboard Access — October 26, 2026
+- Resolved false-positive session loop terminations caused by unhandled redirections to undefined routes during admin authentication.
+- Added explicit route aliasing (`schools.admin.login` mapped to `schools.login`) ensuring multi-tenant consistency.
+- Fortified the School Admin dashboard (`AdminController@dashboard`) with isolated defensive query fallbacks for student/instructor counts, growth indicators, trends, revenues, and license stats so non-critical metric failures never block administrators from accessing their dashboard.
+- Prevented unintended session invalidation for administrative guards across school context middleware.
+
+![School Admin Dashboard Verified](docs/screenshots/16_school_admin_dashboard_login_verified.png)
+*School Admin dashboard rendering successfully with zero errors following authentication.*
+
+---
+
+### Cross-Module Health Audit & Null-Safe Date Formatting — October 26, 2026
+- Conducted full regression scan across 49 views and endpoints across School Admin, Branch Secretary, Instructor, Student, Guest, and System Admin roles.
+- Fixed a null pointer exception (`Call to a member function format() on null`) in `school/admin/progress.blade.php` and `school/instructor/reports.blade.php` by implementing null-safe date formatting (`?->format()`) for booking and lesson records without scheduled timestamps.
+- Verified 100% pass rate (HTTP 200 OK) across all core module routes and dashboards.
+
+![Instructor Student Progress Verified](docs/screenshots/17_instructor_student_progress_verified.png)
+*Instructor Student Progress portal rendering successfully with responsive student status metrics, course tracking, and recent session history.*
+
+---
+
+### Multi-Course Progression & Completed Course Re-Enrollment — October 26, 2026
+- **Unblocked Re-Enrollments:** Resolved an issue where students who completed a driving course were blocked from enrolling in new courses or re-enrolling in completed courses.
+- **Migration `2026_10_26_000001_drop_unique_student_course_enrollment_index`:** Dropped the unconditional unique index on `enrollment_requests` (`student_id`, `course_id`), permitting multiple historical completions over time.
+- **Auto-Unlock Upon Completion:** Updated `Course::complete()` and enrollment workflows to ensure database transactions commit, student records unlock (`is_course_locked = false`, `canEnrollInNewCourse() = true`), and role promotion logic remains consistent.
+- **Visual Completion & Re-Enrollment Badge:** Added a green `"✓" Course Previously Completed"` badge and an enabled `"Enroll Again"` button on course catalog and detail views.
+
+![Completed Course Re-enrollment](docs/screenshots/18_course_completed_reenroll.png)
+*Course details view displaying completed status badge and active "Enroll Again" action.*
+
+---
+
+### Dynamic Media Handling & School Branding Management — October 26, 2026
+- **End-to-End Media Persistence:** Eliminated hardcoded image assets across the platform, replacing them with dynamic file uploads, public disk storage (`storage/app/public/`), automatic cleanup of replaced files, and removal toggles.
+- **User Avatars:** Integrated direct avatar upload and live preview across Student, Guest, Instructor, and School Admin profile settings and User Management edit modals.
+- **Course Artwork:** Added custom course banner image upload and removal toggles within Admin Course Management.
+- **School Branding (Smart Driving School):** Uploaded and persisted the official Smart Driving School logo (`public/images/logo-smart-transparent.png`) via Admin School Settings, dynamically rendering across the top navigation bar, login headers, and public landing pages.
+
+![Admin Settings Smart Logo](docs/screenshots/20_admin_settings_smart_logo.png)
+*Admin School Settings with uploaded Smart Driving School logo preview and configuration controls.*
+
+![Admin Header Smart Logo](docs/screenshots/21_admin_header_smart_logo.png)
+*Admin Dashboard header dynamically rendering the Smart Driving School logo.*
+
+---
+
+### Training & Session Records Export Relocation & Filtering — October 26, 2026
+- **Relocated from Schedule to Training Logs:** Moved the "Training & Session Records" export panel from the Schedule section (`schedules.blade.php`) to **Training Logs > Verify Session Completion** (`verify-session-completion.blade.php`).
+- **Student & Instructor Filters:** Added dropdown selectors to filter and export records specifically by **Student** and/or **Instructor**, in addition to start/end date ranges.
+- **Resolved PDF Export Exceptions:** Fixed DomPDF font caching permissions (`storage/fonts/`), canvas page text font metrics (`DejaVu Sans`), and implemented null-safe attribute formatting in `SessionReportController` and `session-report-pdf.blade.php`.
+- **Enriched Export Metadata:** Both PDF and Excel (.xlsx) reports dynamically display the active Student and Instructor filter metadata in report headers.
+
+![Verify Session Completion Export Section](docs/screenshots/19_verify_session_completion_export_section.png)
+*Verify Session Completion page with Training & Session Records export panel featuring Student and Instructor filters.*
+
+---
+
+### Defense Preparation Documents — October 24, 2026
+- Added `docs/CAPSTONE_DEFENSE_MASTER_GUIDE.md`: Presenter guide and 2-laptop walkthrough script (Laptop 1: Student/Guest, Laptop 2: Admin/Instructor).
+- Added `docs/SYSTEM_PROCESS_FLOWS_PRESENTATION.md`: Scenario walkthroughs including smooth enrollment, exception handling, and expired license workflows.
+- Updated `docs/SYSTEM_DOCUMENTATION.md` to clarify regulatory boundaries between the driving school and the LTO.
+
+---
+
+### Getting Started (Docker)
+
+Run the system locally using Docker Compose:
+
+```bash
+# Start containers
+docker compose up -d
+
+# Run migrations
+docker compose exec app php artisan migrate
+
+# Seed sample data (optional)
+docker compose exec app php artisan db:seed --class=DriveEdHubSeeder
+```
+
+### Accessing the Portal
+- **URL:** `http://localhost:8004/drived-hub`
+- **School Slug:** `drived-hub`
+- **Admin:** `admin1@driveedhub.test` / `DriveDemo123`
+- **Instructor:** `instructor1@driveedhub.test` / `DriveDemo123`
+- **Student:** `student1@driveedhub.test` / `DriveDemo123`
+
+---
+
+### Testing & Verification
+
+Automated regression test scripts are located in `tests/`:
+
+```bash
+# Verify course re-enrollment & dynamic media persistence
+docker compose exec app php tests/verify-enrollment-and-media.php
+
+# Verify session report export & student/instructor filtering
+docker compose exec app php tests/verify-session-report-export.php
+
+# Verify session exports & claim notices
+docker compose exec app php tests/verify-session-features.php
+
+# Verify receipt serving & path security
+docker compose exec app php tests/verify-receipt-serving.php
+
+# Verify license expiration reminders
+docker compose exec app php tests/verify-license-expiration-reminders.php
+
+# Verify bundle transitions
+docker compose exec app php tests/verify-bundle-transitions.php
+
+# Verify in-place enrollment re-upload modals
+docker compose exec app php tests/verify-enrollment-reupload-modals.php
+
+# Verify toast deduplication & schedule validation
+node tests/verify-module-toasts.cjs
+node tests/verify-schedule-submission.cjs
+```
+
+![Automated Test Verification](docs/screenshots/07_automated_test_suites_passing.png)
+*Terminal output showing 100% pass rate across all automated test suites.*

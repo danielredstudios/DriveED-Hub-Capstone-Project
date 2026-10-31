@@ -373,6 +373,12 @@ class AdminController extends Controller
             $filteredStudentQuery = clone $studentQuery;
             $filteredInstructorQuery = clone $instructorQuery;
 
+            if ($request->query('registered') === 'month') {
+                $filteredStudentQuery->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()]);
+                $filteredInstructorQuery->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()]);
+                $filtersApplied = true;
+            }
+
             $applySharedFilters($filteredStudentQuery);
             $applySharedFilters($filteredInstructorQuery);
 
@@ -1551,6 +1557,12 @@ class AdminController extends Controller
                 'badge_cancelled_bg' => 'nullable|regex:/^#[0-9A-Fa-f]{6}$/',
                 'badge_cancelled_text' => 'nullable|regex:/^#[0-9A-Fa-f]{6}$/',
                 'role_student_bg' => 'nullable|regex:/^#[0-9A-Fa-f]{6}$/',
+                'admin_header_bg' => 'nullable|regex:/^#[0-9A-Fa-f]{6}$/',
+                'admin_header_text' => 'nullable|regex:/^#[0-9A-Fa-f]{6}$/',
+                'instructor_header_bg' => 'nullable|regex:/^#[0-9A-Fa-f]{6}$/',
+                'instructor_header_text' => 'nullable|regex:/^#[0-9A-Fa-f]{6}$/',
+                'student_header_bg' => 'nullable|regex:/^#[0-9A-Fa-f]{6}$/',
+                'student_header_text' => 'nullable|regex:/^#[0-9A-Fa-f]{6}$/',
                 'role_student_text' => 'nullable|regex:/^#[0-9A-Fa-f]{6}$/',
                 'role_instructor_bg' => 'nullable|regex:/^#[0-9A-Fa-f]{6}$/',
                 'role_instructor_text' => 'nullable|regex:/^#[0-9A-Fa-f]{6}$/',
@@ -1723,6 +1735,12 @@ class AdminController extends Controller
                 'badge_cancelled_bg' => $request->badge_cancelled_bg ?? '#ef4444',
                 'badge_cancelled_text' => $request->badge_cancelled_text ?? '#7f1d1d',
                 'role_student_bg' => $request->role_student_bg ?? '#dbeafe',
+                'admin_header_bg' => $request->admin_header_bg ?? $schoolSetting->admin_header_bg,
+                'admin_header_text' => $request->admin_header_text ?? $schoolSetting->admin_header_text,
+                'instructor_header_bg' => $request->instructor_header_bg ?? $schoolSetting->instructor_header_bg,
+                'instructor_header_text' => $request->instructor_header_text ?? $schoolSetting->instructor_header_text,
+                'student_header_bg' => $request->student_header_bg ?? $schoolSetting->student_header_bg,
+                'student_header_text' => $request->student_header_text ?? $schoolSetting->student_header_text,
                 'role_student_text' => $request->role_student_text ?? '#1e40af',
                 'role_instructor_bg' => $request->role_instructor_bg ?? '#e0f2fe',
                 'role_instructor_text' => $request->role_instructor_text ?? '#0369a1',

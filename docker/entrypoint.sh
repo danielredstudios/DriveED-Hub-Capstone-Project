@@ -44,6 +44,8 @@ if [ ! -f vendor/autoload.php ]; then
 fi
 
 # Ensure application key is set
+php artisan config:clear
+
 if ! grep -q "^APP_KEY=base64:" .env; then
     echo "Generating Laravel application key..."
     php artisan key:generate --force
@@ -77,15 +79,15 @@ if [ "${DB_CONNECTION:-mysql}" = "mysql" ]; then
     " 2>/dev/null; do
         counter=$((counter + 1))
         if [ $counter -ge $max_retries ]; then
-            echo "Warning: Database connection could not be established within $max_retries attempts. Continuing..."
-            break
+            echo "Database connection could not be established within $max_retries attempts. Stopping deployment."
+            exit 1
         fi
         sleep 2
     done
 
     if [ $counter -lt $max_retries ]; then
         echo "Database is ready! Running migrations..."
-        php artisan migrate --force || echo "Migrations finished with warnings or already applied."
+        php artisan migrate --force
     fi
 elif [ "${DB_CONNECTION:-}" = "sqlite" ]; then
     SQLITE_PATH="${DB_DATABASE:-database/database.sqlite}"
@@ -95,11 +97,10 @@ elif [ "${DB_CONNECTION:-}" = "sqlite" ]; then
         chmod 664 "$SQLITE_PATH"
     fi
     echo "Running SQLite migrations..."
-    php artisan migrate --force || true
+    php artisan migrate --force
 fi
 
 # Clear stale caches
-php artisan config:clear || true
 php artisan route:clear || true
 php artisan view:clear || true
 

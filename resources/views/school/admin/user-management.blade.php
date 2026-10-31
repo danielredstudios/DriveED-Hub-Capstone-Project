@@ -1988,6 +1988,7 @@
                     <input type="hidden" name="filtered" value="1">
                     {{-- Quick-filter cards keep their selection when the form is submitted. --}}
                     <input type="hidden" name="role" id="userRoleFilter" value="{{ $activeRoleFilter ?? 'all' }}">
+                    @if(request('registered') === 'month')<input type="hidden" name="registered" value="month">@endif
                     <input type="hidden" name="status" id="userStatusFilter" value="{{ $activeStatusFilter ?? 'all' }}">
 
                     <div class="search-box">
@@ -2941,7 +2942,8 @@
                     : (params.get('branch') || initialUserFilterState.branch || 'all'),
                 license_filter: licenseSelect
                     ? (licenseSelect.value || 'all')
-                    : (params.get('license_filter') || initialUserFilterState.license_filter || 'all')
+                    : (params.get('license_filter') || initialUserFilterState.license_filter || 'all'),
+                registered: params.get('registered') || ''
             };
         }
 
@@ -2954,7 +2956,7 @@
                 url.searchParams.set('search', search);
             }
 
-            ['status', 'role', 'branch', 'license_filter'].forEach(function (key) {
+            ['status', 'role', 'branch', 'license_filter', 'registered'].forEach(function (key) {
                 const value = merged[key];
                 if (value && value !== 'all') {
                     url.searchParams.set(key, value);
@@ -3060,7 +3062,8 @@
                 role: 'all',
                 status: 'all',
                 branch: 'all',
-                license_filter: 'all'
+                license_filter: 'all',
+                registered: ''
             }, true);
         }
 

@@ -1623,7 +1623,9 @@
                                     <p>{{ \Carbon\Carbon::parse($daySlot->start_time)->format('g:i A') }} to {{ \Carbon\Carbon::parse($daySlot->end_time)->format('g:i A') }} · {{ $daySlot->branch->name ?? 'School' }}</p>
                                     @foreach($daySlot->bookings->where('instructor_id', $instructorId) as $dayBooking)
                                         <p>{{ $dayBooking->student->name ?? 'Student' }} · {{ ucfirst($dayBooking->status) }}</p>
-                                        <button type="button" class="btn btn-primary" onclick="document.getElementById('calendarDayDialog').close();openScheduleSessionLog({{ $dayBooking->id }})">Log Session</button>
+                                        @if(in_array($dayBooking->status, ['scheduled', 'confirmed'], true))
+                                            <button type="button" class="btn btn-primary" onclick="document.getElementById('calendarDayDialog').close();openScheduleSessionLog({{ $dayBooking->id }})">Log Session</button>
+                                        @endif
                                     @endforeach
                                 </article>
                             @empty
@@ -2127,5 +2129,6 @@
     }
 </script>
 @include('partials.calendar-day-dialog')
+@include('partials.schedule-layout')
 @include('partials.schedule-session-log')
 @endsection

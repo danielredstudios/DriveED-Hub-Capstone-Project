@@ -460,6 +460,8 @@
 
     /* Bundle/Combo transition panel inside the verification modal */
     .v-transition-panel {
+        flex-basis:100%;
+        box-sizing:border-box;
         margin: 0 24px 24px;
         padding: 16px 18px;
         border: 1px solid #dbeafe;
@@ -1019,6 +1021,9 @@
     
     .v-modal-body {
         display: flex;
+        min-height: 0;
+        min-width: 0;
+        flex-wrap: wrap;
         overflow-y: auto;
         padding: 0;
         flex: 1;
@@ -1026,6 +1031,8 @@
     
     .v-modal-sidebar {
         width: 300px;
+        box-sizing: border-box;
+        flex: 0 0 280px;
         background: #fff;
         border-right: 1px solid #e2e8f0;
         padding: 20px;
@@ -1036,6 +1043,7 @@
     
     .v-modal-content {
         flex: 1;
+        min-width: 0;
         background: #f1f5f9;
         display: flex;
         gap: 2px;
@@ -1043,10 +1051,19 @@
     
     .v-image-panel {
         flex: 1;
+        min-width: 0;
+        min-height: 320px;
         display: flex;
         flex-direction: column;
         background: #1e293b;
         position: relative;
+    }
+    @media (max-width: 760px) {
+        .v-modal-body { flex-direction:column;flex-wrap:nowrap; }
+        .v-modal-sidebar { width:100%;flex-basis:auto; }
+        .v-modal-content { flex-direction:column;flex-shrink:0; }
+        .verification-modal-card { width:96vw;max-height:90dvh; }
+        .v-panel-actions { flex-wrap:wrap; }
     }
     
     .v-panel-title {
@@ -1068,6 +1085,7 @@
 
     .v-image-viewer {
         flex: 1;
+        color: #e2e8f0;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -1115,7 +1133,7 @@
     }
 
     .v-empty-image {
-        color: #64748b;
+        color: #cbd5e1;
         text-align: center;
         display: flex;
         flex-direction: column;
@@ -1281,6 +1299,14 @@
     </div>
 
     <div class="filters-row">
+        <form method="GET" action="{{ school_route('admin.enrollments.index') }}" data-no-ajax="1" style="display:flex;gap:8px;flex-wrap:wrap;">
+            @foreach(['status', 'branch', 'sort'] as $filter)
+                @if(request()->filled($filter))<input type="hidden" name="{{ $filter }}" value="{{ request($filter) }}">@endif
+            @endforeach
+            <label for="enrollmentSearch" class="sr-only">Search enrollments</label>
+            <input type="search" id="enrollmentSearch" name="search" value="{{ request('search') }}" placeholder="Name, email, course or enrollment ID" class="form-control" style="min-width:240px;max-width:100%;">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
         @if($branches->count() > 0 && !$admin->isBranchSecretary())
         <div class="branch-filter-wrap">
             <select id="branchFilter" class="form-select branch-filter-select" onchange="applyEnrollmentBranchFilter()">
@@ -1719,6 +1745,7 @@ function getEnrollmentFilterState() {
         status: currentStatus,
         branch: branchFilter ? (branchFilter.value || '') : currentBranch,
         sort: sortFilter ? (sortFilter.value || currentSort) : currentSort,
+        search: document.getElementById('enrollmentSearch')?.value || params.get('search') || '',
     };
 }
 
@@ -1728,6 +1755,7 @@ function buildEnrollmentUrl(filters = {}) {
 
     url.searchParams.set('status', merged.status || 'all');
     url.searchParams.set('sort', merged.sort || 'priority');
+    if (merged.search) url.searchParams.set('search', merged.search);
 
     if (merged.branch) {
         url.searchParams.set('branch', merged.branch);
@@ -1945,11 +1973,14 @@ document.addEventListener('click', function(e) {
  * Unified Verification Modal Logic
  */
 let currentEnrollmentId = null;
+let verificationTrigger = null;
 
 function openVerificationModal(enrollmentId) {
+    verificationTrigger = document.activeElement;
     currentEnrollmentId = enrollmentId;
     const modal = document.getElementById('unifiedVerificationModal');
     modal.style.display = 'flex';
+    modal.querySelector('.btn-close').focus();
     
     // Show loading state
     document.getElementById('v-modal-loading').style.display = 'flex';
@@ -2054,7 +2085,7 @@ function updatePanelImage(type, url, label) {
         } else {
             viewer.innerHTML = `
                 <div class="position-relative d-inline-block text-center w-100">
-                    <img src="${url}" alt="${label}" class="img-fluid zoomable-image-target" style="cursor: zoom-in; max-height: 220px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" onclick="openImageLightbox('${url}', '${label}')" title="Click to zoom & inspect">
+                    <img src="${url}" alt="${label}" class="img-fluid zoomable-image-target" style="cursor: zoom-in; max-height: 220px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" onclick="openImageLightbox('${url}', '${label}')" onerror="this.parentElement.textContent='Document unavailable. Ask the student to upload it again.'" title="Click to zoom & inspect">
                     <div class="mt-2">
                         <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill py-1 px-3" onclick="openImageLightbox('${url}', '${label}')" style="font-size: 0.78rem;">
                             <i class="fas fa-search-plus me-1"></i> Zoom / Inspect Full-Size
@@ -2071,6 +2102,7 @@ function updatePanelImage(type, url, label) {
 function closeVerificationModal() {
     document.getElementById('unifiedVerificationModal').style.display = 'none';
     currentEnrollmentId = null;
+    verificationTrigger?.focus();
 }
 
 function verifyPaymentAjax() {
@@ -2449,10 +2481,10 @@ function finalApproveFromModal() {
 </script>
 
 <!-- Unified Verification Modal -->
-<div id="unifiedVerificationModal" class="action-modal modal" style="display: none;">
+<div id="unifiedVerificationModal" class="action-modal modal" role="dialog" aria-modal="true" aria-labelledby="verificationModalTitle" style="display: none;">
     <div class="verification-modal-card">
         <div class="v-modal-header">
-            <h3 class="m-0 font-weight-bold" style="font-size: 1.1rem; color: #1e293b;">Verification Dashboard</h3>
+            <h3 id="verificationModalTitle" class="m-0 font-weight-bold" style="font-size: 1.1rem; color: #1e293b;">Verification Dashboard</h3>
             <button type="button" onclick="closeVerificationModal()" class="btn-close" style="border:none;background:none;font-size:1.5rem;">&times;</button>
         </div>
         
@@ -2503,7 +2535,6 @@ function finalApproveFromModal() {
                     <div style="margin-top: 8px; font-size: 0.75rem; color: #9b1c1c; font-style: italic;">
                         Approval is blocked until this request is resolved.
                     </div>
-                </div>
                 </div>
                 <div class="mt-auto">
                     <p class="text-muted small" style="line-height: 1.4;">
@@ -2603,6 +2634,21 @@ function finalApproveFromModal() {
 // Close unified modal when clicking outside
 document.getElementById('unifiedVerificationModal')?.addEventListener('click', function(e) {
     if (e.target === this) closeVerificationModal();
+});
+document.getElementById('unifiedVerificationModal')?.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        event.preventDefault();
+        closeVerificationModal();
+        return;
+    }
+    if (event.key !== 'Tab') return;
+    const controls = [...this.querySelectorAll('button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled])')].filter(control => control.getClientRects().length);
+    const first = controls[0];
+    const last = controls[controls.length - 1];
+    if ((event.shiftKey && document.activeElement === first) || (!event.shiftKey && document.activeElement === last)) {
+        event.preventDefault();
+        (event.shiftKey ? last : first)?.focus();
+    }
 });
 </script>
 @endsection

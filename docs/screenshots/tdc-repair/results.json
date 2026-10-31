@@ -1,0 +1,27 @@
+[
+  {
+    "name": "TDC passing lifecycle",
+    "command": "php tests/verify-tdc-completion.php",
+    "stdout": "PASS: 38 TDC completion regression checks."
+  },
+  {
+    "name": "Existing students and deployment migration",
+    "command": "php tests/verify-tdc-repair.php",
+    "stdout": "PASS: TDC repair preview, school scope, completion, lock ownership, Combo exclusion, training logs, and repeat runs.\nPASS: deployment migration runs repair across schools; reruns and rollback preserve repaired data and training logs."
+  },
+  {
+    "name": "Repair command syntax",
+    "command": "php -l app/Console/Commands/RepairPassedTdcEnrollments.php",
+    "stdout": "No syntax errors detected in app/Console/Commands/RepairPassedTdcEnrollments.php"
+  },
+  {
+    "name": "Deployment migration syntax",
+    "command": "php -l database/migrations/2026_10_31_000001_repair_passed_standalone_tdc_enrollments.php",
+    "stdout": "No syntax errors detected in database/migrations/2026_10_31_000001_repair_passed_standalone_tdc_enrollments.php"
+  },
+  {
+    "name": "Docker startup syntax",
+    "command": "bash -n docker/entrypoint.sh",
+    "stdout": "Exit code 0"
+  }
+]

@@ -46,6 +46,7 @@ class EnrollmentRequest extends Model
         'theoretical_passed',
         'theoretical_passed_at',
         'theoretical_passed_by',
+        'theoretical_pass_notes',
         'cancellation_requested',
         'cancellation_reason',
         // New enrollment fields
@@ -274,7 +275,7 @@ class EnrollmentRequest extends Model
             'theoretical_passed' => true,
             'theoretical_passed_at' => now(),
             'theoretical_passed_by' => $adminId,
-            'theoretical_pass_notes' => $notes,
+            'theoretical_pass_notes' => $notes ?? $this->theoretical_pass_notes,
         ]);
 
         // Confirm the student's pending license-triggered transition request.
@@ -282,6 +283,18 @@ class EnrollmentRequest extends Model
 
         if ($this->learner && !$this->learner->hasPassedTheoretical()) {
             $this->learner->markTheoreticalPassed();
+        }
+
+        if ($this->status === 'approved' && $this->course?->course_type === 'theoretical') {
+            $this->complete($adminId, $notes);
+            $student = $this->learner;
+            if ($student && (
+                (string) $student->active_enrollment_id === (string) $this->id
+                || ($student->active_enrollment_id === null && $student->is_course_locked
+                    && !$student->enrollmentRequests()->whereKeyNot($this->id)->whereIn('status', ['pending', 'approved'])->exists())
+            )) {
+                $student->unlockFromCourse();
+            }
         }
     }
 

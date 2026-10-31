@@ -99,6 +99,16 @@ class StoreSessionCompletionRequest extends FormRequest
                     $validator->errors()->add('enrollment_id', 'Cannot log sessions for inactive enrollments.');
                 }
 
+                if (in_array($this->session_type, ['theoretical', 'practical'], true)) {
+                    try {
+                        \App\Support\TrainingHours::ensureCanLog($enrollment, $this->session_type, (float) $this->hours_completed);
+                    } catch (\Illuminate\Validation\ValidationException $error) {
+                        foreach ($error->errors()['hours_completed'] as $message) {
+                            $validator->errors()->add('hours_completed', $message);
+                        }
+                    }
+                }
+
                 // Verify instructor is authorized for this enrollment
                 $user = $this->user();
                 if ($user instanceof \App\Models\Instructor) {

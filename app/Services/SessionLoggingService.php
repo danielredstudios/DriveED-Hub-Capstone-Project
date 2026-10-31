@@ -59,6 +59,8 @@ class SessionLoggingService
         }
 
         return DB::transaction(function () use ($booking) {
+            // Lock the allocation before reading sessions so concurrent logs see the committed total.
+            $enrollment = \App\Models\EnrollmentRequest::whereKey($booking->enrollment_request_id)->lockForUpdate()->firstOrFail();
             $booking = Booking::whereKey($booking->id)->lockForUpdate()->firstOrFail();
             $slot = $booking->timeSlot;
             $start = $slot?->start_time ?? $booking->scheduled_at?->format('H:i:s');
@@ -73,6 +75,9 @@ class SessionLoggingService
             }
             $session ??= new SessionCompletion;
             $hours = $session->hours_completed ?? ($slot ? round(Carbon::parse($slot->start_time)->diffInMinutes(Carbon::parse($slot->end_time)) / 60, 2) : 1);
+            if ((!$session->exists || $session->status !== 'completed') && !in_array($booking->status, ['cancelled', 'no-show', 'no_show'], true)) {
+                \App\Support\TrainingHours::ensureCanLog($enrollment, $type, (float) $hours, $session->exists ? $session->id : null);
+            }
             $session->fill([
                 'booking_id' => $booking->id, 'school_id' => $booking->school_id,
                 'enrollment_id' => $booking->enrollment_request_id, 'instructor_id' => $booking->instructor_id,

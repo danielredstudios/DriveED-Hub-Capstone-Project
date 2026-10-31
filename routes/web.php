@@ -380,6 +380,8 @@ Route::prefix('{school:slug}')
                         Route::prefix('theoretical')->name('theoretical.')->group(function () {
                             Route::get('/', [TheoreticalCompletionController::class , 'index'])->name('index');
                             Route::get('/stats/overview', [TheoreticalCompletionController::class , 'stats'])->name('stats');
+                            Route::get('/export/pdf', [TheoreticalCompletionController::class, 'exportList'])->name('exportList');
+                            Route::get('/{enrollment}/export/pdf', [TheoreticalCompletionController::class, 'export'])->name('export');
                             Route::get('/{enrollment}', [TheoreticalCompletionController::class , 'show'])->name('show');
                             Route::post('/mark-passed', [TheoreticalCompletionController::class , 'markAsPassed'])->name('markAsPassed');
                             Route::post('/{enrollment}/complete', [TheoreticalCompletionController::class , 'complete'])->name('complete');
@@ -533,6 +535,8 @@ Route::prefix('{school:slug}')
 
                     Route::prefix('theoretical')->name('theoretical.')->group(function () {
                             Route::get('/', [TheoreticalCompletionController::class , 'index'])->name('index');
+                            Route::get('/export/pdf', [TheoreticalCompletionController::class, 'exportList'])->name('exportList');
+                            Route::get('/{enrollment}/export/pdf', [TheoreticalCompletionController::class, 'export'])->name('export');
                             Route::get('/{enrollment}', [TheoreticalCompletionController::class , 'show'])->name('show');
                             Route::post('/mark-passed', [TheoreticalCompletionController::class , 'markAsPassed'])->name('markAsPassed');
                         }
