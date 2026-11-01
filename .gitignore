@@ -93,5 +93,8 @@ Thumbs.db
 !/tests/verify-hours-login-fix.mjs
 !/tests/verify-home-branding.mjs
 !/tests/run-chat-regression.mjs
+!/tests/verify-nov1-findings.mjs
+!/tests/verify-nov1-experience.php
+!/tests/nov1-package-snapshot.php
 
 !/docs/screenshots/full-regression/*.log

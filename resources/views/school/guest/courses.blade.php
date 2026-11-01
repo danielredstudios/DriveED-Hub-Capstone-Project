@@ -1076,19 +1076,11 @@
                         </label>
                         <select name="experience_level" id="experience_level{{ $course->id }}" class="form-select @error('experience_level') is-invalid @enderror" required onchange="handleExperienceChange{{ $course->id }}()">
                             <option value="">Select your experience...</option>
-                            @if(in_array($course->course_type, ['theoretical', 'combo']))
-                                <option value="new_driver" {{ old('experience_level') == 'new_driver' ? 'selected' : '' }}>
-                                    New Driver (No license, learning from scratch)
-                                </option>
-                                <option value="experienced" {{ old('experience_level') == 'experienced' ? 'selected' : '' }}>
-                                    Experienced Driver (Have license or experience)
-                                </option>
-                            @else
-                                {{-- PDC: Only experienced drivers allowed --}}
-                                <option value="experienced" {{ old('experience_level') == 'experienced' ? 'selected' : '' }}>
-                                    Experienced Driver (Have Student Driver's License)
-                                </option>
+                            @if($course->course_type !== 'practical')
+                                <option value="new_driver" {{ old('experience_level') == 'new_driver' ? 'selected' : '' }}>New Driver (No license, learning from scratch)</option>
                             @endif
+                            <option value="new_driver_with_license" {{ old('experience_level') == 'new_driver_with_license' ? 'selected' : '' }}>New Driver (Have Student Driver's License)</option>
+                            <option value="experienced" {{ old('experience_level') == 'experienced' ? 'selected' : '' }}>Experienced Driver (Have Driver's License)</option>
                         </select>
                         @error('experience_level')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -1105,7 +1097,7 @@
                     <!-- Student License Status & Upload (shown for experienced drivers on practical courses) -->
                     <div class="mb-3 {{ $course->course_type === 'practical' ? '' : 'credential-section-hidden' }}" id="credentialSection{{ $course->id }}">
                         <label for="student_license{{ $course->id }}" class="form-label">
-                            <strong>Student Driver's License</strong> 
+                            <strong id="licenseLabel{{ $course->id }}">Student Driver's License</strong>
                             <span class="text-danger" id="licenseRequiredStar{{ $course->id }}">
                                 {{ ($course->course_type === 'practical' && !$guest->hasVerifiedLicense() && !$guest->isLicensePending()) ? '*' : '' }}
                             </span>
@@ -1141,7 +1133,7 @@
                             @if($guest->hasVerifiedLicense() || $guest->isLicensePending())
                                 (Optional) Upload a new version only if you need to update your license on file.
                             @elseif($course->course_type === 'practical')
-                                Please upload a clear photo or PDF of your Student Driver's License.
+                                Please upload a clear photo or PDF of your license.
                             @else
                                 Upload a copy of your existing driver's license or credential (optional, PDF/Image, max 5MB)
                             @endif
@@ -1151,26 +1143,7 @@
                     <!-- Package Selection (if available) -->
                     @if($course->packages && $course->packages->count() > 0)
                         <div class="mb-3">
-                            <div class="enroll-package-details" aria-label="Package details">
-                                @foreach($course->packages as $package)
-                                    <div class="enroll-package-detail">
-                                        <div class="enroll-package-heading">
-                                            <span>{{ $package->name }}</span>
-                                            <strong>₱{{ number_format($package->price, 2) }}</strong>
-                                        </div>
-                                        <p>
-                                            @if($package->training_hours){{ $package->training_hours }} hours of training @endif
-                                            @if(!$package->training_hours && $package->tdc_hours){{ $package->tdc_hours }}h TDC @endif
-                                            @if(!$package->training_hours && $package->pdc_hours){{ $package->tdc_hours ? ' · ' : '' }}{{ $package->pdc_hours }}h PDC @endif
-                                            @if($package->transmission_type){{ ($package->training_hours || $package->tdc_hours || $package->pdc_hours) ? ' · ' : '' }}{{ ucfirst($package->transmission_type) }} transmission @endif
-                                        </p>
-                                        @if($package->description)<p>{{ $package->description }}</p>@endif
-                                        @if(is_array($package->features) && count($package->features))
-                                            <ul>@foreach($package->features as $feature)<li>{{ $feature }}</li>@endforeach</ul>
-                                        @endif
-                                    </div>
-                                @endforeach
-                            </div>
+                            @include('school.partials.enrollment-package-details')
                             <label for="package_id{{ $course->id }}" class="form-label">
                                 <strong>Select Package</strong> <span class="text-danger">*</span>
                             </label>
@@ -1227,7 +1200,8 @@ function handleExperienceChange{{ $course->id }}() {
     const credentialSection = document.getElementById('credentialSection{{ $course->id }}');
     const courseType = '{{ $course->course_type }}';
     
-    if (select.value === 'experienced') {
+    document.getElementById('licenseLabel{{ $course->id }}').textContent = select.value === 'experienced' ? "Driver's License" : "Student Driver's License";
+    if (select.value === 'experienced' || select.value === 'new_driver_with_license') {
         credentialSection.style.display = 'block';
     } else {
         if (courseType !== 'practical') {
@@ -1240,9 +1214,7 @@ function handleExperienceChange{{ $course->id }}() {
 }
 
 // Initialize on page load if there's an old value
-document.addEventListener('DOMContentLoaded', function() {
-    handleExperienceChange{{ $course->id }}();
-});
+handleExperienceChange{{ $course->id }}();
 </script>
 @endforeach
 

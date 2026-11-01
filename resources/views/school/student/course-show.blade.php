@@ -514,26 +514,7 @@
                 
                 @if($course->packages && $course->packages->count() > 0)
                 <div class="form-group">
-                    <div class="enroll-package-details" aria-label="Package details">
-                        @foreach($course->packages as $package)
-                            <div class="enroll-package-detail">
-                                <div class="enroll-package-heading">
-                                    <span>{{ $package->name }}</span>
-                                    <strong>₱{{ number_format($package->price, 2) }}</strong>
-                                </div>
-                                <p>
-                                    @if($package->training_hours){{ $package->training_hours }} hours of training @endif
-                                    @if(!$package->training_hours && $package->tdc_hours){{ $package->tdc_hours }}h TDC @endif
-                                    @if(!$package->training_hours && $package->pdc_hours){{ $package->tdc_hours ? ' · ' : '' }}{{ $package->pdc_hours }}h PDC @endif
-                                    @if($package->transmission_type){{ ($package->training_hours || $package->tdc_hours || $package->pdc_hours) ? ' · ' : '' }}{{ ucfirst($package->transmission_type) }} transmission @endif
-                                </p>
-                                @if($package->description)<p>{{ $package->description }}</p>@endif
-                                @if(is_array($package->features) && count($package->features))
-                                    <ul>@foreach($package->features as $feature)<li>{{ $feature }}</li>@endforeach</ul>
-                                @endif
-                            </div>
-                        @endforeach
-                    </div>
+                    @include('school.partials.enrollment-package-details')
                     <label class="form-label">Choose Package</label>
                     <select name="package_id" class="form-select" required>
                         <option value="">Select a package...</option>
@@ -563,14 +544,15 @@
                 <div class="form-group">
                     <label class="form-label">Experience Level</label>
                     <select name="experience_level" class="form-select" required id="exp_level">
-                        <option value="new_driver">New Driver</option>
-                        <option value="experienced">Experienced Driver</option>
+                        @if(!$isPracticalCourse)<option value="new_driver">New Driver (No license, learning from scratch)</option>@endif
+                        <option value="new_driver_with_license">New Driver (Have Student Driver's License)</option>
+                        <option value="experienced">Experienced Driver (Have Driver's License)</option>
                     </select>
                 </div>
 
                 @if($mustUploadLicenseForPractical)
                 <div class="form-group">
-                    <label class="form-label">Upload Student Driver's License</label>
+                    <label class="form-label" id="studentLicenseLabel">Upload Student Driver's License</label>
                     <input type="file" name="student_license" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required>
                     <small class="text-gray-500">Required for practical enrollment. Accepted: PDF, JPG, PNG.</small>
                 </div>
@@ -603,6 +585,8 @@
 
     document.getElementById('exp_level').addEventListener('change', function() {
         document.getElementById('license_upload').style.display = this.value === 'experienced' ? 'block' : 'none';
+        const label = document.getElementById('studentLicenseLabel');
+        if (label) label.textContent = this.value === 'experienced' ? "Upload Driver's License" : "Upload Student Driver's License";
     });
 
     window.onclick = function(event) {

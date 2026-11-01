@@ -415,9 +415,9 @@
         /* Interactive Auto-Scroll Ticker */
         .packages-ticker-container {
             max-height: 280px;
-            overflow: hidden;
+            overflow-y: auto;
+            overscroll-behavior: contain;
             position: relative;
-            cursor: pointer;
         }
 
         .packages-ticker {
@@ -2132,11 +2132,40 @@
             </div>
         </div>
 
+
+        @include('school.partials.course-flyer-styles')
+        @foreach($courses as $course)
+        <template id="coursePreview{{ $course->id }}">
+            <div class="enrollment-preview">
+                <p><span class="preview-course-badge">{{ $course->type }}</span> <span class="preview-course-badge">{{ $course->license_type === 'professional' ? 'Professional' : 'Non Professional' }}</span></p>
+                <label class="form-label">Driver Experience Level <span class="text-danger">*</span></label>
+                <select class="form-select" disabled aria-label="Driver Experience Level preview"><option>Select your experience...</option></select>
+                <p class="preview-help">{{ $course->course_type === 'theoretical' ? 'TDC is open to all drivers — this helps us customize your learning path' : 'A verified license is required before practical driving sessions.' }}</p>
+                @include('school.partials.enrollment-package-details')
+                <label class="form-label">Select Package <span class="text-danger">*</span></label>
+                <select class="form-select" disabled aria-label="Select Package preview"><option>Choose a package...</option>@foreach($course->packages as $package)<option>{{ $package->name }} - ₱{{ number_format($package->price, 2) }}</option>@endforeach</select>
+                <label class="form-label">Additional Notes (Optional)</label>
+                <textarea class="form-control" rows="3" disabled placeholder="Any special requests or information we should know..."></textarea>
+                <p class="preview-help">Your enrollment request will be reviewed by an administrator. You'll be notified once approved.</p>
+            </div>
+        </template>
+        @endforeach
+        <style>
+            #previewModal .preview-modal-content { max-width: 600px; }
+            #previewModal .preview-modal-header { background: {{ $settings?->primary_color ?: '#2563eb' }}; color: white; }
+            #previewModal .preview-modal-header h5 { color: inherit; }
+            #previewModal .preview-modal-body { padding: 24px; }
+            #previewModal .form-label { display: block; margin: 18px 0 8px; }
+            #previewModal .form-select, #previewModal .form-control { width: 100%; padding: 10px 12px; border: 1px solid #dce3ed; border-radius: 8px; background: white; color: #17243b; opacity: 1; }
+            .preview-course-badge { display: inline-block; padding: 6px 12px; border-radius: 20px; background: #64748b; color: white; font-size: .8rem; }
+            .preview-help { color: #5c687c; font-size: .85rem; margin: 8px 0 24px; }
+        </style>
+
         <!-- Preview Modal (Guest View) -->
         <div class="modal" id="previewModal">
             <div class="modal-content preview-modal-content">
                 <div class="modal-header preview-modal-header">
-                    <h5><i class="bi bi-eye-fill"></i> Course Preview (Guest View)</h5>
+                    <h5 id="coursePreviewTitle">Course Preview</h5>
                     <button class="btn-close" onclick="closePreviewModal()">&times;</button>
                 </div>
                 <div class="modal-body preview-modal-body" id="previewContent">
@@ -2251,9 +2280,10 @@
         </div>
 
         <script>
-            const coursesData = @json($courses->items());
-            let currentCourseId = null;
-            let currentPackageId = null;
+            // AJAX navigation executes this script again after each save.
+            var coursesData = @json($courses->items());
+            var currentCourseId = null;
+            var currentPackageId = null;
 
             function clearCourseFormValidation() {
                 const form = document.getElementById('courseForm');
@@ -2576,8 +2606,9 @@
                     // Load package features
                     const featuresContainer = document.getElementById('packageFeaturesContainer');
                     featuresContainer.innerHTML = '';
-                    if (package.features && package.features.length > 0) {
-                        package.features.forEach(feature => {
+                    const packageFeatures = Object.values(package.features || {});
+                    if (packageFeatures.length > 0) {
+                        packageFeatures.forEach(feature => {
                             addPackageFeature(feature);
                         });
                     } else {
@@ -2585,12 +2616,12 @@
                     }
                 } else {
                     // Create mode
+                    document.getElementById('packageForm').reset();
                     document.getElementById('packageModalTitle').textContent = 'Add New Package';
                     document.getElementById('packageForm').action = `{{ url($school->slug . '/admin/courses') }}/${courseId}/packages`;
                     document.getElementById('packageMethod').value = 'POST';
                     document.getElementById('packageCourseId').value = courseId;
                     document.getElementById('packagePackageId').value = '';
-                    document.getElementById('packageForm').reset();
 
                     const featuresContainer = document.getElementById('packageFeaturesContainer');
                     featuresContainer.innerHTML = '';
@@ -2641,9 +2672,10 @@
                 const div = document.createElement('div');
                 div.className = 'feature-input-group';
                 div.innerHTML = `
-                <input type="text" name="features[]" class="form-control" placeholder="Enter a feature" value="${value}">
+                <input type="text" name="features[]" class="form-control" placeholder="Enter a feature">
                 <button type="button" class="btn-remove-feature" onclick="removeFeature(this)">−</button>
             `;
+                div.querySelector('input').value = value;
                 container.appendChild(div);
             }
 
@@ -2659,9 +2691,10 @@
                 const div = document.createElement('div');
                 div.className = 'feature-input-group';
                 div.innerHTML = `
-                <input type="text" name="features[]" class="form-control" placeholder="Enter a feature" value="${value}">
+                <input type="text" name="features[]" class="form-control" placeholder="Enter a feature">
                 <button type="button" class="btn-remove-feature" onclick="removePackageFeature(this)">−</button>
             `;
+                div.querySelector('input').value = value;
                 container.appendChild(div);
             }
 
@@ -2733,76 +2766,10 @@
 
                 currentCourseId = courseId;
 
-                // Build guest-view HTML
-                const previewHTML = `
-                <div class="preview-guest-hero">
-                    ${course.banner_image_url ?
-                        `<img src="${course.banner_image_url}" class="preview-guest-banner-img">` :
-                        `<i class="bi bi-car-front-fill preview-guest-banner-icon"></i>`
-                    }
-                    <h2 class="preview-guest-title">${course.title}</h2>
-                    <div class="preview-guest-meta">
-                        <span class="preview-guest-pill">${course.type}</span>
-                        ${course.vehicle_type ? `<span class="preview-guest-pill">${course.vehicle_type}</span>` : ''}
-                        ${course.is_featured ? `<span class="preview-guest-featured-pill"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="preview-guest-featured-icon"><path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd" /></svg>Featured</span>` : ''}
-                    </div>
-                    ${course.description ? `<p class="preview-guest-description">${course.description}</p>` : ''}
-                    <div class="preview-guest-facts">
-                        ${!course.packages || !course.packages.length ? `<div><span>Training</span><strong>${course.hours_required || course.duration_hours ? `${course.hours_required || course.duration_hours} hours` : 'See details'}</strong></div>` : ''}
-                        <div><span>Packages</span><strong>${course.packages ? course.packages.length : 0} available</strong></div>
-                        ${course.packages && course.packages.length ? `<div><span>Starting at</span><strong>₱${new Intl.NumberFormat().format(Math.min(...course.packages.map(pkg => Number(pkg.price))))}</strong></div>` : ''}
-                    </div>
-                </div>
-
-                <div class="preview-guest-body">
-                    ${course.features && course.features.length > 0 ? `
-                        <div class="preview-guest-section">
-                            <h3 class="preview-guest-section-title">What's included</h3>
-                            <div class="preview-guest-features-grid">
-                                ${course.features.map(feature => `
-                                    <div class="preview-guest-feature-item">
-                                        <i class="bi bi-check-circle-fill preview-guest-feature-icon"></i>
-                                        ${feature}
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    ` : ''}
-
-                    ${course.packages && course.packages.length > 0 ? `
-                        <div>
-                            <h3 class="preview-guest-section-title">Package details</h3>
-                            <div class="preview-guest-packages-grid">
-                                ${course.packages.map(pkg => `
-                                    <div class="preview-guest-package-card ${pkg.is_popular ? 'popular' : ''}">
-                                        ${pkg.is_popular ? `<div class="preview-guest-popular-ribbon">MOST POPULAR</div>` : ''}
-                                        <h4 class="preview-guest-package-title ${pkg.is_popular ? 'popular' : ''}">${pkg.name}</h4>
-                                        <div class="preview-guest-package-meta">
-                                            ${pkg.vehicle_type ? `<span class="preview-guest-package-tag vehicle">${pkg.vehicle_type}</span>` : ''}
-                                            <span class="preview-guest-package-tag ${pkg.transmission_type === 'manual' ? 'manual' : 'automatic'}">
-                                                ${pkg.transmission_type.toUpperCase()}
-                                            </span>
-                                            ${pkg.tdc_hours > 0 ? `<span class="preview-guest-package-hours"><i class="bi bi-journal-text"></i> ${pkg.tdc_hours}h TDC</span>` : ''}
-                                            ${pkg.pdc_hours > 0 ? `<span class="preview-guest-package-hours"><i class="bi bi-car-front"></i> ${pkg.pdc_hours}h PDC</span>` : ''}
-                                        </div>
-                                        ${pkg.description ? `<p class="preview-guest-package-description">${pkg.description}</p>` : ''}
-                                        ${pkg.features && pkg.features.length > 0 ? `
-                                            <ul class="preview-guest-package-features">
-                                                ${pkg.features.map(f => `<li class="preview-guest-package-feature-item"><i class="bi bi-check-circle-fill preview-guest-feature-icon"></i>${f}</li>`).join('')}
-                                            </ul>
-                                        ` : ''}
-                                        <div class="preview-guest-package-divider">
-                                            <div class="preview-guest-package-price">₱${new Intl.NumberFormat().format(pkg.price)}</div>
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    ` : '<p class="preview-guest-empty">No packages available yet.</p>'}
-                </div>
-            `;
-
-                document.getElementById('previewContent').innerHTML = previewHTML;
+                document.getElementById('coursePreviewTitle').textContent = 'Enroll in ' + course.title;
+                document.getElementById('previewContent').replaceChildren(
+                    document.getElementById('coursePreview' + courseId).content.cloneNode(true)
+                );
                 document.getElementById('previewModal').style.display = 'flex';
             }
 
@@ -2917,45 +2884,46 @@
             }
 
             function initPackageTickers() {
-                const containers = document.querySelectorAll('.packages-ticker-container');
-                containers.forEach(container => {
-                    const ticker = container.querySelector('.packages-ticker');
-                    const items = ticker.querySelectorAll('.package-item');
-
-                    // Only auto-scroll if there are enough items to warrant it (e.g. > 3)
-                    if (items.length > 3) {
-                        // Remove existing duplicates if any (for re-init)
-                        const originalItems = Array.from(items);
-                        ticker.innerHTML = '';
-                        originalItems.forEach(item => ticker.appendChild(item.cloneNode(true)));
-
-                        // Duplicate content for seamless scrolling
-                        originalItems.forEach(item => ticker.appendChild(item.cloneNode(true)));
-
-                        // Calculate animation duration based on content height
-                        const height = ticker.scrollHeight / 2;
-                        const speed = 25; // pixels per second
-                        const duration = height / speed;
-
-                        ticker.style.animation = `ticker-scroll ${duration}s linear infinite`;
-
-                        // Add pause on hover logic via JS to ensure it works with manual scroll
-                        container.addEventListener('mouseenter', () => {
-                            ticker.style.animationPlayState = 'paused';
-                        });
-                        container.addEventListener('mouseleave', () => {
-                            ticker.style.animationPlayState = 'running';
-                        });
-                    } else {
+                document.querySelectorAll('.packages-ticker-container').forEach(container => {
+                    if (container.dataset.tickerReady) return;
+                    container.dataset.tickerReady = '1';
+                    container.tabIndex = 0;
+                    container.setAttribute('aria-label', 'Course packages; scroll to browse');
+                    const items = container.querySelectorAll('.package-item');
+                    if (items.length <= 3) {
                         container.style.maxHeight = 'none';
-                        container.style.maskImage = 'none';
-                        container.style.webkitMaskImage = 'none';
+                        return;
                     }
+                    container.style.maxHeight = '';
+                    let previous = null;
+                    let position = container.scrollTop;
+                    let hovered = false;
+                    let touched = false;
+                    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+                    container.addEventListener('mouseenter', () => { hovered = true; });
+                    container.addEventListener('mouseleave', () => { hovered = false; });
+                    container.addEventListener('touchstart', () => { touched = true; }, {passive: true});
+                    container.addEventListener('touchend', () => { touched = false; }, {passive: true});
+                    container.addEventListener('touchcancel', () => { touched = false; }, {passive: true});
+                    const tick = time => {
+                        if (!container.isConnected) return;
+                        const elapsed = previous === null ? 0 : Math.min(time - previous, 100);
+                        previous = time;
+                        if (hovered || touched || container.matches(':focus-visible') || container.querySelector(':focus-visible') || reducedMotion.matches || document.hidden) {
+                            position = container.scrollTop;
+                        } else {
+                            const maximum = container.scrollHeight - container.clientHeight;
+                            position = position >= maximum ? 0 : Math.min(maximum, position + elapsed * .025);
+                            container.scrollTop = position;
+                        }
+                        requestAnimationFrame(tick);
+                    };
+                    requestAnimationFrame(tick);
                 });
             }
 
             // Restore view preference on load
-            document.addEventListener('DOMContentLoaded', function () {
+            function initializeCoursesPage() {
                 initCourseFormSubmitHandler();
                 initPackageTickers();
 
@@ -2997,10 +2965,12 @@
                         });
                     @endif
                 @endif
-        });
-
-            initCourseFormSubmitHandler();
-            initPackageTickers();
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initializeCoursesPage, {once: true});
+            } else {
+                initializeCoursesPage();
+            }
 
             // Auto-hide alerts
             setTimeout(() => {

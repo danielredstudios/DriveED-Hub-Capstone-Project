@@ -2,7 +2,97 @@
 
 A school portal for managing students, instructors, courses, schedules, payments, and training records.
 
-[Latest fixes](#latest-fixes-october-31-2026) · [October 30](#fixes-october-30-2026) · [October 29](#fixes-october-29-2026) · [October 27](#fixes-october-27-2026) · [Earlier fixes](#earlier-fixes-october-20-to-26-2026)
+[Latest fixes](#latest-fixes-november-1-2026) · [October 31](#latest-fixes-october-31-2026) · [October 30](#fixes-october-30-2026) · [October 29](#fixes-october-29-2026) · [October 27](#fixes-october-27-2026) · [Earlier fixes](#earlier-fixes-october-20-to-26-2026)
+
+## Latest Fixes November 1 2026
+
+Updated November 1, 2026.
+
+The issues reported in the November 1 findings document have been fixed and checked in the local app. The screenshots and videos below show the results.
+
+- Saved package changes now appear when an admin opens Edit or Preview again.
+- Long package lists scroll automatically. Hovering pauses them so you can scroll with the mouse wheel. Moving the cursor away starts automatic scrolling again.
+- Admin Preview now uses the same package details shown during guest and student enrollment, including names, prices, descriptions, and features.
+- Enrollment includes **New Driver (Have Student Driver's License)**. Choosing **Experienced Driver** changes the upload label to **Driver's License**; choosing the new-driver option changes it back to **Student Driver's License**.
+
+### Saved packages and course preview
+
+The saved package name, price, description, and features appear when Edit is reopened. Quotation marks and blank feature rows were also checked.
+
+![Saved package reopened in Edit](docs/screenshots/nov1-findings/package-edit-saved.png)
+
+The admin preview shows the updated details on desktop and mobile.
+
+![Admin course preview on desktop](docs/screenshots/nov1-findings/admin-preview-desktop.png)
+
+![Admin course preview on mobile](docs/screenshots/nov1-findings/admin-preview-mobile.png)
+
+<details>
+<summary>Full admin Courses page</summary>
+
+![Admin Courses page after the fixes](docs/screenshots/nov1-findings/admin-current.png)
+
+</details>
+
+### Package scrolling
+
+This recording shows automatic scrolling, the pause on hover, manual mouse-wheel scrolling, and automatic scrolling starting again when the cursor leaves. Extra demo rows were added only in the browser to make the list long enough; they were not saved to the database.
+
+[![Play the package scrolling demo](docs/screenshots/nov1-findings/package-scrolling-video-poster.png)](docs/screenshots/nov1-findings/package-scrolling-demo.webm)
+
+[Watch or download the package scrolling video](docs/screenshots/nov1-findings/package-scrolling-demo.webm)
+
+![Package list during manual scrolling](docs/screenshots/nov1-findings/packages-manual-scroll.png)
+
+### Driver experience and license labels
+
+The guest enrollment form asks experienced drivers for a Driver's License.
+
+![Guest enrollment with Experienced Driver selected](docs/screenshots/nov1-findings/guest-experienced-license.png)
+
+Choosing New Driver (Have Student Driver's License) changes the label to Student Driver's License.
+
+![Guest enrollment with New Driver selected](docs/screenshots/nov1-findings/guest-new-driver-license.png)
+
+The new-driver option is also available in student enrollment.
+
+![Student enrollment with New Driver selected](docs/screenshots/nov1-findings/student-new-driver-license.png)
+
+This recording switches between both options in the student form so you can see the upload label change. It uses a demo student without a license on file. No enrollment was submitted.
+
+[![Play the student license label demo](docs/screenshots/nov1-findings/student-experienced-video-poster.png)](docs/screenshots/nov1-findings/student-license-switching.webm)
+
+[Watch or download the student enrollment video](docs/screenshots/nov1-findings/student-license-switching.webm)
+
+### What was checked
+
+The browser checks covered saving and reopening a package, previewing the saved details, desktop and mobile preview sizes, automatic and manual scrolling, and both enrollment forms. Automatic scrolling also stops when reduced motion is enabled. Server checks confirmed that the new-driver option is accepted and that the updated PHP and page templates compile.
+
+The package used during testing was restored after the checks. The videos demonstrate form behavior; they do not submit an enrollment.
+
+<details>
+<summary>Original screenshots from the November 1 findings document — before the fixes</summary>
+
+These are the eight reference screenshots supplied in the findings document. They show the reported issues, rather than the finished changes above.
+
+![Original finding screenshot 1](docs/screenshots/nov1-findings/image1.png)
+
+![Original finding screenshot 2](docs/screenshots/nov1-findings/image2.png)
+
+![Original finding screenshot 3](docs/screenshots/nov1-findings/image3.png)
+
+![Original finding screenshot 4](docs/screenshots/nov1-findings/image4.png)
+
+![Original finding screenshot 5](docs/screenshots/nov1-findings/image5.png)
+
+![Original finding screenshot 6](docs/screenshots/nov1-findings/image6.png)
+
+![Original finding screenshot 7](docs/screenshots/nov1-findings/image7.png)
+
+![Original finding screenshot 8](docs/screenshots/nov1-findings/image8.png)
+
+</details>
+
 
 ## Latest Fixes October 31 2026
 

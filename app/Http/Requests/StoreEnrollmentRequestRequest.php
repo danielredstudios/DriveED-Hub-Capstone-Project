@@ -15,6 +15,13 @@ class StoreEnrollmentRequestRequest extends FormRequest
         return true; // Guest enrollment is public
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->input('experience_level') === 'new_driver_with_license') {
+            $this->merge(['experience_level' => 'new_driver']);
+        }
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *

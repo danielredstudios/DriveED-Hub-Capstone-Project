@@ -2758,7 +2758,7 @@ class AdminController extends Controller
 
             // Filter out empty features
             if (isset($validated['features'])) {
-                $validated['features'] = array_filter($validated['features']);
+                $validated['features'] = array_values(array_filter($validated['features'], fn ($feature) => $feature !== null && trim($feature) !== ''));
             }
 
             \App\Models\CoursePackage::create($validated);
@@ -2810,7 +2810,7 @@ class AdminController extends Controller
 
             // Filter out empty features
             if (isset($validated['features'])) {
-                $validated['features'] = array_filter($validated['features']);
+                $validated['features'] = array_values(array_filter($validated['features'], fn ($feature) => $feature !== null && trim($feature) !== ''));
             }
 
             $package->update($validated);
