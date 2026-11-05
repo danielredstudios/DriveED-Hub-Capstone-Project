@@ -28,9 +28,9 @@ Enrolled Course shows the selected package's required hours. The after screensho
 
 ### My Payments date
 
-My Payments shows a date when the payment record has a received, paid, or creation timestamp.
+The after screenshot shows an approved ₱100.00 test payment with a populated date and a ₱100.00 Total Amount Paid.
 
-![Before and after showing a date in the payment history](docs/screenshots/nov5-findings/compare-payment.png)
+![Before and after showing the payment date and approved ₱100.00 total](docs/screenshots/nov5-findings/compare-payment.png)
 
 ### TDC batch scheduling
 
