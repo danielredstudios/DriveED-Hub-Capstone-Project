@@ -11,8 +11,8 @@
 
     // ...existing code...
     
-    $totalHours = $enrollment->sessionCompletions->sum('hours_completed');
-    $requiredHours = $enrollment->course->theoretical_hours ?? 15;
+    $totalHours = $enrollment->sessionCompletions->where('status', 'completed')->where('session_type', 'theoretical')->sum('hours_completed');
+    $requiredHours = $enrollment->tdc_hours_limit;
     $progress = $requiredHours > 0 ? min(100, round(($totalHours / $requiredHours) * 100)) : 0;
     $progressClass = $progress >= 100 ? 'high' : ($progress >= 50 ? 'mid' : 'low');
 @endphp
@@ -432,7 +432,7 @@
                 </div>
                 <div class="info-row">
                     <span class="info-label">Enrolled:</span>
-                    <span class="info-value">{{ $enrollment->enrolled_at->format('M d, Y') }}</span>
+                    <span class="info-value">{{ $enrollment->enrolled_at?->format('M d, Y') ?? 'N/A' }}</span>
                 </div>
             </div>
 

@@ -2053,7 +2053,7 @@
                         <small class="text-muted">Determines seating vs 1-on-1 logic.</small>
                     </div>
 
-                    <div class="form-group" id="batchSchedulingWrapper" style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                    <div class="form-group" id="batchSchedulingWrapper" hidden style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
                         <label class="checkbox-wrapper" style="margin-bottom: 6px; cursor: pointer;">
                             <input type="checkbox" id="toggleBatchScheduling" class="checkbox" onchange="toggleBatchMode(this.checked)">
                             <span class="checkbox-label" style="font-weight: 600; color: #1e293b;">
@@ -2108,17 +2108,16 @@
                         }
                         function updateBatchAvailability() {
                             var checkbox = document.getElementById('toggleBatchScheduling');
-                            var hint = document.getElementById('batchSchedulingHint');
+                            var wrapper = document.getElementById('batchSchedulingWrapper');
                             if (!checkbox) return;
                             var allowed = isTheoreticalCourseSelected();
+                            wrapper.hidden = !allowed;
                             if (!allowed) {
                                 checkbox.checked = false;
                                 toggleBatchMode(false);
                                 checkbox.disabled = true;
-                                if (hint) hint.textContent = 'TDC Batch Scheduling is only available for Theoretical (TDC) courses. Select a Theoretical course to enable it.';
                             } else {
                                 checkbox.disabled = false;
-                                if (hint) hint.textContent = 'Creates sequential schedule days (e.g. Day 1, Day 2) under one linked batch so students take the full sequence.';
                             }
                         }
                         function validateScheduleDate(input) {

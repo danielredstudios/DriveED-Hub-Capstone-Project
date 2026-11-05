@@ -472,13 +472,11 @@ class EnrollmentRequest extends Model
             return (float) $this->package->tdc_hours;
         }
 
-        // 2. Fallback for dedicated TDC courses: Use the legacy training_hours
-        if ($this->course->course_type === 'theoretical') {
-            return (float) ($this->package->training_hours ?? $this->course->hours_required ?? 15.0);
+        if ($this->course->course_type === 'theoretical' && $this->package?->training_hours > 0) {
+            return (float) $this->package->training_hours;
         }
 
-        // 3. Absolute Fallback: Use Course required hours
-        return (float) ($this->course->hours_required ?? 15.0);
+        return $this->courseHoursOr(15.0);
     }
 
     /**
@@ -495,12 +493,23 @@ class EnrollmentRequest extends Model
             return (float) $this->package->pdc_hours;
         }
 
-        // 2. Fallback for Practical/Combo: Use legacy training_hours
         if (in_array($this->course->course_type, ['practical', 'combo'])) {
-            return (float) ($this->package->training_hours ?? 10.0);
+            if ($this->package?->training_hours > 0) {
+                return (float) $this->package->training_hours;
+            }
+
+            return $this->course->course_type === 'practical' ? $this->courseHoursOr(10.0) : 10.0;
         }
 
         return 0.0;
+    }
+
+    private function courseHoursOr(float $default): float
+    {
+        $required = (float) $this->course->hours_required;
+        $duration = (float) $this->course->duration_hours;
+
+        return $required > 0 ? $required : ($duration > 0 ? $duration : $default);
     }
 
     /**

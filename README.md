@@ -2,7 +2,59 @@
 
 A school portal for managing students, instructors, courses, schedules, payments, and training records.
 
-[November 4](#latest-fixes-november-4-2026) · [November 1](#fixes-november-1-2026) · [October 31](#latest-fixes-october-31-2026) · [October 30](#fixes-october-30-2026) · [October 29](#fixes-october-29-2026) · [October 27](#fixes-october-27-2026) · [Earlier fixes](#earlier-fixes-october-20-to-26-2026)
+[November 5](#fixes-november-5-2026) · [November 4](#latest-fixes-november-4-2026) · [November 1](#fixes-november-1-2026) · [October 31](#latest-fixes-october-31-2026) · [October 30](#fixes-october-30-2026) · [October 29](#fixes-october-29-2026) · [October 27](#fixes-october-27-2026) · [Earlier fixes](#earlier-fixes-october-20-to-26-2026)
+
+## Fixes November 5 2026
+
+The **before** screenshots come from the two November 5 findings documents. The **after** screenshots come from local Chrome tests with QA records, so names and dates can differ.
+
+### Question Bank
+
+The Question Bank saves new questions. Chrome verified all four question types.
+
+![Before and after showing saved questions in the Question Bank](docs/screenshots/nov5-findings/compare-question.png)
+
+### Instructor dashboard navigation
+
+Today's Lessons and This Week open Schedules. Active Students opens My Students. Chrome verified all three destinations.
+
+![Before and after showing the instructor dashboard cards](docs/screenshots/nov5-findings/compare-dashboard.png)
+
+### Enrolled Course hours
+
+Enrolled Course shows the selected package's required hours. The after screenshot shows a 15-hour practical package.
+
+![Before and after showing the required hours for a practical enrollment](docs/screenshots/nov5-findings/compare-hours.png)
+
+### My Payments date
+
+My Payments shows a date when the payment record has a received, paid, or creation timestamp.
+
+![Before and after showing a date in the payment history](docs/screenshots/nov5-findings/compare-payment.png)
+
+### TDC batch scheduling
+
+The batch controls appear for theoretical courses and are hidden for practical courses.
+
+![Before and after showing the schedule form for a practical course](docs/screenshots/nov5-findings/compare-batch.png)
+
+### Instructor notes in session history
+
+Student Session History shows the notes saved with the logged session.
+
+![Before and after showing instructor notes in Student Session History](docs/screenshots/nov5-findings/compare-notes.png)
+
+### Manually logged sessions in Grades Management
+
+Grades Management includes manually logged sessions pending admin review. The test row shows one session, its date, and its 94.7 grade.
+
+![Before and after showing a manually logged session in Grades Management](docs/screenshots/nov5-findings/compare-grades.png)
+
+### Theoretical Training hours and PDF export
+
+Theoretical Training uses the enrollment's required hours. Export PDF sits on the right side of the header, and the download returned a valid PDF in Chrome.
+
+![Before and after showing the theoretical hours and Export PDF placement](docs/screenshots/nov5-findings/compare-theoretical.png)
 
 ## Latest Fixes November 4 2026
 

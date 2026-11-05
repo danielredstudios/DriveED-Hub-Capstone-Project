@@ -328,7 +328,7 @@ class InstructorController extends Controller
             ->with(['bookings' => function ($query) use ($school) {
             $query->where('school_id', '=', $school->id, 'and')
                 ->orderBy('scheduled_at', 'desc');
-        }, 'bookings.course', 'bookings.instructor'])
+        }, 'bookings.course', 'bookings.instructor', 'bookings.sessionCompletion'])
             ->where('school_id', '=', $school->id, 'and')
             ->findOrFail($id);
 
@@ -341,7 +341,7 @@ class InstructorController extends Controller
                 'is_mine' => ($booking->instructor_id == $instructor->id),
                 'course' => $booking->course->title ?? 'N/A',
                 'status' => $booking->status,
-                'notes' => $booking->notes ?? 'No notes provided',
+                'notes' => $booking->sessionCompletion?->notes ?? $booking->instructor_feedback ?? $booking->notes,
             ];
         });
 
@@ -601,7 +601,7 @@ class InstructorController extends Controller
 
         $pendingGrades = Booking::where('school_id', '=', $school->id, 'and')
             ->where('instructor_id', '=', $instructor->id, 'and')
-            ->where('status', '=', 'completed', 'and')
+            ->whereIn('status', [Booking::STATUS_DONE, Booking::STATUS_COMPLETED])
             ->whereNull('session_grade', 'and', false)
             ->count('*');
 

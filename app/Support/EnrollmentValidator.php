@@ -145,7 +145,7 @@ class EnrollmentValidator
 
         // Check if student has completed required hours
         $totalHours = (float) ($enrollment->used_tdc_hours ?? $enrollment->hours_completed ?? 0);
-        $requiredHours = (float) ($enrollment->course->hours_required ?? 15);
+        $requiredHours = $enrollment->tdc_hours_limit;
 
         if ($totalHours < $requiredHours) {
             return [

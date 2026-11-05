@@ -272,7 +272,7 @@
 
     <!-- Stats Cards -->
     <div class="stats-grid">
-        <div class="stat-card active">
+        <a class="stat-card active" style="text-decoration: none; color: inherit;" href="{{ $schoolRoute('instructor.schedule') }}">
             <div class="stat-content">
                 <div class="stat-header">
                     <div>
@@ -285,8 +285,8 @@
                 </div>
                 <div class="stat-detail">Scheduled for today</div>
             </div>
-        </div>
-        <div class="stat-card students">
+        </a>
+        <a class="stat-card students" style="text-decoration: none; color: inherit;" href="{{ $schoolRoute('instructor.schedule') }}">
             <div class="stat-content">
                 <div class="stat-header">
                     <div>
@@ -299,8 +299,8 @@
                 </div>
                 <div class="stat-detail">Sessions this week</div>
             </div>
-        </div>
-        <div class="stat-card growth">
+        </a>
+        <a class="stat-card growth" style="text-decoration: none; color: inherit;" href="{{ $schoolRoute('instructor.students.index') }}">
             <div class="stat-content">
                 <div class="stat-header">
                     <div>
@@ -313,7 +313,7 @@
                 </div>
                 <div class="stat-detail">Currently assigned to you</div>
             </div>
-        </div>
+        </a>
         <div class="stat-card inactive">
             <div class="stat-content">
                 <div class="stat-header">

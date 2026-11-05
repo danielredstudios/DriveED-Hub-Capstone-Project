@@ -1165,7 +1165,7 @@ class StudentController extends Controller
                             ->where('completed_at', '>=', Carbon::now()->subDay());
                       });
             })
-            ->with(['course.modules.lessons', 'sessionCompletions', 'bookings.timeSlot', 'bookings.instructor'])
+            ->with(['course.modules.lessons', 'package', 'sessionCompletions', 'bookings.timeSlot', 'bookings.instructor'])
             ->first();
         
         $approvedRequest = $activeEnrollment;
@@ -1194,15 +1194,12 @@ class StudentController extends Controller
             $course = $activeEnrollment->course;
             $completions = $activeEnrollment->sessionCompletions ?? collect();
             $hoursCompleted = $completions->where('status', 'completed')->sum('hours_completed');
-            $hoursRequired = $course ? ($course->hours_required ?? $course->duration_hours ?? 0) : 0;
-            $progressPercentage = $hoursRequired > 0 ? min(100, round(($hoursCompleted / $hoursRequired) * 100)) : 0;
-            $modules = $course ? ($course->modules ?? collect()) : collect();
-            $sessionCompletions = $completions;
-        } elseif ($approvedRequest) {
-            $course = $approvedRequest->course;
-            $completions = $approvedRequest->sessionCompletions ?? collect();
-            $hoursCompleted = $completions->where('status', 'completed')->sum('hours_completed');
-            $hoursRequired = $course ? ($course->hours_required ?? $course->duration_hours ?? 0) : 0;
+            $hoursRequired = match ($course?->course_type) {
+                'theoretical' => $activeEnrollment->tdc_hours_limit,
+                'practical' => $activeEnrollment->pdc_hours_limit,
+                'combo' => $activeEnrollment->tdc_hours_limit + $activeEnrollment->pdc_hours_limit,
+                default => $course->hours_required ?? $course->duration_hours ?? 0,
+            };
             $progressPercentage = $hoursRequired > 0 ? min(100, round(($hoursCompleted / $hoursRequired) * 100)) : 0;
             $modules = $course ? ($course->modules ?? collect()) : collect();
             $sessionCompletions = $completions;

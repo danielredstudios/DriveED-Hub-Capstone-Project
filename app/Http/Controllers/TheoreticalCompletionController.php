@@ -85,7 +85,7 @@ class TheoreticalCompletionController extends Controller
         $ctx = $this->getSchoolAndGuard();
         $school = $ctx['school'];
 
-        $activeQuery = EnrollmentRequest::with(['learner', 'course', 'sessionCompletions'])
+        $activeQuery = EnrollmentRequest::with(['learner', 'course', 'package', 'sessionCompletions'])
             ->whereHas('course', function ($query) use ($school) {
             $query->where('school_id', $school->id)
                 ->where('course_type', 'theoretical');
@@ -98,8 +98,8 @@ class TheoreticalCompletionController extends Controller
         // Calculate absolute totals for stats before pagination
         $totalInTraining = (clone $activeQuery)->count();
         $readyToPass = (clone $activeQuery)->get()->filter(function ($enrollment) {
-            $enrollment->total_hours = $enrollment->sessionCompletions->sum('hours_completed');
-            $enrollment->required_hours = $enrollment->course->theoretical_hours ?? $enrollment->course->hours_required ?? 15;
+            $enrollment->total_hours = $enrollment->sessionCompletions->where('status', 'completed')->where('session_type', 'theoretical')->sum('hours_completed');
+            $enrollment->required_hours = $enrollment->tdc_hours_limit;
             return $enrollment->required_hours > 0 && ($enrollment->total_hours / $enrollment->required_hours) >= 1;
         })->count();
 
@@ -107,8 +107,8 @@ class TheoreticalCompletionController extends Controller
 
         // Calculate hours & progress for the current page
         $activeEnrollments->getCollection()->transform(function ($enrollment) {
-            $enrollment->total_hours = $enrollment->sessionCompletions->sum('hours_completed');
-            $enrollment->required_hours = $enrollment->course->theoretical_hours ?? $enrollment->course->hours_required ?? 15;
+            $enrollment->total_hours = $enrollment->sessionCompletions->where('status', 'completed')->where('session_type', 'theoretical')->sum('hours_completed');
+            $enrollment->required_hours = $enrollment->tdc_hours_limit;
             $enrollment->progress = $enrollment->required_hours > 0
                 ? min(100, round(($enrollment->total_hours / $enrollment->required_hours) * 100))
                 : 0;
@@ -155,7 +155,7 @@ class TheoreticalCompletionController extends Controller
 
         // Retrieval of primary enrollment
         $enrollment = $school->enrollmentRequests()
-            ->with(['learner', 'course', 'sessionCompletions.instructor'])
+            ->with(['learner', 'course', 'package', 'sessionCompletions.instructor'])
             ->findOrFail($enrollment);
 
         $student = $enrollment->learner;

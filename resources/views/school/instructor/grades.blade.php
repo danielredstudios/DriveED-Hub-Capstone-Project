@@ -438,9 +438,9 @@
                 <tbody id="gradesTableBody">
                     @foreach($students as $student)
                         @php
-                            $completedSessions = $student->bookings->where('status', 'completed')->count();
+                            $completedSessions = $student->bookings->whereIn('status', ['done', 'completed'])->count();
                             $avgGrade = $student->bookings->whereNotNull('session_grade')->avg('session_grade');
-                            $lastCompletedSession = $student->bookings->where('status', 'completed')->sortByDesc('scheduled_at')->first();
+                            $lastCompletedSession = $student->bookings->whereIn('status', ['done', 'completed'])->sortByDesc('scheduled_at')->first();
                             $enrollmentTimestamp = $student->enrollment_date ? strtotime($student->enrollment_date) : 0;
                             $gradeCategory = $avgGrade >= 90 ? 'excellent' : ($avgGrade >= 75 ? 'good' : ($avgGrade >= 60 ? 'average' : ($avgGrade ? 'poor' : 'none')));
                         @endphp
@@ -465,7 +465,7 @@
                                 <span class="sessions-badge">{{ $completedSessions }} sessions</span>
                             </td>
                             <td>
-                                @if($avgGrade)
+                                @if($avgGrade !== null)
                                     <span class="grade-badge grade-{{ $gradeCategory }}">
                                         {{ number_format($avgGrade, 1) }}
                                     </span>
@@ -481,7 +481,7 @@
                                 @endif
                             </td>
                             <td>
-                                @if($lastCompletedSession && $lastCompletedSession->session_grade)
+                                @if($lastCompletedSession && $lastCompletedSession->session_grade !== null)
                                     <strong>{{ $lastCompletedSession->session_grade }}</strong>
                                 @else
                                     <span class="text-muted">-</span>

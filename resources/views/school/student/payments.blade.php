@@ -323,7 +323,7 @@ nav[role="navigation"] span:not([aria-current]):not([aria-disabled]) {
             <tbody>
                 @forelse($payments as $payment)
                 <tr>
-                    <td>{{ $payment->paid_on ? $payment->paid_on->format('M d, Y') : 'N/A' }}</td>
+                    <td>{{ ($payment->received_at ?? $payment->paid_on ?? $payment->created_at)?->format('M d, Y') ?? 'N/A' }}</td>
                     <td>
                         <strong>{{ $payment->booking?->course?->title ?? $payment->enrollmentRequest?->course?->title ?? 'N/A' }}</strong>
                         <div style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.75rem; color: #2563eb; margin-top: 2px;">
@@ -356,7 +356,7 @@ nav[role="navigation"] span:not([aria-current]):not([aria-disabled]) {
         <div class="payment-card">
             <div class="payment-card-row">
                 <span class="payment-card-label">Date</span>
-                <span class="payment-card-value">{{ $payment->paid_on ? $payment->paid_on->format('M d, Y') : 'N/A' }}</span>
+                <span class="payment-card-value">{{ ($payment->received_at ?? $payment->paid_on ?? $payment->created_at)?->format('M d, Y') ?? 'N/A' }}</span>
             </div>
             <div class="payment-card-row">
                 <span class="payment-card-label">Course</span>

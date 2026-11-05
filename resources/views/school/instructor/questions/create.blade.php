@@ -32,7 +32,14 @@
     </div>
 
     <div class="lms-card" style="padding: 2rem;">
-        <form action="{{ school_route('instructor.questions.store', request()->query()) }}" method="POST" id="questionForm">
+        @if ($errors->any())
+            <ul class="alert alert-danger" role="alert">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        @endif
+        <form action="{{ school_route('instructor.questions.store', request()->query()) }}" method="POST" id="questionForm" data-no-ajax>
             @csrf
             
             <div style="margin-bottom: 2rem;">
@@ -183,7 +190,7 @@
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+(function () {
     const typeSelect = document.getElementById('typeSelect');
     const mcOptions = document.getElementById('mcOptions');
     const tfOptions = document.getElementById('tfOptions');
@@ -299,6 +306,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-});
+})();
 </script>
 @endsection
