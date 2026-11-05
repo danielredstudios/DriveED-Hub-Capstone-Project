@@ -2,9 +2,29 @@
 
 A school portal for managing students, instructors, courses, schedules, payments, and training records.
 
-[Latest fixes](#latest-fixes-november-1-2026) · [October 31](#latest-fixes-october-31-2026) · [October 30](#fixes-october-30-2026) · [October 29](#fixes-october-29-2026) · [October 27](#fixes-october-27-2026) · [Earlier fixes](#earlier-fixes-october-20-to-26-2026)
+[November 4](#latest-fixes-november-4-2026) · [November 1](#fixes-november-1-2026) · [October 31](#latest-fixes-october-31-2026) · [October 30](#fixes-october-30-2026) · [October 29](#fixes-october-29-2026) · [October 27](#fixes-october-27-2026) · [Earlier fixes](#earlier-fixes-october-20-to-26-2026)
 
-## Latest Fixes November 1 2026
+## Latest Fixes November 4 2026
+
+Updated November 5, 2026.
+
+- **School Admin color preview.** The primary, secondary, and accent swatches show the selected colors when the preview opens and update as the colors change. All three swatches were checked in the local browser before saving.
+- **Student invitation activation.** Completing an invitation now verifies the student's email. For students already stuck, a [repair migration](database/migrations/2026_11_05_000001_verify_students_from_used_invitations.php) verifies accounts that match a used invitation and an activation record. In the local browser test, a repaired account signed in with its original password, completed the required first-login password change, and reached the student dashboard without registering again.
+- **Student payment total.** My Payments sums approved payments across all pages of the current results. A temporary approved payment of ₱2,301.00 appeared in both the payment list and the total during local browser verification.
+
+### Before and after
+
+The **Before** screenshots come from the Nov 4 report. The **After** screenshots come from local browser tests.
+
+| Finding | Before | After |
+| --- | --- | --- |
+| School Admin color preview | ![Blank primary, secondary, and accent swatches](docs/screenshots/nov4-findings/colors-before.png) | ![Swatches filled with the selected colors](docs/screenshots/nov4-findings/colors-after.png) |
+| Student invitation activation | ![Invitation email from the reported activation flow](docs/screenshots/nov4-findings/activation-before.jpeg) The student received this invitation but was redirected to registration after submitting their profile. | ![Student dashboard after signing in with a repaired account](docs/screenshots/student-activation-repair/02-student-dashboard.png) The repaired test account reached the dashboard after the [first-login password change](docs/screenshots/student-activation-repair/01-signed-in.png). |
+| Student payment total | ![Approved ₱2,301.00 payment with a ₱0.00 total](docs/screenshots/nov4-findings/payments-before.png) | ![Approved ₱2,301.00 payment included in the total](docs/screenshots/nov4-findings/payments-after.png) |
+
+The local database had no matching records for the reported student. Applying the migration and verifying affected accounts on the database used for the report are still pending.
+
+## Fixes November 1 2026
 
 Updated November 1, 2026.
 

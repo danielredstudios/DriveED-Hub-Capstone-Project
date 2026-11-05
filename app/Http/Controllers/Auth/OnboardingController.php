@@ -156,6 +156,7 @@ class OnboardingController extends Controller
                         'status' => 'active',
                         'role' => 'student', // Ensure role is set to student, not guest
                     ]));
+                    $user->markEmailAsVerified();
 
                     // Handle Auto-Enrollment (Item 5)
                     if (!empty($payload['course_id'])) {

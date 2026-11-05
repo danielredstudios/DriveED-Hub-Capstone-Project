@@ -2814,7 +2814,10 @@ function closePreview(type) {
 // Update text input when color picker changes
 document.querySelectorAll('.color-picker').forEach(picker => {
     picker.addEventListener('input', function() {
-        this.nextElementSibling.value = this.value;
+        const colorText = this.nextElementSibling;
+        if (colorText?.classList.contains('color-text')) {
+            colorText.value = this.value;
+        }
         updatePreview();
     });
 });
@@ -2822,6 +2825,11 @@ document.querySelectorAll('.color-picker').forEach(picker => {
 // Update preview in real-time
 function updatePreview() {
     if (!settingsCurrentPreview) return;
+
+    for (const color of ['primary', 'secondary', 'accent']) {
+        document.getElementById(`${color}-color-swatch`).style.backgroundColor =
+            document.getElementById(`${color}_color`).value;
+    }
     
     // Background
     const backgroundType = document.getElementById('background_type').value;
@@ -3037,9 +3045,11 @@ function resetToDefaults() {
             document.getElementById('role_instructor_text').value = '#0369a1';
             document.getElementById('border_radius').value = '8';
             
-            // Update text inputs
             document.querySelectorAll('.color-picker').forEach(picker => {
-                picker.nextElementSibling.value = picker.value;
+                const colorText = picker.nextElementSibling;
+                if (colorText?.classList.contains('color-text')) {
+                    colorText.value = picker.value;
+                }
             });
             
             if (settingsCurrentPreview) {

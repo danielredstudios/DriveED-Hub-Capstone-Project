@@ -306,7 +306,7 @@ nav[role="navigation"] span:not([aria-current]):not([aria-disabled]) {
 
     <div class="total-spent">
         <p class="total-spent-label">Total Amount Paid</p>
-        <h2>&#8369;{{ number_format($totalPaid ?? $payments->where('status', 'completed')->sum('amount'), 2) }}</h2>
+        <h2>&#8369;{{ number_format($stats['total_revenue'], 2) }}</h2>
     </div>
 
     <div class="payments-table">
